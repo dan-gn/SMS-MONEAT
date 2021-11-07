@@ -1,0 +1,140 @@
+from algorithms.neat import NEAT, set_seed
+from algorithms.fs_neat import FS_NEAT
+from algorithms.n3o import N3O
+from models.ann import ArtificialNeuralNetwork
+from models.ann_pytorch import Ann_PyTorch, eval_model
+from models.genes import Genome, NodeGene, ConnectionGene
+from utilities.activation_functions import gaussian, Gaussian
+from utilities.scalers import MeanScaler
+from utilities.fitness_functions import fitness_function, torch_fitness_function
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+from sklearn.preprocessing import MinMaxScaler
+
+params = {
+	'fitness_function' : torch_fitness_function,
+	'n_population' : 100, 
+	'max_iterations' : 100,
+	'hidden_activation_function' : nn.Tanh(),
+	'hidden_activation_coeff' : 4.9 * 0.5,
+	'output_activation_function' : Gaussian(),
+	'output_activation_coeff' : 1,
+	'regularization_parameter' : 0.5,
+	'crossover_prob' : 0.75,
+	'n_competitors' : 2,
+	'disable_node_prob' : 0.75,
+	'interspecies_mating_rate' : 0.001,
+	'add_input_prob' : 0.05,
+	'swap_input_prob' : 0.05,
+	'add_connection_prob' : 0.05,
+	'add_node_prob' : 0.03,
+	'weight_mutation_prob' : 0.04,
+	'pol_mutation_distr' : 5,
+	'weight_mutation_sustitution_prob' : 0.1,
+	'compatibility_threshold' : 3,
+	'compatibility_distance_coeff' : [1.0, 1.0, 0.4],
+	'stagnant_generations_threshold' : 15,
+	'champion_elitism_threshold' : 5,
+	'elitism_prop' : 0.1,
+	'initial_weight_limits' : [-1, 1],
+}
+
+
+if __name__ == '__main__':
+
+	"""
+	Dataset and pre-processing
+	"""
+	# Read dataset
+	df = pd.read_csv('datasets/breast-cancer-wisconsin.data', delimiter=',', header=None)
+	df = df.drop([6], axis=1)
+
+	# Remove column with incomplete data
+	x = df.iloc[:, 1:-1].to_numpy(dtype=np.float32)
+
+	# Set label data between 0 and 1
+	y = df.iloc[:, -1].to_numpy(dtype=np.float32)
+	y = np.round((y - 2) / 2)
+
+	# Divide dataset in training set and validation set
+	x_train = x[:640, :]
+	y_train = y[:640]
+	x_test = x[640:, :]
+	y_test = y[640:]
+
+
+	# Count class distribution from both datasets
+	n_relapsed_train = np.sum(y_train)
+	n_non_relapsed_train = y_train.shape[0] - n_relapsed_train
+	n_relapsed_test = np.sum(y_test)
+	n_non_relapsed_test = y_test.shape[0] - n_relapsed_test
+
+	# Print information
+	print(f"Train dataset shape: {x_train.shape[0]}, Relapsed instances: {n_relapsed_train}, Non-Relapsed instances: {n_non_relapsed_train}")
+	print(f"Test dataset shape: {x_test.shape[0]}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
+
+	# Kruskal Wallis H Test
+	from scipy import stats
+
+	kw_pvalue = np.zeros(x_train.shape[1])
+
+	for feature in range(x_train.shape[1]):
+		_, kw_pvalue[feature] = stats.kruskal(x_train[:, feature], y_train)
+
+	kw_feature_selected = np.argwhere(kw_pvalue < 0.01)
+	kw_value = kw_pvalue[kw_feature_selected]
+	x_train_kw = x_train[:, kw_feature_selected[:, 0]]
+	x_test_kw = x_test[:, kw_feature_selected[:, 0]]
+
+	print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
+
+	# Normalized datasets
+	scaler = MinMaxScaler()
+	x_train_norm = scaler.fit_transform(x_train_kw)
+	x_test_norm = scaler.transform(x_test_kw)
+
+	print(x_train_norm.shape)
+
+	# Preprocess dataset
+	# bias = np.ones((x_test.shape[0], 1))
+	# x_train_norm = np.concatenate((bias, x_train_norm), axis=1)
+	# bias = np.ones((x_test.shape[0], 1))
+	# x_test_norm = np.concatenate((bias, x_test_norm), axis=1)
+
+	y_train = np.expand_dims(y_train, axis=1)
+	y_test = np.expand_dims(y_test, axis=1)
+	
+	x_train = torch.from_numpy(x_train_norm).type(torch.float32)
+	y_train = torch.from_numpy(y_train).type(torch.float32)
+	x_test = torch.from_numpy(x_test_norm).type(torch.float32)
+	y_test = torch.from_numpy(y_test).type(torch.float32)
+
+	"""
+	Training ANNs
+	"""
+	problem = {
+		'x' : x_train,
+		'y' : y_train,
+		'x_test' : x_test,
+		'y_test' : y_test,
+		'kw_htest_pvalue' : kw_pvalue
+	}
+
+	set_seed()
+	neat = N3O(problem, params)
+	neat.run()
+	neat.best_solution.describe()
+
+	"""
+	Print results
+	"""
+	acc, fitness = neat.evaluate(neat.best_solution, neat.x_train, neat.y_train)
+	print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+
+	acc, fitness = neat.evaluate(neat.best_solution, neat.x_test, neat.y_test)
+	print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
+
+	
