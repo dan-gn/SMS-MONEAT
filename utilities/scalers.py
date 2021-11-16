@@ -16,5 +16,5 @@ class MeanScaler:
 	def transform(self, x):
 		x_norm = np.zeros_like(x)
 		for i, xi in enumerate(x_norm):
-			x_norm[i] = (xi - self.mu) / (self.x_max - self.x_min)
+			x_norm[i] = (xi - self.mu) / ((self.x_max - self.x_min) + 1e-6)
 		return x_norm

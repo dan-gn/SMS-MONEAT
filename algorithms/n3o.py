@@ -4,6 +4,7 @@ Required libraries
 """
 import numpy as np
 import random
+import logging
 
 """
 Class
@@ -36,11 +37,18 @@ class N3O(FS_NEAT):
 		self.global_genome = Genome()
 		self.global_genome.create_node_genes(self.x_train.shape[1], self.y_train.shape[1])
 		self.global_genome.set_weight_limits(self.weight_min_value, self.weight_max_value)
+		if self.debug:
+			logging.info(f'Global genome')
+			for connection in self.global_genome.connection_genes:
+				logging.info(f'{connection.innovation_number}, {connection.input_node}, {connection.output_node}')
+			
 		# Global variables for node id and innovation number
 		self.node_id = len(self.global_genome.node_genes)
 		self.innovation_number = 0
 		# Create population from copies of the global genome 
 		self.population = []
+		if self.debug:
+			logging.info('Initialize population')
 		for i in range(self.n_population):
 			# Create a random connection
 			connection, self.innovation_number = self.global_genome.connect_one_input(self.innovation_number)
@@ -52,12 +60,14 @@ class N3O(FS_NEAT):
 			member = Genome(node_genes, connection_genes)	
 			member.set_weight_limits(self.weight_min_value, self.weight_max_value)
 			# Evaluate member fitness
-			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train)
+			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train, True)
 			# Add member to population
 			self.population.append(member)
 			# Keep track of the best solution found
 			if member.fitness > self.best_solution.fitness:
-				self.best_solution = member.copy()
+				self.best_solution = member.copy(with_phenotype=True)
+			if self.debug:
+				self.describe(member)
 
 	def get_guided_input_prob(self, pvalue):
 		return softmax(-np.log10(pvalue))
@@ -97,7 +107,7 @@ class N3O(FS_NEAT):
 							if offspring.get_node_gene(connection_b.input_node) is None:
 								offspring.node_genes.append(input_node.copy())
 							offspring.connection_genes.append(connection_b.copy())
-			return offspring, True
+			return offspring, offspring.validate_network()
 		else:
 			return self.crossover_same_fitness(genome1, genome2)
 
@@ -182,7 +192,7 @@ class N3O(FS_NEAT):
 		sorted_pop = sorted(self.population, key=lambda x: -x.fitness)
 		k = int(self.n_population * self.elitism_prop)
 		for i in range(k):
-			sorted_pop[i].accuracy, sorted_pop[i].fitness = self.evaluate(sorted_pop[i], self.x_batch, self.y_batch)
-			offspring.append(sorted_pop[i].copy())
+			sorted_pop[i].accuracy, sorted_pop[i].fitness = self.evaluate(sorted_pop[i], self.x_batch, self.y_batch, False)
+			offspring.append(sorted_pop[i].copy(with_phenotype=True))
 		remaining_offspring_space = self.n_population - k
 		return offspring, remaining_offspring_space

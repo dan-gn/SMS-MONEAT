@@ -1,14 +1,15 @@
 import torch
 import torch.nn as nn
 
-import numpy as np
-
-
 class Ann_PyTorch(nn.Module):
 
-	def __init__(self, layer_weights, activation):
+	def __init__(self, layer_weights, n_inputs, activation):
 
 		super().__init__()
+
+		self.layer_weights = layer_weights
+		self.n_inputs = n_inputs
+		self.activation = activation
 
 		self.activation_f1 = activation['hidden_activation_function']
 		self.activation_c1 = activation['hidden_activation_coeff']
@@ -29,15 +30,19 @@ class Ann_PyTorch(nn.Module):
 
 	def forward(self, x):
 
-		for layer in self.layers[:-1]:
-			y = layer(x) / layer.weight.shape[0]
+		for i, layer in enumerate(self.layers[:-1]):
+			y = layer(x) / self.n_inputs[i]
 			y = self.activation_f1(self.activation_c1 * y)
 			x = torch.cat((x, y), dim=1)
 		
-		y = self.layers[-1](x) / self.layers[-1].weight.shape[0]
+		y = self.layers[-1](x) / self.n_inputs[-1]
 		y = self.activation_f2(self.activation_c2 * y)
 
 		return y
+
+	def copy(self):
+		return Ann_PyTorch(self.layer_weights, self.n_inputs, self.activation)
+
 
 
 

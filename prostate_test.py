@@ -54,27 +54,27 @@ if __name__ == '__main__':
 	"""
 
 	# Load train dataset
-	data = arff.loadarff('datasets/breastCancer-train.arff')
+	data = arff.loadarff('datasets/prostate_tumorVSNormal_train.arff')
 	df_train = pd.DataFrame(data[0])
 
 	# Load test dataset
-	data = arff.loadarff('datasets/breastCancer-test.arff')
+	data = arff.loadarff('datasets/prostate_tumorVSNormal_test.arff')
 	df_test = pd.DataFrame(data[0])
 
 	# Change category class label to binary class label
-	labels = {b'relapse' : 1, b'non-relapse' : 0}
+	labels = {b'Tumor' : 1, b'Normal' : 0}
 	df_train['Class'] = df_train['Class'].replace(labels)
 	df_test['Class'] = df_test['Class'].replace(labels)
 
 	# Count class distribution from both datasets
-	n_relapsed_train = np.sum(df_train['Class'].to_numpy(dtype=np.float32))
-	n_non_relapsed_train = df_train.shape[0] - n_relapsed_train
-	n_relapsed_test = np.sum(df_test['Class'].to_numpy(dtype=np.float32))
-	n_non_relapsed_test = df_test.shape[0] - n_relapsed_test
+	n_tumor_train = np.sum(df_train['Class'].to_numpy(dtype=np.float32))
+	n_normal_train = df_train.shape[0] - n_tumor_train
+	n_tumor_test = np.sum(df_test['Class'].to_numpy(dtype=np.float32))
+	n_normal_test = df_test.shape[0] - n_tumor_test
 
 	# Print information
-	print(f"Train dataset shape: {df_train.shape}, Relapsed instances: {n_relapsed_train}, Non-Relapsed instances: {n_non_relapsed_train}")
-	print(f"Test dataset shape: {df_test.shape}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
+	print(f"Train dataset shape: {df_train.shape}, Tumor instances: {n_tumor_train}, Normal instances: {n_normal_train}")
+	print(f"Test dataset shape: {df_test.shape}, Tumor instances: {n_tumor_test}, Normal instances: {n_normal_test}")
 
 	"""
 	Preprocess data
@@ -101,7 +101,7 @@ if __name__ == '__main__':
 	print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
 
 	# Normalize data
-	scaler = MeanScaler()
+	scaler = MinMaxScaler()
 	x_train_norm = scaler.fit_transform(x_train_kw)
 	x_test_norm = scaler.transform(x_test_kw)
 
@@ -126,7 +126,6 @@ if __name__ == '__main__':
 	TRAIN MODEL
 	"""
 
-	
 	for seed in range(20):
 
 		print(f'Execution = {seed}, seed = {seed}')
@@ -137,7 +136,7 @@ if __name__ == '__main__':
 		model = N3O(problem, params)
 		model.run(seed, debug)
 		# neat.best_solution.describe()
-		result = {'seed' : seed, 'model' : model}
+		res = {'seed' : seed, 'model' : model}
 
 		"""
 		DISPLAY RESULTS
@@ -150,6 +149,6 @@ if __name__ == '__main__':
 		print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
 
 		problem['fitness_function'] = 'torch_fitness_function'	
-		filename = f"bc_test_seed_{seed}_it{params['max_iterations']}_f_meanSc.pkl"
+		filename = f"prost_test_seed_{seed}_it{params['max_iterations']}_f.pkl"
 		with open(f'results/{filename}', 'wb') as f:
-			pickle.dump([problem, params, result], f)
+			pickle.dump([problem, params, res], f)

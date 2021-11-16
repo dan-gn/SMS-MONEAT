@@ -13,7 +13,7 @@ class Species:
 		self.member_index.append(index)
 		self.stagnant_generations = 0
 		if member.fitness > self.champion.fitness:
-			self.champion = member.copy()
+			self.champion = member.copy(with_phenotype=True)
 
 	def choose_representant(self, population):
 		self.representant = population[random.choice(self.member_index)].copy()

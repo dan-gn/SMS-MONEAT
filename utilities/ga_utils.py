@@ -19,7 +19,7 @@ def tournament_selection(population, probs, n_competitors):
 	draw = np.random.permutation(population)
 	competitors = draw[:n_competitors]
 	winner = roulette_wheel(probs[competitors])
-	return winner
+	return competitors[winner]
 
 # Get parent selection probabilities
 def compute_parent_selection_prob(population, beta=1):

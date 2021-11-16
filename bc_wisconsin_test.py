@@ -3,7 +3,7 @@ from algorithms.fs_neat import FS_NEAT
 from algorithms.n3o import N3O
 from models.ann import ArtificialNeuralNetwork
 from models.ann_pytorch import Ann_PyTorch, eval_model
-from models.genes import Genome, NodeGene, ConnectionGene
+from models.genotype import Genome, NodeGene, ConnectionGene
 from utilities.activation_functions import gaussian, Gaussian
 from utilities.scalers import MeanScaler
 from utilities.fitness_functions import fitness_function, torch_fitness_function
@@ -12,11 +12,12 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import pickle
 from sklearn.preprocessing import MinMaxScaler
 
 params = {
 	'fitness_function' : torch_fitness_function,
-	'n_population' : 100, 
+	'n_population' : 1000, 
 	'max_iterations' : 100,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
@@ -107,34 +108,67 @@ if __name__ == '__main__':
 	y_train = np.expand_dims(y_train, axis=1)
 	y_test = np.expand_dims(y_test, axis=1)
 	
-	x_train = torch.from_numpy(x_train_norm).type(torch.float32)
-	y_train = torch.from_numpy(y_train).type(torch.float32)
-	x_test = torch.from_numpy(x_test_norm).type(torch.float32)
-	y_test = torch.from_numpy(y_test).type(torch.float32)
+	x_train_torch = torch.from_numpy(x_train_norm).type(torch.float32)
+	y_train_torch = torch.from_numpy(y_train).type(torch.float32)
+	x_test_torch = torch.from_numpy(x_test_norm).type(torch.float32)
+	y_test_torch = torch.from_numpy(y_test).type(torch.float32)
 
 	"""
 	Training ANNs
 	"""
 	problem = {
-		'x' : x_train,
-		'y' : y_train,
-		'x_test' : x_test,
-		'y_test' : y_test,
+		'x_train' : x_train_torch,
+		'y_train' : y_train_torch,
+		'x_test' : x_test_torch,
+		'y_test' : y_test_torch,
 		'kw_htest_pvalue' : kw_pvalue
 	}
 
-	set_seed()
-	neat = N3O(problem, params)
-	neat.run()
-	neat.best_solution.describe()
+	for seed in range(2, 20):
 
-	"""
-	Print results
-	"""
-	acc, fitness = neat.evaluate(neat.best_solution, neat.x_train, neat.y_train)
-	print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+		print(f'Execution = {seed}, seed = {seed}')
 
-	acc, fitness = neat.evaluate(neat.best_solution, neat.x_test, neat.y_test)
-	print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
+		debug = True if seed == -1 else False
+
+		problem['fitness_function'] = torch_fitness_function	
+		model = NEAT(problem, params)
+		model.run(seed, debug)
+		# neat.best_solution.describe()
+		result = {'seed' : seed, 'model' : model}
+
+		"""
+		Print results
+		"""
+		acc, fitness = model.evaluate(model.best_solution, model.x_train, model.y_train)
+		print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+
+		acc, fitness = model.evaluate(model.best_solution, model.x_test, model.y_test)
+		print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
+
+		problem['fitness_function'] = 'torch_fitness_function'	
+		filename = f"neat_bc_wis_test_seed_{seed}_it{params['max_iterations']}_f.pkl"
+		with open(f'results/{filename}', 'wb') as f:
+			pickle.dump([problem, params, result], f)
+
+		"""
+		Test results
+		"""
+		# activation = {}
+		# activation['hidden_activation_function'] = np.tanh
+		# activation['hidden_activation_coeff'] = params['hidden_activation_coeff']
+		# activation['output_activation_function'] = gaussian
+		# activation['output_activation_coeff'] = params['output_activation_coeff']
+
+		# model = ArtificialNeuralNetwork(neat.best_solution, activation)
+
+		# loss, acc = model.eval_model(x_train_norm, y_train, fitness_function, params['regularization_parameter'])
+		# fitness = 100 - loss
+		# print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+
+		# loss, acc = model.eval_model(x_test_norm, y_test, fitness_function, params['regularization_parameter'])
+		# fitness = 100 - loss
+		# print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+
+
 
 	

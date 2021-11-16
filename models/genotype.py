@@ -1,9 +1,13 @@
 """
 NEAT's genetic encoding scheme
 """
-
 import random
 import numpy as np
+import torch
+import torch.nn as nn
+from models.ann_pytorch import Ann_PyTorch, eval_model
+from utilities.fitness_functions import torch_fitness_function, fitness_function
+from utilities.activation_functions import Gaussian, gaussian
 
 class NodeGene:
 	"""
@@ -47,14 +51,15 @@ class Genome:
 	connection genes.
 	"""
 
-	def __init__(self, node_genes=[], connection_genes=[], min_value=1e-6, max_value=1):
-		self.node_genes = node_genes
-		self.connection_genes = connection_genes
+	def __init__(self, node_genes=None, connection_genes=None, min_value=1e-6, max_value=1):
+		self.node_genes = [] if node_genes is None else node_genes
+		self.connection_genes = [] if connection_genes is None else connection_genes
 		self.fitness = 0
 		self.shared_fitness = 0
 		self.weight_min_value = min_value
 		self.weight_max_value = max_value
 		self.accuracy = None
+		self.phenotype = None
 
 	def create_node_genes(self, n_inputs, n_outputs):
 		for id in range(n_inputs):
@@ -102,7 +107,7 @@ class Genome:
 			self.connection_genes.append(connection)
 			innovation_number += 1
 		# Randomize weight
-		connection.weight = random.uniform(self.weight_max_value, self.weight_max_value)
+		connection.weight = random.uniform(self.weight_min_value, self.weight_max_value)
 		return connection, innovation_number 
 
 	def set_weight_limits(self, min_value, max_value):
@@ -207,7 +212,26 @@ class Genome:
 					return False
 		return True
 
-	def depth_first_search(self, node, max_depth):
+	def connection_from_input(self, node):
+		if node.node_type == 'input':
+			return True
+		for connection in self.connection_genes:
+			if connection.output_node == node.id and connection.enabled:
+				input_node = self.get_node_gene(connection.input_node)
+				if self.connection_from_input(input_node):
+					return True
+		return False
+	
+	def validate_network(self):
+		for node in self.node_genes:
+			if node.node_type == 'output':
+				if not self.connection_from_input(node):
+					return False
+		return True
+
+
+
+	def depth_first_search(self, node, unchecked_connections, max_depth=0):
 		if node.layer is None:
 			node.layer = max_depth
 		elif node.layer < max_depth:
@@ -216,11 +240,13 @@ class Genome:
 			return max_depth
 		max_depth += 1
 		current_depth = max_depth
-		for connection in self.connection_genes:
+		for connection in list(unchecked_connections):
 			if connection.input_node == node.id:
+				if node.node_type == 'input':
+					unchecked_connections.remove(connection)
 				output_node = self.get_node_gene(connection.output_node)
 				if output_node.node_type == 'hidden':
-					depth = self.depth_first_search(output_node, current_depth)
+					depth = self.depth_first_search(output_node, unchecked_connections, current_depth)
 					max_depth = max(depth, max_depth)
 		return max_depth
 
@@ -229,9 +255,10 @@ class Genome:
 			node.layer = None
 		input_nodes = [node for node in self.node_genes if node.node_type == 'input']
 		output_nodes = [node for node in self.node_genes if node.node_type == 'output']
+		unchecked_connections = [connection for connection in self.connection_genes if connection.enabled]
 		max_depth = 0
 		for node in input_nodes:
-			depth = self.depth_first_search(node, 0)
+			depth = self.depth_first_search(node, unchecked_connections)
 			max_depth = max(depth, max_depth)
 		for node in output_nodes:
 			node.layer = max_depth
@@ -239,7 +266,9 @@ class Genome:
 
 	def build_layers(self):
 		layers = []
-		layers_weight = []
+		layer_weights = []
+		n_inputs = []
+
 		max_depth = self.tag_layers()
 
 		self.node_genes = sorted(self.node_genes, key = lambda x: x.id)
@@ -247,12 +276,12 @@ class Genome:
 			layer_i = [node.id for node in self.node_genes if node.layer == i]
 			layers.append(layer_i)
 
-		input_nodes = []
+		selected_features = []
 		for connection in self.connection_genes:
-			if connection.input_node in layers[0]:
-				input_nodes.append(connection.input_node)
-		input_nodes = sorted(set(input_nodes))
-		layers[0] = list(input_nodes)
+			if connection.input_node in layers[0] and connection.enabled:
+				selected_features.append(connection.input_node)
+		selected_features = sorted(set(selected_features))
+		layers[0] = list(selected_features)
 
 		for i, layer_i in enumerate(layers):
 			if i == max_depth:
@@ -260,17 +289,20 @@ class Genome:
 			in_features = len(layer_i)
 			out_features = len(layers[i+1])
 			weights = np.zeros((out_features, in_features), dtype=np.float32)
+			inputs = np.zeros(out_features)
 			for connection in self.connection_genes:
-				if connection.output_node in layers[i+1] and connection.enabled:
+				if connection.input_node in layer_i and connection.output_node in layers[i+1]:
 					row = layers[i+1].index(connection.output_node)
 					col = layer_i.index(connection.input_node)
 					weights[row, col] = connection.weight
+					inputs[row] += 1
 
 			layer_i.extend(layers[i+1])
 			layers[i+1] = list(layer_i)
-			layers_weight.append(weights)
+			layer_weights.append(weights)
+			n_inputs.append(inputs)
 
-		return input_nodes, layers_weight
+		return selected_features, layer_weights, n_inputs
 
 	def count_nodes(self):
 		n_input_nodes = 0
@@ -316,7 +348,14 @@ class Genome:
 			n_matching = 1
 		return (c[0] * n_excess / n) + (c[1] * n_disjoint / n) + (c[2] * weight_difference / n_matching)
 
-	def copy(self):
+	def compute_phenotype(self, activation):
+		selected_features, layer_weights, n_inputs = self.build_layers()
+		self.selected_features = torch.tensor(selected_features).type(torch.int32)
+		layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
+		n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
+		self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
+
+	def copy(self, with_phenotype=False):
 		genome_copy = Genome()
 		genome_copy.node_genes = [node.copy() for node in self.node_genes]
 		genome_copy.connection_genes = [connection.copy() for connection in self.connection_genes]
@@ -324,6 +363,9 @@ class Genome:
 		genome_copy.fitness = self.fitness
 		genome_copy.shared_fitness = self.shared_fitness
 		genome_copy.accuracy = self.accuracy
+		if with_phenotype:
+			genome_copy.selected_features = self.selected_features
+			genome_copy.phenotype = self.phenotype.copy()
 		return genome_copy
 
 	def describe(self):
@@ -334,3 +376,5 @@ class Genome:
 		for connection in self.connection_genes:
 			print(f'Connection {connection.innovation_number}: Input node id = {connection.input_node}, Output node id = {connection.output_node}, Weight = {connection.weight}, Enabled = {connection.enabled}')
 		print(f'Fitness: {self.fitness}')
+
+

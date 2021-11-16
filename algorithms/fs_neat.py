@@ -20,15 +20,13 @@ __date__ = "30/09/2021"
 Required libraries
 """
 import numpy as np
-import torch
 
 """
 Class
 """
 from algorithms.neat import NEAT
 from models.genotype import Genome
-from models.ann import ArtificialNeuralNetwork
-from models.ann_pytorch import Ann_PyTorch, eval_model
+from models.ann_pytorch import eval_model
 
 """
 FS-NEAT
@@ -53,34 +51,31 @@ class FS_NEAT(NEAT):
 			connection, self.innovation_number = self.global_genome.connect_one_input(self.innovation_number)
 			member.connection_genes.append(connection.copy())
 			# Evaluate member fitness
-			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train)
+			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train, True)
 			# Keep track of the best solution found
 			if member.fitness > self.best_solution.fitness:
-				self.best_solution = member.copy()
+				self.best_solution = member.copy(with_phenotype=True)
 
-	def evaluate(self, genome, x, y):
+	def evaluate(self, genome, x, y, build_model=True):
 		"""
 		Encoding genomes to actual artifial neural network (ANN) to compute fitness.
 		We should consider that NEAT tries to maximize the fitness, while most common methods
 		for trainng ANNs try to minimize the loss. Therefore, the fitness function should be
 		modified so it can work as maximization task.
 		"""
-		# selected_input, layer_weights = genome.build_layers()
-		# x_prima = x[:, selected_input]
 		# model = ArtificialNeuralNetwork(genome, self.activation)
-		# loss, acc = model.eval_model(x_prima, y, self.fitness_function, self.l2_parameter)
-		# fitness = 100 - (100 * loss / y.shape[0])
+		# loss, acc = model.eval_model(x, y, self.fitness_function, self.l2_parameter)
+		# fitness = 100 - loss
+		# if fitness < 0:
+		# 	print(f'Fitness negativo: {fitness}')
 		# return acc, fitness
 
-		selected_input, layer_weights = genome.build_layers()
-		input_index = torch.tensor(selected_input).type(torch.int32)
-		x_prima = x.index_select(1, input_index)
-		layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
-		model = Ann_PyTorch(layer_weights, self.activation)
+		if build_model:
+			genome.compute_phenotype(self.activation)
+		x_prima = x.index_select(1, genome.selected_features)
 		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
 		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-		loss, acc = eval_model(model, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
-		# fitness = 100 * (1 - (loss / y.shape[0]))
+		loss, acc = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
 		fitness = 100 - loss
 		if fitness < 0:
 			print(f'Fitness negativo: {fitness}')
