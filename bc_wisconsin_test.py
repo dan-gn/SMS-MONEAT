@@ -7,6 +7,7 @@ from models.genotype import Genome, NodeGene, ConnectionGene
 from utilities.activation_functions import gaussian, Gaussian
 from utilities.scalers import MeanScaler
 from utilities.fitness_functions import fitness_function, torch_fitness_function
+from utilities.stats_utils import KruskalWallisFilter
 
 import numpy as np
 import pandas as pd
@@ -78,17 +79,10 @@ if __name__ == '__main__':
 	print(f"Test dataset shape: {x_test.shape[0]}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
 
 	# Kruskal Wallis H Test
-	from scipy import stats
-
-	kw_pvalue = np.zeros(x_train.shape[1])
-
-	for feature in range(x_train.shape[1]):
-		_, kw_pvalue[feature] = stats.kruskal(x_train[:, feature], y_train)
-
-	kw_feature_selected = np.argwhere(kw_pvalue < 0.01)
-	kw_value = kw_pvalue[kw_feature_selected]
-	x_train_kw = x_train[:, kw_feature_selected[:, 0]]
-	x_test_kw = x_test[:, kw_feature_selected[:, 0]]
+	filter = KruskalWallisFilter(threshold=0.01)
+	x_train_kw, kw_feature_selected = filter.fit_transform(x_train, y_train)
+	x_test_kw, _ = filter.transform(x_test)
+	kw_pvalue = filter.p_value
 
 	print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
 
@@ -124,14 +118,14 @@ if __name__ == '__main__':
 		'kw_htest_pvalue' : kw_pvalue
 	}
 
-	for seed in range(2, 20):
+	for seed in range(1):
 
 		print(f'Execution = {seed}, seed = {seed}')
 
 		debug = True if seed == -1 else False
 
 		problem['fitness_function'] = torch_fitness_function	
-		model = NEAT(problem, params)
+		model = N3O(problem, params)
 		model.run(seed, debug)
 		# neat.best_solution.describe()
 		result = {'seed' : seed, 'model' : model}
@@ -145,10 +139,10 @@ if __name__ == '__main__':
 		acc, fitness = model.evaluate(model.best_solution, model.x_test, model.y_test)
 		print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
 
-		problem['fitness_function'] = 'torch_fitness_function'	
-		filename = f"neat_bc_wis_test_seed_{seed}_it{params['max_iterations']}_f.pkl"
-		with open(f'results/{filename}', 'wb') as f:
-			pickle.dump([problem, params, result], f)
+		# problem['fitness_function'] = 'torch_fitness_function'	
+		# filename = f"neat_bc_wis_test_seed_{seed}_it{params['max_iterations']}_f.pkl"
+		# with open(f'results/{filename}', 'wb') as f:
+		# 	pickle.dump([problem, params, result], f)
 
 		"""
 		Test results

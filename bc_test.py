@@ -15,13 +15,14 @@ from algorithms.n3o import N3O
 from utilities.activation_functions import Gaussian
 from utilities.fitness_functions import torch_fitness_function
 from utilities.scalers import MeanScaler
+from utilities.stats_utils import KruskalWallisFilter
 
 
 
 params = {
-	'fitness_function' : torch_fitness_function,
+	'fitness_function': torch_fitness_function,
 	'n_population' : 1000, 
-	'max_iterations' : 100,
+	'max_iterations' : 200,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -88,20 +89,15 @@ if __name__ == '__main__':
 	y_test = df_test.iloc[:, -1].to_numpy(dtype=np.float32)
 
 	# Kruskal Wallis H Test
-	kw_pvalue = np.zeros(x_train.shape[1])
-
-	for feature in range(x_train.shape[1]):
-		_, kw_pvalue[feature] = stats.kruskal(x_train[:, feature], y_train)
-
-	kw_feature_selected = np.argwhere(kw_pvalue < 1e-5)
-	kw_pvalue = kw_pvalue[kw_feature_selected]
-	x_train_kw = x_train[:, kw_feature_selected[:, 0]]
-	x_test_kw = x_test[:, kw_feature_selected[:, 0]]
+	filter = KruskalWallisFilter(threshold=0.01)
+	x_train_kw, kw_feature_selected = filter.fit_transform(x_train, y_train)
+	x_test_kw, _ = filter.transform(x_test)
+	kw_pvalue = filter.p_value
 
 	print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
 
 	# Normalize data
-	scaler = MeanScaler()
+	scaler = MinMaxScaler()
 	x_train_norm = scaler.fit_transform(x_train_kw)
 	x_test_norm = scaler.transform(x_test_kw)
 
@@ -125,7 +121,6 @@ if __name__ == '__main__':
 	"""
 	TRAIN MODEL
 	"""
-
 	
 	for seed in range(20):
 
@@ -150,6 +145,6 @@ if __name__ == '__main__':
 		print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
 
 		problem['fitness_function'] = 'torch_fitness_function'	
-		filename = f"bc_test_seed_{seed}_it{params['max_iterations']}_f_meanSc.pkl"
+		filename = f"breast_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
 		with open(f'results/{filename}', 'wb') as f:
 			pickle.dump([problem, params, result], f)
