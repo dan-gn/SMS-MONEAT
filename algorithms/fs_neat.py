@@ -51,7 +51,7 @@ class FS_NEAT(NEAT):
 			connection, self.innovation_number = self.global_genome.connect_one_input(self.innovation_number)
 			member.connection_genes.append(connection.copy())
 			# Evaluate member fitness
-			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train, True)
+			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train, True)
 			# Keep track of the best solution found
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
@@ -75,8 +75,8 @@ class FS_NEAT(NEAT):
 		x_prima = x.index_select(1, genome.selected_features)
 		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
 		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-		loss, acc = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
+		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
 		fitness = 100 - loss
 		if fitness < 0:
 			print(f'Fitness negativo: {fitness}')
-		return acc, fitness.detach().numpy()
+		return acc, fitness.detach().numpy(), gmean

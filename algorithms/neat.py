@@ -113,7 +113,7 @@ class NEAT:
 			# Randomize weights from each member of the population
 			member.randomize_weights()
 			# Evaluate member fitness
-			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train, True)
+			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train, True)
 			# Keep track of the best solution found
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
@@ -136,9 +136,9 @@ class NEAT:
 		x_prima = x.index_select(1, genome.selected_features)
 		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
 		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-		loss, acc = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
+		loss, acc, g_mean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
 		fitness = 100 - loss
-		return acc, fitness.detach().numpy()
+		return acc, fitness.detach().numpy(), g_mean
 
 
 	def get_offspring_distribution(self, remaining_offspring_space):
@@ -345,7 +345,7 @@ class NEAT:
 		# Add champion of large population species to next generation
 		for s in self.species:
 			if s.get_size() > self.champion_elitism_threshold:
-				s.champion.accuracy, s.champion.fitness = self.evaluate(s.champion, self.x_batch, self.y_batch, False)
+				s.champion.accuracy, s.champion.fitness, s.champion.g_mean = self.evaluate(s.champion, self.x_batch, self.y_batch, False)
 				offspring.append(s.champion.copy(with_phenotype=True))
 				remaining_offspring_space -= 1
 		return offspring, remaining_offspring_space
@@ -382,7 +382,7 @@ class NEAT:
 				if self.debug:
 					temp_child = child.copy()
 				self.mutate(child)
-				child.accuracy, child.fitness = self.evaluate(child, self.x_batch, self.y_batch, True)
+				child.accuracy, child.fitness, child.g_mean = self.evaluate(child, self.x_batch, self.y_batch, True)
 				offspring.append(child)
 				if child.fitness > self.best_solution.fitness:
 					self.best_solution = child.copy(with_phenotype=True)
@@ -458,12 +458,14 @@ class NEAT:
 		self.training_fitness = np.empty((self.max_iterations + 1, 1))
 		self.training_fitness[:] = np.nan
 		self.training_accuracy = np.copy(self.training_fitness)
+		self.training_gmean = np.copy(self.training_fitness)
 		self.testing_fitness = np.copy(self.training_fitness)
 		self.testing_accuracy = np.copy(self.training_fitness)
+		self.testing_gmean = np.copy(self.training_fitness)
 		# Initalize population
 		self.initialize_population()
-		self.training_fitness[0], self.training_accuracy[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-		self.testing_accuracy[0], self.testing_fitness[0] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+		self.training_accuracy[0], self.training_fitness[0], self.training_gmean[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
+		self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
 		# List to store species, initalized empty
 		self.species = []
 		# Evolve population
@@ -474,13 +476,13 @@ class NEAT:
 			self.speciation()
 			# Generate training batch
 			self.x_batch, self.y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP)
-			self.best_solution.accuracy, self.best_solution.fitness = self.evaluate(self.best_solution, self.x_batch, self.y_batch, False)
+			self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_batch, self.y_batch, False)
 			# Compute new generation by crossover and mutation operators
 			self.population = self.next_generation()
 			# Store history of fitness and accuracy from best solution in both datasets
-			self.training_accuracy[i+1], self.training_fitness[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-			self.testing_accuracy[i+1], self.testing_fitness[i+1] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
+			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
 			# Display progress
 			if i % 20 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
-				print(f'Iteration: {i}, Best solution: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
+				print(f'Iteration: {i}, Best solution: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]')

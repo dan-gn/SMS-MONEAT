@@ -59,6 +59,7 @@ class Genome:
 		self.weight_min_value = min_value
 		self.weight_max_value = max_value
 		self.accuracy = None
+		self.g_mean = None
 		self.phenotype = None
 
 	def create_node_genes(self, n_inputs, n_outputs):
@@ -363,6 +364,7 @@ class Genome:
 		genome_copy.fitness = self.fitness
 		genome_copy.shared_fitness = self.shared_fitness
 		genome_copy.accuracy = self.accuracy
+		genome_copy.g_mean = self.g_mean
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
 			genome_copy.phenotype = self.phenotype.copy()

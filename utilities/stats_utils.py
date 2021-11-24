@@ -1,5 +1,7 @@
 import numpy as np
+import torch
 from scipy import stats
+from sklearn.metrics import confusion_matrix
 
 import pandas as pd
 
@@ -38,42 +40,16 @@ class KruskalWallisFilter:
 		return x_filtered, self.feature_selected
 
 
+def geometric_mean(y_true, y_pred):
+	tn, fp, fn, tp = confusion_matrix(y_true, torch.round(y_pred)).ravel()
+	tp_rate = tp / (tp + fn)
+	tn_rate = tn / (tn + fp)
+	return np.sqrt(tp_rate * tn_rate)
+
+
 if __name__ == '__main__':
 
-	"""
-	Dataset and pre-processing
-	"""
-	# Read dataset
-	df = pd.read_csv('datasets/breast-cancer-wisconsin.data', delimiter=',', header=None)
-	df = df.drop([6], axis=1)
+	y_true = torch.tensor([0, 1, 0, 1]).type(torch.float32)
+	y_pred = torch.tensor([0, 1, 0, 1]).type(torch.float32)
 
-	# Remove column with incomplete data
-	x = df.iloc[:, 1:-1].to_numpy(dtype=np.float32)
-
-	# Set label data between 0 and 1
-	y = df.iloc[:, -1].to_numpy(dtype=np.float32)
-	y = np.round((y - 2) / 2)
-
-	# Divide dataset in training set and validation set
-	x_train = x[:640, :]
-	y_train = y[:640]
-	x_test = x[640:, :]
-	y_test = y[640:]
-
-
-	# Count class distribution from both datasets
-	n_relapsed_train = np.sum(y_train)
-	n_non_relapsed_train = y_train.shape[0] - n_relapsed_train
-	n_relapsed_test = np.sum(y_test)
-	n_non_relapsed_test = y_test.shape[0] - n_relapsed_test
-
-	# Print information
-	print(f"Train dataset shape: {x_train.shape[0]}, Relapsed instances: {n_relapsed_train}, Non-Relapsed instances: {n_non_relapsed_train}")
-	print(f"Test dataset shape: {x_test.shape[0]}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
-
-
-	filter = KruskalWallisFilter(threshold=0.01)
-	x_train_kw, feature_selected = filter.fit_transform(x_train, y_train)
-	x_test_kw, _ = filter.transform(x_test)
-
-	print(x_train_kw.shape, x_test_kw.shape)
+	print(geometric_mean(y_true, y_pred))

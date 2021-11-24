@@ -60,7 +60,7 @@ class N3O(FS_NEAT):
 			member = Genome(node_genes, connection_genes)	
 			member.set_weight_limits(self.weight_min_value, self.weight_max_value)
 			# Evaluate member fitness
-			member.accuracy, member.fitness = self.evaluate(member, self.x_train, self.y_train, True)
+			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train, True)
 			# Add member to population
 			self.population.append(member)
 			# Keep track of the best solution found
@@ -192,7 +192,7 @@ class N3O(FS_NEAT):
 		sorted_pop = sorted(self.population, key=lambda x: -x.fitness)
 		k = int(self.n_population * self.elitism_prop)
 		for i in range(k):
-			sorted_pop[i].accuracy, sorted_pop[i].fitness = self.evaluate(sorted_pop[i], self.x_batch, self.y_batch, False)
+			sorted_pop[i].accuracy, sorted_pop[i].fitness, sorted_pop[i].g_mean = self.evaluate(sorted_pop[i], self.x_batch, self.y_batch, False)
 			offspring.append(sorted_pop[i].copy(with_phenotype=True))
 		remaining_offspring_space = self.n_population - k
 		return offspring, remaining_offspring_space

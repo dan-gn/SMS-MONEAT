@@ -4,7 +4,7 @@ import torch.nn as nn
 import pickle
 from sklearn.preprocessing import MinMaxScaler
 
-from models.microarray_ds import MicroarrayDataset
+from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
 from utilities.scalers import MeanScaler
 from utilities.fitness_functions import torch_fitness_function
@@ -12,12 +12,14 @@ from utilities.activation_functions import Gaussian
 from algorithms.neat import set_seed
 from algorithms.n3o import N3O
 
-# filename = 'Colorectal_GSE44076'
 filename = 'Breast_GSE42568'
+# filename = 'Colorectal_GSE44076'
+# filename = 'Leukemia_GSE63270'
+# filename = 'breastCancer-full'
 trn_prop = 0.7
 initial_seed = 0
-n_tests = 20
-save = True
+n_tests = 1
+save = False
 	
 
 params = {
@@ -56,9 +58,10 @@ if __name__ == '__main__':
 
 	# Read microarray dataset
 	print(f'Reading dataset: {filename}')
-	ds = MicroarrayDataset(f'./datasets/{filename}.arff')
+	ds = MicroarrayDataset(f'./datasets/CUMIDA/{filename}.arff')
 	x, y = ds.get_full_dataset()
 	print(f'Total samples = {x.shape[0]}, Total features = {x.shape[1]}')
+	print(f'Proportion of classes = ({np.sum(y)}, {y.shape[0]-np.sum(y)})')
 
 	# Split dataset into training and testing dataset
 	print(f'Spliting into training and testin datasets. Proportion of training dataset = {trn_prop * 100:.2f}%')

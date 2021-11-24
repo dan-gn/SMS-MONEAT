@@ -3,5 +3,5 @@
 *.txt
 *.png
 *.pyc
-
-datasets/
+*.csv
+*.arff
