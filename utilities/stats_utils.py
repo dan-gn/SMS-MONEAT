@@ -3,8 +3,6 @@ import torch
 from scipy import stats
 from sklearn.metrics import confusion_matrix
 
-import pandas as pd
-
 def kruskal_wallis(x, y):
 	labels = np.unique(y)
 	p_value = np.ones(x.shape[1])
@@ -45,11 +43,3 @@ def geometric_mean(y_true, y_pred):
 	tp_rate = tp / (tp + fn)
 	tn_rate = tn / (tn + fp)
 	return np.sqrt(tp_rate * tn_rate)
-
-
-if __name__ == '__main__':
-
-	y_true = torch.tensor([0, 1, 0, 1]).type(torch.float32)
-	y_pred = torch.tensor([0, 1, 0, 1]).type(torch.float32)
-
-	print(geometric_mean(y_true, y_pred))

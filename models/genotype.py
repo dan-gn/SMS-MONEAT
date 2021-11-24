@@ -5,9 +5,7 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
-from models.ann_pytorch import Ann_PyTorch, eval_model
-from utilities.fitness_functions import torch_fitness_function, fitness_function
-from utilities.activation_functions import Gaussian, gaussian
+from models.ann_pytorch import Ann_PyTorch
 
 class NodeGene:
 	"""

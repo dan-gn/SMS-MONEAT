@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from scipy.io import arff
+import arff as arfff
 from sklearn.preprocessing import MinMaxScaler
 from scipy import stats
 import pickle
@@ -22,7 +23,7 @@ from utilities.stats_utils import KruskalWallisFilter
 params = {
 	'fitness_function': torch_fitness_function,
 	'n_population' : 1000, 
-	'max_iterations' : 200,
+	'max_iterations': 100,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -62,89 +63,99 @@ if __name__ == '__main__':
 	data = arff.loadarff('datasets/breastCancer-test.arff')
 	df_test = pd.DataFrame(data[0])
 
-	# Change category class label to binary class label
-	labels = {b'relapse' : 1, b'non-relapse' : 0}
-	df_train['Class'] = df_train['Class'].replace(labels)
-	df_test['Class'] = df_test['Class'].replace(labels)
+	df = pd.concat([df_train, df_test])
+	print(df_train.shape,df_test.shape, df.shape)
 
-	# Count class distribution from both datasets
-	n_relapsed_train = np.sum(df_train['Class'].to_numpy(dtype=np.float32))
-	n_non_relapsed_train = df_train.shape[0] - n_relapsed_train
-	n_relapsed_test = np.sum(df_test['Class'].to_numpy(dtype=np.float32))
-	n_non_relapsed_test = df_test.shape[0] - n_relapsed_test
+	df['Class'] = df['Class'].str.decode("utf-8")
 
-	# Print information
-	print(f"Train dataset shape: {df_train.shape}, Relapsed instances: {n_relapsed_train}, Non-Relapsed instances: {n_non_relapsed_train}")
-	print(f"Test dataset shape: {df_test.shape}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
+	arfff.dump('datasets/breastCancer-full.arff'
+		, df.values
+		, relation='relation name'
+		, names=df.columns)
 
-	"""
-	Preprocess data
-	"""
-	# Convert train dataset to Numpy array
-	x_train = df_train.iloc[:, :-1].to_numpy(dtype=np.float32)
-	y_train = df_train.iloc[:, -1].to_numpy(dtype=np.float32)
+	# # Change category class label to binary class label
+	# labels = {b'relapse' : 1, b'non-relapse' : 0}
+	# df_train['Class'] = df_train['Class'].replace(labels)
+	# df_test['Class'] = df_test['Class'].replace(labels)
 
-	# Convert test dataset to Numpy array
-	x_test = df_test.iloc[:, :-1].to_numpy(dtype=np.float32)
-	y_test = df_test.iloc[:, -1].to_numpy(dtype=np.float32)
+	# # Count class distribution from both datasets
+	# n_relapsed_train = np.sum(df_train['Class'].to_numpy(dtype=np.float32))
+	# n_non_relapsed_train = df_train.shape[0] - n_relapsed_train
+	# n_relapsed_test = np.sum(df_test['Class'].to_numpy(dtype=np.float32))
+	# n_non_relapsed_test = df_test.shape[0] - n_relapsed_test
 
-	# Kruskal Wallis H Test
-	filter = KruskalWallisFilter(threshold=0.01)
-	x_train_kw, kw_feature_selected = filter.fit_transform(x_train, y_train)
-	x_test_kw, _ = filter.transform(x_test)
-	kw_pvalue = filter.p_value
+	# # Print information
+	# print(f"Train dataset shape: {df_train.shape}, Relapsed instances: {n_relapsed_train}, Non-Relapsed instances: {n_non_relapsed_train}")
+	# print(f"Test dataset shape: {df_test.shape}, Relapsed instances: {n_relapsed_test}, Non-Relapsed instances: {n_non_relapsed_test}")
 
-	print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
+	# """
+	# Preprocess data
+	# """
+	# # Convert train dataset to Numpy array
+	# x_train = df_train.iloc[:, :-1].to_numpy(dtype=np.float32)
+	# y_train = df_train.iloc[:, -1].to_numpy(dtype=np.float32)
 
-	# Normalize data
-	scaler = MinMaxScaler()
-	x_train_norm = scaler.fit_transform(x_train_kw)
-	x_test_norm = scaler.transform(x_test_kw)
+	# # Convert test dataset to Numpy array
+	# x_test = df_test.iloc[:, :-1].to_numpy(dtype=np.float32)
+	# y_test = df_test.iloc[:, -1].to_numpy(dtype=np.float32)
 
-	# Preprocess training and testing dataset
-	y_train = np.expand_dims(y_train, axis=1)
-	y_test = np.expand_dims(y_test, axis=1)
+	# # Kruskal Wallis H Test
+	# filter = KruskalWallisFilter(threshold=0.01)
+	# x_train_kw, kw_feature_selected = filter.fit_transform(x_train, y_train)
+	# x_test_kw, _ = filter.transform(x_test)
+	# kw_pvalue = filter.p_value
+
+	# print(f'Attributes selected after KW H Test: {kw_feature_selected.shape[0]}')
+
+	# # Normalize data
+	# scaler = MinMaxScaler()
+	# x_train_norm = scaler.fit_transform(x_train_kw)
+	# x_test_norm = scaler.transform(x_test_kw)
+
+	# # Preprocess training and testing dataset
+	# y_train = np.expand_dims(y_train, axis=1)
+	# y_test = np.expand_dims(y_test, axis=1)
 	
-	x_train = torch.from_numpy(x_train_norm).type(torch.float32)
-	y_train = torch.from_numpy(y_train).type(torch.float32)
-	x_test = torch.from_numpy(x_test_norm).type(torch.float32)
-	y_test = torch.from_numpy(y_test).type(torch.float32)
+	# x_train = torch.from_numpy(x_train_norm).type(torch.float32)
+	# y_train = torch.from_numpy(y_train).type(torch.float32)
+	# x_test = torch.from_numpy(x_test_norm).type(torch.float32)
+	# y_test = torch.from_numpy(y_test).type(torch.float32)
 
-	problem = {
-		'x_train' : x_train,
-		'y_train' : y_train,
-		'x_test' : x_test,
-		'y_test' : y_test,
-		'kw_htest_pvalue' : kw_pvalue
-	}
+	# problem = {
+	# 	'x_train' : x_train,
+	# 	'y_train' : y_train,
+	# 	'x_test' : x_test,
+	# 	'y_test' : y_test,
+	# 	'kw_htest_pvalue' : kw_pvalue
+	# }
 
-	"""
-	TRAIN MODEL
-	"""
+	# """
+	# TRAIN MODEL
+	# """
 	
-	for seed in range(20):
+	# for seed in range(20):
 
-		print(f'Execution = {seed}, seed = {seed}')
+	# 	print(f'Execution = {seed}, seed = {seed}')
 
-		debug = True if seed == -1 else False
+	# 	debug = True if seed == -1 else False
 
-		problem['fitness_function'] = torch_fitness_function	
-		model = N3O(problem, params)
-		model.run(seed, debug)
-		# neat.best_solution.describe()
-		result = {'seed' : seed, 'model' : model}
+	# 	problem['fitness_function'] = torch_fitness_function	
+	# 	model = N3O(problem, params)
+	# 	model.run(seed, debug)
+	# 	# neat.best_solution.describe()
+	# 	result = {'seed' : seed, 'model' : model}
 
-		"""
-		DISPLAY RESULTS
-		"""
+	# 	"""
+	# 	DISPLAY RESULTS
+	# 	"""
 
-		acc, fitness = model.evaluate(model.best_solution, model.x_train, model.y_train)
-		print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
+	# 	acc, fitness = model.evaluate(model.best_solution, model.x_train, model.y_train)
+	# 	print(f'Train dataset: fitness = {fitness}, accuracy = {acc} ')
 
-		acc, fitness = model.evaluate(model.best_solution, model.x_test, model.y_test)
-		print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
+	# 	acc, fitness = model.evaluate(model.best_solution, model.x_test, model.y_test)
+	# 	print(f'Test dataset: fitness = {fitness}, accuracy = {acc} ')
 
-		problem['fitness_function'] = 'torch_fitness_function'	
-		filename = f"breast_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
-		with open(f'results/{filename}', 'wb') as f:
-			pickle.dump([problem, params, result], f)
+	# 	problem['fitness_function'] = 'torch_fitness_function'	
+	# 	filename = f"breast_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
+	# 	with open(f'results/{filename}', 'wb') as f:
+	# 		pickle.dump([problem, params, result], f)

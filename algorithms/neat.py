@@ -485,4 +485,4 @@ class NEAT:
 			# Display progress
 			if i % 20 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
-				print(f'Iteration: {i}, Best solution: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]')
+				print(f'It: {i}, Best solution: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]')
