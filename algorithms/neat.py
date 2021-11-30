@@ -38,7 +38,7 @@ from utilities.ml_utils import get_batch
 """
 Constants
 """
-BATCH_PROP = 1.00
+BATCH_PROP = 1.0
 
 """
 NEAT
@@ -466,6 +466,9 @@ class NEAT:
 		self.initialize_population()
 		self.training_accuracy[0], self.training_fitness[0], self.training_gmean[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 		self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+		# Best solution in test dataset
+		self.best_solution_test = self.best_solution.copy()
+		self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[0, 0], self.testing_fitness[0, 0]
 		# List to store species, initalized empty
 		self.species = []
 		# Evolve population
@@ -482,6 +485,10 @@ class NEAT:
 			# Store history of fitness and accuracy from best solution in both datasets
 			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+			if (self.testing_gmean[i+1, 0] > self.best_solution_test.g_mean) or (self.testing_gmean[i+1, 0] == self.best_solution_test.g_mean and self.testing_fitness[i+1, 0] > self.best_solution_test.fitness):
+				self.best_solution_test = self.best_solution.copy()
+				self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[i+1, 0], self.testing_fitness[i+1, 0]
+			
 			# Display progress
 			if i % 20 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()

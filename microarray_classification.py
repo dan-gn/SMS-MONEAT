@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import pickle
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
@@ -11,21 +11,25 @@ from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from algorithms.n3o import N3O
 
-filename = 'Breast_GSE42568'
-# filename = 'Colorectal_GSE8671'
-# filename = 'Colorectal_GSE21510'
-# filename = 'Colorectal_GSE32323'
-# filename = 'Colorectal_GSE44076'
-# filename = 'Colorectal_GSE44861'
-# filename = 'Leukemia_GSE14317'
-# filename = 'Leukemia_GSE63270'
-# filename = 'Leukemia_GSE71935'
+
+datasets = []
+datasets.append('Breast_GSE42568')
+datasets.append('Colorectal_GSE8671')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE14317')
+datasets.append('Leukemia_GSE63270')
+datasets.append('Leukemia_GSE71935')
+
+# filename = 'Colorectal_GSE21510' # Non-Binary
 # filename = 'breastCancer-full'
+
 
 trn_size = 0.7
 initial_seed = 0
-n_tests = 1
-save_results = False
+n_tests = 20
+save_results = True
 	
 
 params = {
@@ -58,81 +62,84 @@ params = {
 
 
 if __name__ == '__main__':
+	
+	for filename in datasets:
 
-	# Read microarray dataset
-	print(f'Reading dataset: {filename}')
-	ds = MicroarrayDataset(f'./datasets/CUMIDA/{filename}.arff')
-	x, y = ds.get_full_dataset()
-	print(f'Total samples = {x.shape[0]}, Total features = {x.shape[1]}')
-	print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
+		# Read microarray dataset
+		print(f'Reading dataset: {filename}')
+		ds = MicroarrayDataset(f'./datasets/CUMIDA/{filename}.arff')
+		print(f'Dataset labels: {ds.get_labels()}')
+		x, y = ds.get_full_dataset()
+		print(f'Total samples = {x.shape[0]}, Total features = {x.shape[1]}')
+		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
-	for seed in range(initial_seed, initial_seed+n_tests):
+		for seed in range(initial_seed, initial_seed+n_tests):
 
-		print(f'Execution = {seed}, seed = {seed}')
+			print(f'Execution = {seed}, seed = {seed}')
 
-		debug = True if seed == -1 else False
+			debug = True if seed == -1 else False
 
-		# Split dataset into training and testing dataset
-		print(f'Spliting into training and testin datasets. Proportion of training dataset = {trn_size * 100:.2f}%')
-		x_train, x_test, y_train, y_test = ds.split(trn_size=trn_size, random_state=seed)
+			# Split dataset into training and testing dataset
+			print(f'Spliting into training and testin datasets. Proportion of training dataset = {trn_size * 100:.2f}%')
+			x_train, x_test, y_train, y_test = ds.split(trn_size=trn_size, random_state=seed)
 
-		print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')
+			print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')
 
-		# Statistical Filtering
-		# print(f'Statistical Filtering...')
-		filter = KruskalWallisFilter(threshold=0.01)
-		x_train, features_selected = filter.fit_transform(x_train, y_train)
-		x_test, _ = filter.transform(x_test)
-		print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
+			# Statistical Filtering
+			# print(f'Statistical Filtering...')
+			filter = KruskalWallisFilter(threshold=0.01)
+			x_train, features_selected = filter.fit_transform(x_train, y_train)
+			x_test, _ = filter.transform(x_test)
+			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
 
-		# Re-Scale datasets
-		# print(f'Scaling datasets...')
-		scaler = MinMaxScaler()
-		x_train = scaler.fit_transform(x_train)
-		x_test = scaler.transform(x_test)
+			# Re-Scale datasets
+			# print(f'Scaling datasets...')
+			scaler = MinMaxScaler()
+			x_train = scaler.fit_transform(x_train)
+			x_test = scaler.transform(x_test)
 
-		# print(f'Final preprocessing data steps...')
-		y_train = np.expand_dims(y_train, axis=1)
-		y_test = np.expand_dims(y_test, axis=1)
+			# print(f'Final preprocessing data steps...')
+			y_train = np.expand_dims(y_train, axis=1)
+			y_test = np.expand_dims(y_test, axis=1)
 
-		x_train = torch.from_numpy(x_train).type(torch.float32)
-		y_train = torch.from_numpy(y_train).type(torch.float32)
-		x_test = torch.from_numpy(x_test).type(torch.float32)
-		y_test = torch.from_numpy(y_test).type(torch.float32)
+			x_train = torch.from_numpy(x_train).type(torch.float32)
+			y_train = torch.from_numpy(y_train).type(torch.float32)
+			x_test = torch.from_numpy(x_test).type(torch.float32)
+			y_test = torch.from_numpy(y_test).type(torch.float32)
 
-		problem = {
-			'x_train' : x_train,
-			'y_train' : y_train,
-			'x_test' : x_test,
-			'y_test' : y_test,
-			'kw_htest_pvalue' : filter.p_value,
-			'labels' : ds.get_labels()
-		}
+			problem = {
+				'x_train' : x_train,
+				'y_train' : y_train,
+				'x_test' : x_test,
+				'y_test' : y_test,
+				'kw_htest_pvalue' : filter.p_value,
+				'labels' : ds.get_labels()
+			}
 
-		"""
-		TRAIN MODEL
-		"""
+			"""
+			TRAIN MODEL
+			"""
 
-		print(f'Traning model...')
+			print(f'Traning model...')
 
-		problem['fitness_function'] = torch_fitness_function	
-		model = N3O(problem, params)
-		model.run(seed, debug)
-		# neat.best_solution.describe()
-		result = {'seed' : seed, 'model' : model}
+			model = N3O(problem, params)
+			model.run(seed, debug)
+			# neat.best_solution.describe()
 
-		"""
-		DISPLAY RESULTS
-		"""
+			"""
+			DISPLAY RESULTS
+			"""
 
-		acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_train, model.y_train)
-		print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_train, model.y_train)
+			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-		acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_test, model.y_test)
-		print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-		if save_results:
-			problem['fitness_function'] = 'torch_fitness_function'	
-			results_filename = f"{filename}_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
-			with open(f'results/{results_filename}', 'wb') as f:
-				pickle.dump([problem, params, result], f)
+			if save_results:
+				result = {'seed' : seed, 'model' : model}
+				problem['fitness_function'] = 'torch_fitness_function'	
+				results_filename = f"{filename}_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
+				with open(f'results/{results_filename}', 'wb') as f:
+					pickle.dump([problem, params, result], f)
+				problem['fitness_function'] = torch_fitness_function	
