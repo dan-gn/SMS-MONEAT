@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import os
+from pathlib import Path
 import pickle
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
@@ -10,16 +12,17 @@ from utilities.scalers import MeanScaler
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from algorithms.n3o import N3O
+from algorithms.sms_neat import SMS_NEAT
 
 
 datasets = []
-datasets.append('Breast_GSE42568')
-datasets.append('Colorectal_GSE8671')
-datasets.append('Colorectal_GSE32323')
-datasets.append('Colorectal_GSE44076')
-datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE14317')
-datasets.append('Leukemia_GSE63270')
+# datasets.append('Breast_GSE42568')
+# datasets.append('Colorectal_GSE8671')
+# datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE14317')
+# datasets.append('Leukemia_GSE63270')
 datasets.append('Leukemia_GSE71935')
 
 # filename = 'Colorectal_GSE21510' # Non-Binary
@@ -27,15 +30,15 @@ datasets.append('Leukemia_GSE71935')
 
 
 trn_size = 0.7
-initial_seed = 0
-n_tests = 20
-save_results = True
+initial_seed = 19
+n_tests = 1
+save_results = False
 	
 
 params = {
 	'fitness_function': torch_fitness_function,
-	'n_population' : 1000, 
-	'max_iterations' : 100,
+	'n_population' : 100, 
+	'max_iterations' : 2000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -72,6 +75,10 @@ if __name__ == '__main__':
 		x, y = ds.get_full_dataset()
 		print(f'Total samples = {x.shape[0]}, Total features = {x.shape[1]}')
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
+
+		if save_results:
+			results_path = os.getcwd() + f'\\results-sms_emoa\\{filename}'
+			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for seed in range(initial_seed, initial_seed+n_tests):
 
@@ -122,13 +129,15 @@ if __name__ == '__main__':
 
 			print(f'Traning model...')
 
-			model = N3O(problem, params)
+			model = SMS_NEAT(problem, params)
 			model.run(seed, debug)
 			# neat.best_solution.describe()
 
 			"""
 			DISPLAY RESULTS
 			"""
+			input_nodes, hidden_nodes, output_nodes = model.best_solution_test.count_nodes()
+			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}]')
 
 			acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_train, model.y_train)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
@@ -140,6 +149,6 @@ if __name__ == '__main__':
 				result = {'seed' : seed, 'model' : model}
 				problem['fitness_function'] = 'torch_fitness_function'	
 				results_filename = f"{filename}_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
-				with open(f'results/{results_filename}', 'wb') as f:
+				with open(f'{results_path}/{results_filename}', 'wb') as f:
 					pickle.dump([problem, params, result], f)
 				problem['fitness_function'] = torch_fitness_function	

@@ -1,6 +1,9 @@
 import numpy as np
 import random
 
+def simulated_binary_crossover(x, eta):
+	pass
+
 def polynomial_mutation(x, eta):
 	r = random.uniform(0, 1)
 	if r < 0.5:
@@ -8,7 +11,6 @@ def polynomial_mutation(x, eta):
 	else:
 		delta = 1 - (2 * (1-r)) ** (1 / (eta+1))
 	return x + delta
-
 
 def roulette_wheel(p):
 	r = random.uniform(0, 1) * sum(p)	

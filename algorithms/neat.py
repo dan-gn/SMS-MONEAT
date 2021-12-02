@@ -157,7 +157,7 @@ class NEAT:
 			i = random.randint(0, len(self.species)-1)
 			if np.sum(offspring_distribution) < remaining_offspring_space:
 				offspring_distribution[i] += 1
-			else:
+			elif offspring_distribution[i] > 0:
 				offspring_distribution[i] -= 1
 		return offspring_distribution
 
