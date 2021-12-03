@@ -78,10 +78,8 @@ class SMS_NEAT(N3O):
 		offspring inheriting that input.
 		"""
 		if genome1.rank != genome2.rank:
-			parents = sorted([genome1, genome2], key=lambda x: -x.rank)
+			parents = sorted([genome1, genome2], key=lambda x: x.rank)
 			offspring = parents[0].copy()
-			print('OFFSPRING')
-			offspring.describe()
 			for connection_a in offspring.connection_genes:
 				connection_b = parents[1].get_connection_gene(connection_a.innovation_number)
 				if connection_b:
@@ -117,24 +115,15 @@ class SMS_NEAT(N3O):
 		self.generation_new_connections = {}
 		self.probs = self.compute_selection_prob()
 		if random.uniform(0, 1) < self.crossover_prob:
-			print('A')
 			parent1, parent2 = self.select_parents()
-			print('PARENT 1')
-			parent1.describe()
-			print('PARENT 2')
-			parent2.describe()
 			while True:
 				child, succeeded = self.crossover(parent1, parent2)
 				if succeeded:
 					break
 		else:
-			print('B')
 			parent, _ = self.select_parents()
 			child = parent.copy()
-		print('CHILD')
-		child.describe()
 		self.mutate(child)
-		child.describe()
 		child.accuracy, child.fitness, child.g_mean = self.evaluate(child, self.x_train, self.y_train, True)
 		return child
 
@@ -158,7 +147,7 @@ class SMS_NEAT(N3O):
 		self.best_solution_test.g_mean = -math.inf
 		for member in self.population:
 			_, fitness, g_mean = self.evaluate(member, self.x_test, self.y_test, True)
-			if (g_mean > self.best_solution_test.g_mean) or (g_mean == self.best_solution_test and fitness < self.best_solution_test.fitness):
+			if (g_mean > self.best_solution_test.g_mean) or (g_mean == self.best_solution_test.g_mean and fitness[1] < self.best_solution_test.fitness[1]):
 				self.best_solution_test = member.copy(with_phenotype=True)
 
 	def run(self, seed=None, debug=False):
@@ -171,7 +160,7 @@ class SMS_NEAT(N3O):
 			self.reduce_population()
 			population_fitness = np.array([member.fitness for member in self.population])
 			mean_fitness = np.mean(population_fitness, axis=0)
-			if i % 250 == 0:
+			if i % 500 == 0:
 				print(f'Iteration {i}: population fitness {mean_fitness}')
 		self.choose_solution()
 		

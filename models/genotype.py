@@ -199,17 +199,33 @@ class Genome:
 					possible_connections = self.discard_backwards(connection.input_node, possible_connections)
 		return possible_connections
 
+	def search_loop(self, node, nodes_checked):
+		if node.id in nodes_checked:
+			return False
+		else:
+			found = False
+			nodes_checked.append(node.id)
+			for connection in self.connection_genes:
+				if connection.input_node == node.id:
+					found = True
+					output_node = self.get_node_gene(connection.output_node)
+					if output_node.node_type == 'hidden':
+						if not self.search_loop(output_node, list(nodes_checked)):	
+							return False
+		return found
+
 	def check_connectivity(self):
+		any_input = False
+		any_output = False
 		for node in self.node_genes:
-			if node.node_type != 'input':
-				succeeded = False
-				for connection in self.connection_genes:
-					if connection.output_node == node.id:
-						succeeded = True
-						break
-				if not succeeded:
+			if node.node_type == 'input':
+				any_input = True
+				nodes_checked = []
+				if not self.search_loop(node, nodes_checked):
 					return False
-		return True
+			elif node.node_type == 'output':
+				any_output = True
+		return any_input and any_output
 
 	def connection_from_input(self, node):
 		if node.node_type == 'input':
@@ -222,11 +238,13 @@ class Genome:
 		return False
 	
 	def validate_network(self):
+		any_output = False
 		for node in self.node_genes:
 			if node.node_type == 'output':
+				any_output = True
 				if not self.connection_from_input(node):
 					return False
-		return True
+		return any_output
 
 
 

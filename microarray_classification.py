@@ -30,15 +30,15 @@ datasets.append('Leukemia_GSE71935')
 
 
 trn_size = 0.7
-initial_seed = 19
-n_tests = 1
-save_results = False
+initial_seed = 0
+n_tests = 5
+save_results = True
 	
 
 params = {
 	'fitness_function': torch_fitness_function,
 	'n_population' : 100, 
-	'max_iterations' : 2000,
+	'max_iterations' : 5000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
