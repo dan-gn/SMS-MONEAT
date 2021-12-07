@@ -17,13 +17,13 @@ from algorithms.sms_neat import SMS_NEAT
 
 datasets = []
 # datasets.append('Breast_GSE42568')
-# datasets.append('Colorectal_GSE8671')
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE14317')
-# datasets.append('Leukemia_GSE63270')
-datasets.append('Leukemia_GSE71935')
+datasets.append('Colorectal_GSE8671')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE14317')
+datasets.append('Leukemia_GSE63270')
+# datasets.append('Leukemia_GSE71935')
 
 # filename = 'Colorectal_GSE21510' # Non-Binary
 # filename = 'breastCancer-full'
@@ -31,14 +31,14 @@ datasets.append('Leukemia_GSE71935')
 
 trn_size = 0.7
 initial_seed = 0
-n_tests = 5
+n_tests = 20
 save_results = True
 	
 
 params = {
 	'fitness_function': torch_fitness_function,
-	'n_population' : 100, 
-	'max_iterations' : 5000,
+	'n_population' : 200, 
+	'max_iterations' : 2500,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),

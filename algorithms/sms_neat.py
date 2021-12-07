@@ -8,7 +8,7 @@ from models.genotype import Genome
 from models.ann_pytorch import eval_model
 from utilities.ga_utils import tournament_selection
 from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
-from utilities.moea_utils import check_repeated_rows, choose_repeated_index
+from utilities.data_utils import check_repeated_rows, choose_repeated_index
 
 
 class SMS_NEAT(N3O):
