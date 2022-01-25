@@ -16,17 +16,21 @@ from algorithms.sms_neat import SMS_NEAT
 
 
 datasets = []
-# datasets.append('Breast_GSE42568')
+
+datasets.append('breastCancer-full')
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
+
+datasets.append('Breast_GSE42568')
 datasets.append('Colorectal_GSE8671')
 datasets.append('Colorectal_GSE32323')
 datasets.append('Colorectal_GSE44076')
 datasets.append('Colorectal_GSE44861')
 datasets.append('Leukemia_GSE14317')
 datasets.append('Leukemia_GSE63270')
-# datasets.append('Leukemia_GSE71935')
+datasets.append('Leukemia_GSE71935')
 
 # filename = 'Colorectal_GSE21510' # Non-Binary
-# filename = 'breastCancer-full'
 
 
 trn_size = 0.7
@@ -36,9 +40,9 @@ save_results = True
 	
 
 params = {
-	'fitness_function': torch_fitness_function,
-	'n_population' : 200, 
-	'max_iterations' : 2500,
+	'fitness_function': torch_fitness_function, 
+	'n_population' : 100, 
+	'max_iterations' : 18000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -57,7 +61,7 @@ params = {
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
 	'compatibility_distance_coeff' : [1.0, 1.0, 0.4],
-	'stagnant_generations_threshold' : 15,
+	'stagnant_generations_threshold' : 100,
 	'champion_elitism_threshold' : 5,
 	'elitism_prop' : 0.1,
 	'initial_weight_limits' : [-1, 1],
@@ -77,7 +81,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f'\\results-sms_emoa\\{filename}'
+			results_path = os.getcwd() + f"\\results-sms_neat-pop_{params['n_population']}-it_{params['max_iterations']}_2\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for seed in range(initial_seed, initial_seed+n_tests):
@@ -145,10 +149,13 @@ if __name__ == '__main__':
 			acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
 			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+
 			if save_results:
 				result = {'seed' : seed, 'model' : model}
 				problem['fitness_function'] = 'torch_fitness_function'	
-				results_filename = f"{filename}_{seed}_it{params['max_iterations']}_MinMaxSc_f.pkl"
+				results_filename = f"{filename}_{seed}_MinMaxSc.pkl"
 				with open(f'{results_path}/{results_filename}', 'wb') as f:
 					pickle.dump([problem, params, result], f)
 				problem['fitness_function'] = torch_fitness_function	

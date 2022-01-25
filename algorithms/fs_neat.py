@@ -20,6 +20,7 @@ __date__ = "30/09/2021"
 Required libraries
 """
 import numpy as np
+import math
 
 """
 Class
@@ -72,6 +73,8 @@ class FS_NEAT(NEAT):
 
 		if build_model:
 			genome.compute_phenotype(self.activation)
+		if genome.selected_features.shape[0] == 0:
+			return None, 0, 0
 		x_prima = x.index_select(1, genome.selected_features)
 		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
 		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0

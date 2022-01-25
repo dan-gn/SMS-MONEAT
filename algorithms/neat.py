@@ -147,18 +147,14 @@ class NEAT:
 		Stagnant species for more generations than a defined threshold or species with no members should not be taking in count 
 		for generating new offspring.
 		"""
-		# Remove species with stagnant generations higher than threshold or species with no members
-		self.species = [s for s in self.species if (s.stagnant_generations < self.stagnant_generations_threshold and s.get_size() > 0)]
 		# Compute offspring_distribution for each species
 		total_sum_shared_fitness = np.sum(np.array([s.sum_shared_fitness for s in self.species]))
-		offspring_distribution = [round(s.sum_shared_fitness * remaining_offspring_space / total_sum_shared_fitness) for s in self.species]
+		offspring_distribution = [math.ceil(s.sum_shared_fitness * remaining_offspring_space / total_sum_shared_fitness) for s in self.species]
 		# If the offspring distribution is not the same as the remainig space, randomly add or substract an element for a species
-		while np.sum(offspring_distribution) != remaining_offspring_space:
-			i = random.randint(0, len(self.species)-1)
-			if np.sum(offspring_distribution) < remaining_offspring_space:
-				offspring_distribution[i] += 1
-			elif offspring_distribution[i] > 0:
-				offspring_distribution[i] -= 1
+		while np.sum(offspring_distribution) > remaining_offspring_space:
+			sp_options = [i for i, sp in enumerate(self.species) if sp.get_size() > 1]
+			i = random.choice(sp_options)
+			offspring_distribution[i] -= 1
 		return offspring_distribution
 
 	def select_parents(self, species):
@@ -428,6 +424,8 @@ class NEAT:
 				new_species.representant = member.copy()
 				new_species.champion = member.copy(with_phenotype=True)
 				self.species.append(new_species)
+		# Remove species with stagnant generations higher than threshold or species with no members
+		self.species = [s for s in self.species if (s.stagnant_generations < self.stagnant_generations_threshold and s.get_size() > 0)]
 		# Choose each species representant
 		for s in self.species:
 			if s.member_index:
@@ -477,6 +475,9 @@ class NEAT:
 				logging.info(f'Iteration: {i}')
 			# Split population into species
 			self.speciation()
+			# Stop condition
+			if len(self.species) < 1:
+				break
 			# Generate training batch
 			self.x_batch, self.y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP)
 			self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_batch, self.y_batch, False)
@@ -485,11 +486,10 @@ class NEAT:
 			# Store history of fitness and accuracy from best solution in both datasets
 			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
-			if (self.testing_gmean[i+1, 0] > self.best_solution_test.g_mean) or (self.testing_gmean[i+1, 0] == self.best_solution_test.g_mean and self.testing_fitness[i+1, 0] > self.best_solution_test.fitness):
+			if self.testing_fitness[i+1, 0] > self.best_solution_test.fitness:
 				self.best_solution_test = self.best_solution.copy()
 				self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[i+1, 0], self.testing_fitness[i+1, 0]
-			
 			# Display progress
 			if i % 20 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
-				print(f'It: {i}, Best solution: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]')
+				print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')

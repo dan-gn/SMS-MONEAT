@@ -56,11 +56,11 @@ if __name__ == '__main__':
 	"""
 
 	# Load train dataset
-	data = arff.loadarff('datasets/breastCancer-train.arff')
+	data = arff.loadarff('datasets/ALL-AML_train.arff')
 	df_train = pd.DataFrame(data[0])
 
 	# Load test dataset
-	data = arff.loadarff('datasets/breastCancer-test.arff')
+	data = arff.loadarff('datasets/ALL-AML_test.arff')
 	df_test = pd.DataFrame(data[0])
 
 	df = pd.concat([df_train, df_test])
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
 	df['Class'] = df['Class'].str.decode("utf-8")
 
-	arfff.dump('datasets/breastCancer-full.arff'
+	arfff.dump('datasets/ALL-AML-full.arff'
 		, df.values
 		, relation='relation name'
 		, names=df.columns)

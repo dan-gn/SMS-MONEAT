@@ -9,13 +9,22 @@ from models.ann_pytorch import eval_model
 from utilities.ga_utils import tournament_selection
 from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
 from utilities.data_utils import check_repeated_rows, choose_repeated_index
+from utilities.ml_utils import get_batch
 
+from algorithms.archive import SpeciesArchive
+from sklearn.model_selection import train_test_split
+
+BATCH_PROP = 1.0
+VALIDATION_PROP = 0.4
 
 class SMS_NEAT(N3O):
 
 	def __init__(self, problem, params):
 		super().__init__(problem, params)
 		self.beta = 1
+
+	def split_test_dataset(self, random_state=None):
+		return train_test_split(self.x_train, self.y_train, test_size=VALIDATION_PROP, random_state=random_state, stratify=self.y_train)
 
 	def initialize_population(self):
 		"""
@@ -56,6 +65,11 @@ class SMS_NEAT(N3O):
 		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
 		fitness = np.array([loss, genome.selected_features.shape[0]])
 		return acc, fitness, gmean
+
+	def evaluate_population(self, x, y):
+		for member in self.population:
+			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, False)
+		_ = non_dominated_sorting(self.population)
 
 	def compute_selection_prob(self):
 		c = np.array([member.rank+1 for member in self.population], dtype="float32") 
@@ -116,7 +130,9 @@ class SMS_NEAT(N3O):
 		self.probs = self.compute_selection_prob()
 		if random.uniform(0, 1) < self.crossover_prob:
 			parent1, parent2 = self.select_parents()
-			while True:
+			attempts = 0
+			while attempts < 10:
+				attempts += 1
 				child, succeeded = self.crossover(parent1, parent2)
 				if succeeded:
 					break
@@ -132,11 +148,12 @@ class SMS_NEAT(N3O):
 		if len(front[-1]) == 1:
 			self.population.remove(front[-1][0])
 		else:
-			f = np.array([list(p.fitness) for p in front[-1]])
+			f = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
 			if check_repeated_rows(f):
 				r = choose_repeated_index(f)
 			else:
-				r = np.argmin(get_hv_contribution(f))
+				hv = get_hv_contribution(f)
+				r = np.argmin(hv[1:]) + 1
 			self.population.remove(front[-1][r])
 
 	def choose_solution(self):
@@ -146,21 +163,47 @@ class SMS_NEAT(N3O):
 		self.best_solution_test.fitness = math.inf
 		self.best_solution_test.g_mean = -math.inf
 		for member in self.population:
-			_, fitness, g_mean = self.evaluate(member, self.x_test, self.y_test, True)
+			_, fitness, g_mean = self.evaluate(member, self.x_val, self.y_val, True)
 			if (g_mean > self.best_solution_test.g_mean) or (g_mean == self.best_solution_test.g_mean and fitness[1] < self.best_solution_test.fitness[1]):
 				self.best_solution_test = member.copy(with_phenotype=True)
 
+	def choose_solution_archive(self):
+		self.best_solution_archive = Genome()
+		self.best_solution_archive.fitness = math.inf
+		self.best_solution_archive.g_mean = -math.inf
+		archive_population = self.archive.get_full_population()
+		for member in archive_population:
+			_, fitness, g_mean = self.evaluate(member, self.x_val, self.y_val, True)
+			if (g_mean > self.best_solution_archive.g_mean) or (g_mean == self.best_solution_archive.g_mean and fitness[1] < self.best_solution_archive.fitness[1]):
+				self.best_solution_archive = member.copy(with_phenotype=True)
+
+
 	def run(self, seed=None, debug=False):
-		set_seed()
+		if seed is not None:
+			set_seed(seed)
+		self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
 		self.initialize_population()
 		_ = non_dominated_sorting(self.population)
+		self.archive = SpeciesArchive(self.n_population, self.population)
 		for i in range(self.max_iterations):
+			# Get batch
+			if i % 100 == 0 and BATCH_PROP < 1.0:
+				x_batch, y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP, random_state=i)
+				self.evaluate_population(x_batch, y_batch)
+			# Get offspring
 			offspring = self.next_generation()
+			if BATCH_PROP < 1.0:
+				offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
 			self.population.append(offspring)
+			self.archive.add(offspring)
+			# Reduce population
 			self.reduce_population()
-			population_fitness = np.array([member.fitness for member in self.population])
-			mean_fitness = np.mean(population_fitness, axis=0)
-			if i % 500 == 0:
-				print(f'Iteration {i}: population fitness {mean_fitness}')
+			# Display run info
+			if i % 4500 == 0:
+				# self.evaluate_population(self.x_train, self.y_train)
+				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
+				population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
+				print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
 		self.choose_solution()
+		self.choose_solution_archive()
 		
