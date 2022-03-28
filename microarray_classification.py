@@ -17,32 +17,41 @@ from algorithms.sms_neat import SMS_NEAT
 
 datasets = []
 
-datasets.append('breastCancer-full')
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full')
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
-datasets.append('Breast_GSE42568')
-datasets.append('Colorectal_GSE8671')
-datasets.append('Colorectal_GSE32323')
-datasets.append('Colorectal_GSE44076')
-datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE14317')
-datasets.append('Leukemia_GSE63270')
-datasets.append('Leukemia_GSE71935')
+# datasets.append('Breast_GSE42568')
+# datasets.append('Colorectal_GSE8671')
+# datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE14317')
+# datasets.append('Leukemia_GSE63270')
+# datasets.append('Leukemia_GSE71935')
 
-# filename = 'Colorectal_GSE21510' # Non-Binary
-
+# datasets.append('Breast_GSE22820')
+# datasets.append('Breast_GSE59246')
+# datasets.append('Breast_GSE70947')
+# datasets.append('Liver_GSE14520_U133A')
+# datasets.append('Liver_GSE50579')
+# datasets.append('Liver_GSE62232')
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE46602')
+# datasets.append('Prostate_GSE11682')
+datasets.append('Leukemia_GSE33615')
 
 trn_size = 0.7
 initial_seed = 0
-n_tests = 20
-save_results = True
+n_tests = 1
+save_results = False
+algorithm = 'sms_neat'
 	
 
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 18000,
+	'max_iterations' : 100,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -61,7 +70,7 @@ params = {
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
 	'compatibility_distance_coeff' : [1.0, 1.0, 0.4],
-	'stagnant_generations_threshold' : 100,
+	'stagnant_generations_threshold' : 200,
 	'champion_elitism_threshold' : 5,
 	'elitism_prop' : 0.1,
 	'initial_weight_limits' : [-1, 1],
@@ -81,7 +90,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results-sms_neat-pop_{params['n_population']}-it_{params['max_iterations']}_2\\{filename}"
+			results_path = os.getcwd() + f"\\results-{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_2\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for seed in range(initial_seed, initial_seed+n_tests):
@@ -132,8 +141,11 @@ if __name__ == '__main__':
 			"""
 
 			print(f'Traning model...')
+			if algorithm == 'n3o':
+				model = N3O(problem, params)
+			elif algorithm == 'sms_neat':
+				model = SMS_NEAT(problem, params)
 
-			model = SMS_NEAT(problem, params)
 			model.run(seed, debug)
 			# neat.best_solution.describe()
 
@@ -149,8 +161,10 @@ if __name__ == '__main__':
 			acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
 			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+
+			if algorithm == 'sms_neat':
+				acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+				print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
 			if save_results:
 				result = {'seed' : seed, 'model' : model}

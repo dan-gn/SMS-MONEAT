@@ -152,6 +152,7 @@ class SMS_NEAT(N3O):
 			if check_repeated_rows(f):
 				r = choose_repeated_index(f)
 			else:
+				print(f)
 				hv = get_hv_contribution(f)
 				r = np.argmin(hv[1:]) + 1
 			self.population.remove(front[-1][r])
@@ -160,21 +161,19 @@ class SMS_NEAT(N3O):
 		self.population = sorted(self.population, key=lambda x: x.fitness[0])
 		self.best_solution = self.population[0].copy(with_phenotype=True)
 		self.best_solution_test = Genome()
-		self.best_solution_test.fitness = math.inf
-		self.best_solution_test.g_mean = -math.inf
+		self.best_solution_test.fitness = np.ones(2) * math.inf
 		for member in self.population:
-			_, fitness, g_mean = self.evaluate(member, self.x_val, self.y_val, True)
-			if (g_mean > self.best_solution_test.g_mean) or (g_mean == self.best_solution_test.g_mean and fitness[1] < self.best_solution_test.fitness[1]):
+			_, fitness, _ = self.evaluate(member, self.x_val, self.y_val, True)
+			if (fitness[0] < self.best_solution_test.fitness[0]) or (fitness[0] == self.best_solution_test.fitness[0] and fitness[1] < self.best_solution_test.fitness[1]):
 				self.best_solution_test = member.copy(with_phenotype=True)
 
 	def choose_solution_archive(self):
-		self.best_solution_archive = Genome()
-		self.best_solution_archive.fitness = math.inf
-		self.best_solution_archive.g_mean = -math.inf
 		archive_population = self.archive.get_full_population()
+		self.best_solution_archive = Genome()
+		self.best_solution_archive.fitness = np.ones(2) * math.inf
 		for member in archive_population:
-			_, fitness, g_mean = self.evaluate(member, self.x_val, self.y_val, True)
-			if (g_mean > self.best_solution_archive.g_mean) or (g_mean == self.best_solution_archive.g_mean and fitness[1] < self.best_solution_archive.fitness[1]):
+			_, fitness, _ = self.evaluate(member, self.x_val, self.y_val, True)
+			if (fitness[0] < self.best_solution_archive.fitness[0]) or (fitness[0] == self.best_solution_archive.fitness[0] and fitness[1] < self.best_solution_archive.fitness[1]):
 				self.best_solution_archive = member.copy(with_phenotype=True)
 
 
@@ -186,6 +185,13 @@ class SMS_NEAT(N3O):
 		_ = non_dominated_sorting(self.population)
 		self.archive = SpeciesArchive(self.n_population, self.population)
 		for i in range(self.max_iterations):
+			if i == 9000:
+				self.choose_solution()
+				self.choose_solution_archive()
+				self.best_solution_9000 = self.best_solution.copy(with_phenotype=True)
+				self.best_solution_test_9000 = self.best_solution_test.copy(with_phenotype=True)
+				self.best_solution_archive_9000 = self.best_solution_archive.copy(with_phenotype=True)
+
 			# Get batch
 			if i % 100 == 0 and BATCH_PROP < 1.0:
 				x_batch, y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP, random_state=i)

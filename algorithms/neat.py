@@ -24,6 +24,7 @@ import math
 import random
 import torch
 import logging
+from sklearn.model_selection import train_test_split
 
 """
 Models
@@ -39,6 +40,8 @@ from utilities.ml_utils import get_batch
 Constants
 """
 BATCH_PROP = 1.0
+VALIDATION_PROP = 0.4
+
 
 """
 NEAT
@@ -92,6 +95,8 @@ class NEAT:
 		self.x_test = problem['x_test']
 		self.y_test = problem['y_test']
 		
+	def split_test_dataset(self, random_state=None):
+		return train_test_split(self.x_train, self.y_train, test_size=VALIDATION_PROP, random_state=random_state, stratify=self.y_train)
 
 	def initialize_population(self):
 		"""
@@ -152,7 +157,9 @@ class NEAT:
 		offspring_distribution = [math.ceil(s.sum_shared_fitness * remaining_offspring_space / total_sum_shared_fitness) for s in self.species]
 		# If the offspring distribution is not the same as the remainig space, randomly add or substract an element for a species
 		while np.sum(offspring_distribution) > remaining_offspring_space:
-			sp_options = [i for i, sp in enumerate(self.species) if sp.get_size() > 1]
+			sp_options = [i for i, x in enumerate(offspring_distribution) if x > 1]
+			if len(sp_options) == 0:
+				sp_options = [i for i, x in enumerate(offspring_distribution)]
 			i = random.choice(sp_options)
 			offspring_distribution[i] -= 1
 		return offspring_distribution
@@ -449,6 +456,7 @@ class NEAT:
 			logging.basicConfig(filename="test_mean.log", level=logging.INFO)
 		if seed is not None:
 			set_seed(seed)
+		self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
 		# Variable to store best solution
 		self.best_solution = Genome()
 		self.best_solution.fitness = -math.inf
@@ -463,7 +471,7 @@ class NEAT:
 		# Initalize population
 		self.initialize_population()
 		self.training_accuracy[0], self.training_fitness[0], self.training_gmean[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-		self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+		self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
 		# Best solution in test dataset
 		self.best_solution_test = self.best_solution.copy()
 		self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[0, 0], self.testing_fitness[0, 0]
@@ -478,6 +486,7 @@ class NEAT:
 			# Stop condition
 			if len(self.species) < 1:
 				break
+
 			# Generate training batch
 			self.x_batch, self.y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP)
 			self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_batch, self.y_batch, False)
@@ -485,11 +494,11 @@ class NEAT:
 			self.population = self.next_generation()
 			# Store history of fitness and accuracy from best solution in both datasets
 			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_test, self.y_test, False)
+			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
 			if self.testing_fitness[i+1, 0] > self.best_solution_test.fitness:
 				self.best_solution_test = self.best_solution.copy()
 				self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[i+1, 0], self.testing_fitness[i+1, 0]
 			# Display progress
-			if i % 20 == 0:
+			if i % 50 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
 				print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
