@@ -9,6 +9,9 @@ from statistics import mean
 import torch
 import torch.nn as nn
 
+from typing import Tuple
+from collections.abc import Callable
+
 from models.genotype import Genome, NodeGene, ConnectionGene
 from models.ann_pytorch import Ann_PyTorch, eval_model
 from utilities.fitness_functions import torch_fitness_function, fitness_function
@@ -16,7 +19,7 @@ from utilities.activation_functions import Gaussian, gaussian
 
 class ArtificialNeuralNetwork:
 
-	def __init__(self, genome, activation):
+	def __init__(self, genome: Genome, activation : dict) -> None:
 		self.nodes = genome.node_genes
 		self.connections = genome.connection_genes
 		self.hidden_activation_function = activation['hidden_activation_function']
@@ -25,7 +28,7 @@ class ArtificialNeuralNetwork:
 		self.output_activation_coeff = activation['output_activation_coeff']
 		self.structure_recognition()
 
-	def structure_recognition(self):
+	def structure_recognition(self) -> None:
 		self.input_nodes = []
 		self.hidden_nodes = []
 		self.output_nodes = []
@@ -37,21 +40,21 @@ class ArtificialNeuralNetwork:
 			else:
 				self.output_nodes.append(node)
 
-	def restart(self):
+	def restart(self) -> None:
 		for node in self.nodes:
 			node.value = None
 
-	def set_input(self, input):
+	def set_input(self, input: np.float32) -> None:
 		for node in self.input_nodes:
 			node.value = input[node.id]
 
-	def get_node(self, id):
+	def get_node(self, id: int) -> NodeGene:
 		for node in self.nodes:
 			if node.id == id:
 				return node
 		return None
 
-	def compute_node(self, id):
+	def compute_node(self, id: int) -> np.float32:
 		node = self.get_node(id)
 
 		if node.value is None:
@@ -66,7 +69,7 @@ class ArtificialNeuralNetwork:
 				node.value = self.output_activation_function(self.output_activation_coeff * value)
 		return node.value	
 
-	def evaluate_input(self, input):
+	def evaluate_input(self, input: np.array) -> np.float32:
 		output = np.ones(len(self.output_nodes))
 		self.restart()
 		self.set_input(input)
@@ -77,18 +80,18 @@ class ArtificialNeuralNetwork:
 		# except:
 		# 	return None
 
-	def predict(self, X):
+	def predict(self, X: np.array) -> np.array:
 		y = np.zeros(X.shape[0])
 		for i, xi in enumerate(X):
 			y[i] = self.evaluate_input(xi)
 		return y
 
-	def score(self, X, y):
+	def score(self, X: np.array, y: np.array) -> np.float32:
 		y_predict = self.predict(X)
 		y_predict = np.expand_dims(y_predict, axis=1)
 		return y.shape[0] - np.sum(np.square(y - y_predict))
 
-	def eval_model(self, X, y, fitness_function, l2_parameter):
+	def eval_model(self, X: np.array, y: np.array, fitness_function: Callable[[np.array, np.array], np.float32], l2_parameter: np.float32) -> Tuple(np.flot32, np.float32):
 		n = y.shape[0]
 		w = np.mean([connection.weight**2 for connection in self.connections if connection.enabled])
 		y_predict = self.predict(X)

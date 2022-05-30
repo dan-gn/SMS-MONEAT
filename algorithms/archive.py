@@ -2,54 +2,56 @@ import numpy as np
 import torch
 import random
 from itertools import chain
+
+from models.genotype import Genome
 from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
 from utilities.data_utils import check_repeated_rows, choose_repeated_index
 
 class Species:
 
-	def __init__(self):
+	def __init__(self) -> None:
 		self.members = []
 
-	def add_member(self, new_member):
+	def add_member(self, new_member: Genome) -> None:
 		self.members.append(new_member)
 
-	def remove_member(self, member):
+	def remove_member(self, member: Genome) -> None:
 		self.members.remove(member)
 
-	def get_random_member(self):
+	def get_random_member(self) -> Genome:
 		return random.choice(self.members)
 
-	def get_size(self):
+	def get_size(self) -> int:
 		return len(self.members)
 
-	def sort_members(self):
+	def sort_members(self) -> None:
 		self.members = sorted(self.members, key=lambda x: -x.fitness[0])
 
 
 class SpeciesArchive:
 
-	def __init__(self, max_size, population=None):
+	def __init__(self, max_size: int, population: list = None) -> None:
 		self.max_size = max_size
 		self.current_size = 0
 		self.archive = []
 		if population is not None:
 			self.add_population(population)
 
-	def add_population(self, population):
+	def add_population(self, population: list) -> None:
 		for member in population:
 			self.add(member)
 
-	def species_count(self):
+	def species_count(self) -> int:
 		return len(self.archive)
 
-	def compare(self, a, b):
+	def compare(self, a : Genome, b : Genome) -> bool:
 		fs1, fs2 = a.selected_features, b.selected_features
 		return torch.equal(fs1, fs2)
 
-	def check_overflow(self):
+	def check_overflow(self) -> bool:
 		return True if self.current_size > self.max_size else False
 
-	def choose_element_to_remove(self, population):
+	def choose_element_to_remove(self, population: list) -> Genome:
 		front = non_dominated_sorting(population)
 		if len(front[-1]) == 1:
 			return front[-1][0]
@@ -62,10 +64,10 @@ class SpeciesArchive:
 				r = np.argmin(hv[1:]) + 1
 			return front[-1][r]
 
-	def get_full_population(self):
+	def get_full_population(self) -> list:
 		return list(chain.from_iterable([species.members for species in self.archive]))
 
-	def reduce_archive(self, species=None):
+	def reduce_archive(self, species: Species = None) -> None:
 		if species is None:
 			all_species = self.get_full_population()
 			x = self.choose_element_to_remove(all_species)
@@ -80,7 +82,7 @@ class SpeciesArchive:
 			self.archive.remove(species)
 		self.current_size -= 1
 
-	def add(self, new_member):
+	def add(self, new_member: Genome) -> None:
 		# Set flag to know if new member has been already added to any existing species to False
 		added = False
 		self.current_size += 1
@@ -102,6 +104,3 @@ class SpeciesArchive:
 				self.reduce_archive(species)
 			else:
 				self.reduce_archive()
-
-if __name__ == '__main__':
-	pass

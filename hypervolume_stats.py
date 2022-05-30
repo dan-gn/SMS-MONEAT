@@ -17,28 +17,28 @@ datasets = []
 
 datasets.append('Breast_GSE22820')
 datasets.append('Breast_GSE42568')
-datasets.append('Breast_GSE59246')
-datasets.append('Breast_GSE70947')
-datasets.append('breastCancer-full')
+# datasets.append('Breast_GSE59246')
+# datasets.append('Breast_GSE70947')
+# datasets.append('breastCancer-full')
 
-datasets.append('Colorectal_GSE8671')
-datasets.append('Colorectal_GSE32323')
-datasets.append('Colorectal_GSE44076')
-datasets.append('Colorectal_GSE44861')
+# datasets.append('Colorectal_GSE8671')
+# datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
 
-datasets.append('Leukemia_GSE14317')
-datasets.append('Leukemia_GSE33615')
-datasets.append('Leukemia_GSE63270')
-datasets.append('Leukemia_GSE71935')
-datasets.append('ALL-AML-full')
+# datasets.append('Leukemia_GSE14317')
+# datasets.append('Leukemia_GSE33615')
+# datasets.append('Leukemia_GSE63270')
+# datasets.append('Leukemia_GSE71935')
+# datasets.append('ALL-AML-full')
 
-datasets.append('Liver_GSE14520_U133A')
-datasets.append('Liver_GSE62232')
+# datasets.append('Liver_GSE14520_U133A')
+# datasets.append('Liver_GSE62232')
 
-datasets.append('Prostate_GSE6919_U95Av2')
-datasets.append('Prostate_GSE11682')
-datasets.append('Prostate_GSE46602')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE11682')
+# datasets.append('Prostate_GSE46602')
+# datasets.append('prostate_tumorVSNormal-full')
 
 # output_filename = 'hv_results.pkl'
 # with open(output_filename, 'rb') as f:
@@ -167,5 +167,5 @@ hv_results = {
 	'sms_moneat_arch' : [archive_hv, archive_loss, archive_fs]
 }
 
-with open(output_filename, 'wb') as f:
-	pickle.dump(hv_results, f)
+# with open(output_filename, 'wb') as f:
+# 	pickle.dump(hv_results, f)

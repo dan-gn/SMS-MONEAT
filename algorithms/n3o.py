@@ -5,6 +5,7 @@ Required libraries
 import numpy as np
 import random
 import logging
+from typing import Tuple
 
 """
 Class
@@ -19,7 +20,7 @@ N3O
 
 class N3O(FS_NEAT):
 
-	def __init__(self, problem, params):
+	def __init__(self, problem: dict, params: dict) -> None:
 		super().__init__(problem, params)
 		pvalue = problem['kw_htest_pvalue']
 		self.guided_input_probs = self.get_guided_input_prob(pvalue)
@@ -29,7 +30,7 @@ class N3O(FS_NEAT):
 		self.input_ids = [i for i in range(self.x_train.shape[1])]
 		self.output_ids = [i for i in range(self.x_train.shape[1], self.x_train.shape[1] + self.y_train.shape[1])]
 
-	def initialize_population(self):
+	def initialize_population(self) -> None:
 		"""
 		For each network in the intial population, randomly select an input and an output and add a link connecting them.
 		"""
@@ -69,10 +70,10 @@ class N3O(FS_NEAT):
 			if self.debug:
 				self.describe(member)
 
-	def get_guided_input_prob(self, pvalue):
+	def get_guided_input_prob(self, pvalue : np.array) -> np.array:
 		return softmax(-np.log10(pvalue))
 
-	def crossover(self, genome1, genome2):
+	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
 		"""
 		Works similary as the NEAT crossover operator, but if the parent with lower fitness has an input that the other
 		parent does not, and the input is connected to a node present in the other parent, there is a 50% chance of the
@@ -111,7 +112,7 @@ class N3O(FS_NEAT):
 		else:
 			return self.crossover_same_fitness(genome1, genome2)
 
-	def swap_input_mutation(self, genome):
+	def swap_input_mutation(self, genome: Genome) -> None:
 		"""
 		Randomly swaps one of the network inputs by another input not present in the ANN.
 		"""
@@ -150,7 +151,7 @@ class N3O(FS_NEAT):
 				genome.remove_connection(i_num)
 			genome.remove_node(old_input)
 
-	def guided_add_input_mutation(self, genome):
+	def guided_add_input_mutation(self, genome: Genome) -> None:
 		possible_new_input_ids = list(self.input_ids)
 		for connection in genome.connection_genes:
 			if connection.input_node in possible_new_input_ids:
@@ -173,7 +174,7 @@ class N3O(FS_NEAT):
 				self.innovation_number = genome.add_connection(choosen_input, choosen_output, self.innovation_number) - 1
 				self.innovation_number = self.global_genome.add_connection(choosen_input, choosen_output, self.innovation_number) 
 
-	def mutate(self, genome):
+	def mutate(self, genome: Genome) -> None:
 		super().mutate(genome)
 		# # Add input mutation
 		if random.uniform(0, 1) <= self.add_input_prob:
@@ -183,7 +184,7 @@ class N3O(FS_NEAT):
 		if random.uniform(0, 1) <= self.swap_input_prob:
 			self.swap_input_mutation(genome)
 
-	def elitism(self):
+	def elitism(self) -> Tuple(list, int):
 		"""
 		Preserves the best individuals from each generation.
 		"""

@@ -24,6 +24,7 @@ import math
 import random
 import torch
 import logging
+from typing import Tuple
 from sklearn.model_selection import train_test_split
 
 """
@@ -56,7 +57,7 @@ def set_seed(seed = 0):
 class NEAT:
 
 	# Constructor method
-	def __init__(self, problem, params):
+	def __init__(self, problem: dict, params: dict) -> None:
 		# Execution algorithm parameters
 		self.max_iterations = params['max_iterations']
 		self.n_population = params['n_population']
@@ -95,10 +96,10 @@ class NEAT:
 		self.x_test = problem['x_test']
 		self.y_test = problem['y_test']
 		
-	def split_test_dataset(self, random_state=None):
+	def split_test_dataset(self, random_state: int=None):
 		return train_test_split(self.x_train, self.y_train, test_size=VALIDATION_PROP, random_state=random_state, stratify=self.y_train)
 
-	def initialize_population(self):
+	def initialize_population(self) -> None:
 		"""
 		NEAT starts with a population of Artificial Neural Networks with a minimal structure. It means that there
 		are no hidden nodes, but only a fully connected layer between the input and output nodes. 
@@ -123,7 +124,7 @@ class NEAT:
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 
-	def evaluate(self, genome, x, y, build_model=True):
+	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple(np.float32, np.float32, np.float32):
 		"""
 		Encoding genomes to actual artifial neural network (ANN) to compute fitness.
 		We should consider that NEAT tries to maximize the fitness, while most common methods
@@ -146,7 +147,7 @@ class NEAT:
 		return acc, fitness.detach().numpy(), g_mean
 
 
-	def get_offspring_distribution(self, remaining_offspring_space):
+	def get_offspring_distribution(self, remaining_offspring_space: int) -> list:
 		"""
 		The proportion of offspring for each species is defined by the sum of shared fitness of their members.
 		Stagnant species for more generations than a defined threshold or species with no members should not be taking in count 
@@ -164,7 +165,7 @@ class NEAT:
 			offspring_distribution[i] -= 1
 		return offspring_distribution
 
-	def select_parents(self, species):
+	def select_parents(self, species: list) -> Tuple(Genome, Genome):
 		parent1 = tournament_selection(species.member_index, self.probs, self.n_competitors)
 		if random.uniform(0, 1) <= self.interspecies_mating_rate or species.get_size() == 1:
 			other_species = random.choice(self.species)
@@ -173,7 +174,7 @@ class NEAT:
 			parent2 = tournament_selection(species.member_index, self.probs, self.n_competitors)
 		return self.population[parent1], self.population[parent2]
 
-	def crossover(self, genome1, genome2):
+	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
 		"""
 		When crossing over, the genes in both genomes with the same innovation numbers are lined up.
 		These genes are called matching genes. Genes that do not match are either disjoint or exceess,
@@ -200,7 +201,7 @@ class NEAT:
 		else:
 			return self.crossover_same_fitness(genome1, genome2)
 
-	def crossover_same_fitness(self, genome1, genome2):
+	def crossover_same_fitness(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
 		node_genes_id = []
 		connection_genes = []
 		# Find matching genes
@@ -267,7 +268,7 @@ class NEAT:
 			return offspring, False
 		return offspring, offspring.check_connectivity()
 
-	def mutate_weights(self, genome):
+	def mutate_weights(self, genome: Genome) -> None:
 		for connection in genome.connection_genes:
 			if random.uniform(0, 1) <= self.weight_mutation_prob:
 				# Polynomial mutation
@@ -277,7 +278,7 @@ class NEAT:
 				else:
 					connection.weight = random.uniform(self.weight_min_value, self.weight_max_value) 
 	
-	def add_node_mutation(self, genome):
+	def add_node_mutation(self, genome: Genome) -> None:
 		old_connection = random.choice(genome.connection_genes)
 		# Check if this innovation already happend during this generation
 		if old_connection.innovation_number not in self.generation_add_node:
@@ -296,7 +297,7 @@ class NEAT:
 			new_node = NodeGene(node_id)
 			genome.add_node(new_node, old_connection.innovation_number, innovation_number)
 
-	def add_connection_mutation(self, genome):
+	def add_connection_mutation(self, genome: Genome) -> None:
 		# Search possible input nodes
 		possible_input_nodes = []
 		for node in genome.node_genes:
@@ -322,7 +323,7 @@ class NEAT:
 				# If no possible output node was found for the chosen input node, this input node is actually not possible
 				possible_input_nodes.remove(input_node_id)
 
-	def mutate(self, genome):
+	def mutate(self, genome: Genome) -> None:
 		"""
 		Mutation in NEAT can change both connection weights and network structures.
 		Connection weights mutate as in any NE system, with each connection either perturbated or not in each generation.
@@ -353,7 +354,7 @@ class NEAT:
 				remaining_offspring_space -= 1
 		return offspring, remaining_offspring_space
 
-	def next_generation(self):
+	def next_generation(self) -> Genome:
 		"""
 		Get next generation population. First add champion of each species which has a population 
 		larger than a defined threshold. Then, compute the distribution of offspring by each species
@@ -401,7 +402,7 @@ class NEAT:
 
 		return offspring
 
-	def compute_shared_fitness(self):
+	def compute_shared_fitness(self) -> None:
 		for s in self.species:
 			species_size = s.get_size()
 			for index in s.member_index:
@@ -410,7 +411,7 @@ class NEAT:
 				# Compute sum of shared fitness for each species 
 				s.sum_shared_fitness += self.population[index].shared_fitness
 
-	def speciation(self):
+	def speciation(self) -> None:
 		# Remove past population index from species
 		if self.species:
 			for s in self.species:
@@ -440,7 +441,7 @@ class NEAT:
 		# Compute shared fitness for each member and the sum of shared fitness for each species
 		self.compute_shared_fitness()
 
-	def describe(self, genome):
+	def describe(self, genome: Genome) -> None:
 		logging.info('Node genes:')
 		for node in genome.node_genes:
 			logging.info(f'Node {node.id}, type {node.node_type}, layer {node.layer}')
@@ -450,7 +451,7 @@ class NEAT:
 		logging.info(f'Fitness: {genome.fitness}')
 
 	# Run algorithm
-	def run(self, seed=None, debug=False):
+	def run(self, seed: int = None, debug: bool = False) -> None:
 		self.debug = debug
 		if debug:
 			logging.basicConfig(filename="test_mean.log", level=logging.INFO)

@@ -1,39 +1,43 @@
-
 import numpy as np
 import torch
 import torch.nn as nn
-import os
-from pathlib import Path
-import pickle
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
 import sys
+sys.path.insert(0, '..')
 
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
-from utilities.scalers import MeanScaler
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
-from algorithms.n3o import N3O
+from utilities.hv import HyperVolume
+from utilities.moea_utils import non_dominated_sorting
 from algorithms.sms_neat import SMS_NEAT
 
+configuration_id = sys.argv[1]
+instance_id = sys.argv[2]
+seed = int(sys.argv[3])
+instance = sys.argv[4]
+irace_params = sys.argv[5:]
+# N_POPULATION = int(irace_params[1])
+# N_ITERATIONS = int(irace_params[3])
+N_POPULATION = 100
+N_ITERATIONS = 4000
+CROSSOVER_PROB = float(irace_params[1])
+ADD_INPUT_PROB = float(irace_params[3])
+SWAP_INPUT_PROB = float(irace_params[5])
+ADD_CONNECTION_PROB = float(irace_params[7])
+ADD_NODE_PROB = float(irace_params[9])
+WEIGHT_MUTATION_PROB = float(irace_params[11])
 
-N_POPULATION = sys.argv[1]
-N_ITERATIONS = sys.argv[2]
-CROSSOVER_PROB = sys.argv[3]
-ADD_INPUT_PROB = sys.argv[4]
-SWAP_INPUT_PROB = sys.argv[5]
-ADD_CONNECTION_PROB = sys.argv[6]
-ADD_NODE_PROB = sys.argv[7]
-
-dataset = 'breastCancer-full'
+dataset = instance.split('/')[-1]
 trn_size = 0.7
-seed = 0
 debug = False
 
 
 params = {
 	'fitness_function': torch_fitness_function,
-	'n_population' : N_POPULATION, 
+	'n_population' : int(N_POPULATION), 
 	'max_iterations' : N_ITERATIONS,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
@@ -48,7 +52,7 @@ params = {
 	'swap_input_prob' : SWAP_INPUT_PROB,
 	'add_connection_prob' : ADD_CONNECTION_PROB,
 	'add_node_prob' : ADD_NODE_PROB,
-	'weight_mutation_prob' : 0.04,
+	'weight_mutation_prob' : WEIGHT_MUTATION_PROB,
 	'pol_mutation_distr' : 5,
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
@@ -61,7 +65,8 @@ params = {
 
 
 # Read microarray dataset
-ds = MicroarrayDataset(f'./datasets/CUMIDA/{dataset}.arff')
+import os
+ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\..\\datasets\\CUMIDA\\{dataset}.arff')
 x, y = ds.get_full_dataset()
 
 # Split dataset into training and testing dataset
@@ -100,9 +105,18 @@ TRAIN MODEL
 """
 # Training the model
 model = SMS_NEAT(problem, params)
-model.run(seed, debug)
+model.run(seed, debug=False)
 
 
-acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
+# acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
 
-print(fitness)
+reference = np.array([10, 10])
+alpha = 10
+
+hv = HyperVolume(reference)
+front = non_dominated_sorting(model.population)
+fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0]])
+unq, count = np.unique(fitness, axis=0, return_counts=True)
+target = -hv.compute(unq)
+
+print(target)

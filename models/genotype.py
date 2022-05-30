@@ -5,6 +5,7 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
+from typing import Tuple
 from models.ann_pytorch import Ann_PyTorch
 
 class NodeGene:
@@ -12,7 +13,7 @@ class NodeGene:
 	A node gene to represent an input, hidden or output node from a Artificial Neural Network.
 	"""
 
-	def __init__(self, id, node_type='hidden'):
+	def __init__(self, id: int, node_type: str = 'hidden') -> None:
 		self.id = id
 		self.node_type = node_type
 		self.value = None
@@ -32,7 +33,7 @@ class ConnectionGene:
 	which allows finding corresponding genes.
 	"""
 
-	def __init__(self, input_node, output_node, innovation_number=-1, weight=1, enabled=True):
+	def __init__(self, input_node: int, output_node: int, innovation_number: int = -1, weight: float = 1.0, enabled: bool = True) -> None:
 		self.input_node = input_node
 		self.output_node = output_node
 		self.innovation_number = innovation_number
@@ -49,7 +50,7 @@ class Genome:
 	connection genes.
 	"""
 
-	def __init__(self, node_genes=None, connection_genes=None, min_value=1e-6, max_value=1):
+	def __init__(self, node_genes: list = None, connection_genes: list = None, min_value: float = 1e-6, max_value: float = 1.0) -> None:
 		self.node_genes = [] if node_genes is None else node_genes
 		self.connection_genes = [] if connection_genes is None else connection_genes
 		self.fitness = 0
@@ -60,13 +61,13 @@ class Genome:
 		self.g_mean = None
 		self.phenotype = None
 
-	def create_node_genes(self, n_inputs, n_outputs):
+	def create_node_genes(self, n_inputs: list, n_outputs: list) -> None:
 		for id in range(n_inputs):
 			self.node_genes.append(NodeGene(id, 'input'))
 		for id in range(n_inputs, n_inputs+n_outputs):
 			self.node_genes.append(NodeGene(id, 'output'))
 	
-	def connect_all(self):
+	def connect_all(self) -> int:
 		innovation_number = 0
 		input_nodes_index = []
 		output_nodes_index = []
@@ -75,16 +76,14 @@ class Genome:
 				input_nodes_index.append(i)
 			else:
 				output_nodes_index.append(i)
-
 		for i in input_nodes_index:
 			for j in output_nodes_index:
 				connection = ConnectionGene(self.node_genes[i].id, self.node_genes[j].id, innovation_number)
 				self.connection_genes.append(connection)
 				innovation_number += 1
-
 		return innovation_number
 
-	def connect_one_input(self, innovation_number):
+	def connect_one_input(self, innovation_number: int) -> Tuple(ConnectionGene, int):
 		# Get input and output nodes
 		input_node_ids = []
 		output_node_ids = []
@@ -109,33 +108,33 @@ class Genome:
 		connection.weight = random.uniform(self.weight_min_value, self.weight_max_value)
 		return connection, innovation_number 
 
-	def set_weight_limits(self, min_value, max_value):
+	def set_weight_limits(self, min_value: float, max_value: float) -> None:
 		self.weight_min_value = min_value
 		self.weight_max_value = max_value
 
-	def randomize_weights(self):
+	def randomize_weights(self) -> None:
 		for connection in self.connection_genes:
 			connection.weight = random.uniform(self.weight_min_value, self.weight_max_value)
 
-	def get_node_gene(self, id):
+	def get_node_gene(self, id: int) -> NodeGene:
 		for node in self.node_genes:
 			if node.id == id:
 				return node
 		return None
 
-	def get_connection_gene(self, innovation_number):
+	def get_connection_gene(self, innovation_number: int) -> ConnectionGene:
 		for connection in self.connection_genes:
 			if connection.innovation_number == innovation_number:
 				return connection
 		return None
 
-	def get_innovation_number(self, input_node_id, output_node_id):
+	def get_innovation_number(self, input_node_id: int, output_node_id: int) -> int:
 		for connection in self.connection_genes:
 			if connection.input_node == input_node_id and connection.output_node == output_node_id:
 				return connection.innovation_number
 		return None
 
-	def add_node(self, node, old_connection_inum, innovation_number):
+	def add_node(self, node: NodeGene, old_connection_inum: int, innovation_number: int) -> int:
 		""" 
 		In the add node mutation, an existing connection is split and the new node placed where the old connection used
 		to be. The old connection is disabled and two new connections are added to the genome. The new connection leading
@@ -149,13 +148,13 @@ class Genome:
 		innovation_number = self.add_connection(node.id, connection.output_node, innovation_number, connection.weight)
 		return innovation_number
 
-	def remove_node(self, node_id):
+	def remove_node(self, node_id: int) -> None:
 		for index, node in enumerate(self.node_genes):
 			if node.id == node_id:
 				self.node_genes.pop(index)
 				break
 
-	def add_connection(self, in_node, out_node, innovation_number, weight=None):
+	def add_connection(self, in_node: int, out_node: int, innovation_number: int, weight: float = None) -> int:
 		"""
 		In add connection mutation, a single new connection gene with a random weight is added connecting two previously
 		unconnected nodes.
@@ -167,13 +166,13 @@ class Genome:
 		self.connection_genes = sorted(self.connection_genes, key = lambda x: x.innovation_number)
 		return innovation_number + 1
 
-	def remove_connection(self, innovation_number):
+	def remove_connection(self, innovation_number: int) -> None:
 		for index, connection in enumerate(self.connection_genes):
 			if connection.innovation_number == innovation_number:
 				self.connection_genes.pop(index)
 				break
 
-	def get_possible_connections(self, input_node_id):
+	def get_possible_connections(self, input_node_id: int) -> list:
 		possible_connections = []
 		for node in self.node_genes:
 			# Discard same node and input nodes
@@ -191,7 +190,7 @@ class Genome:
 					self.discard_backwards(connection.input_node, possible_connections)	
 		return possible_connections
 	
-	def discard_backwards(self, node_id, possible_connections):
+	def discard_backwards(self, node_id: int, possible_connections: list) -> list:
 		if possible_connections:
 			for connection in self.connection_genes:
 				if connection.input_node in possible_connections and connection.output_node == node_id:
@@ -199,7 +198,7 @@ class Genome:
 					possible_connections = self.discard_backwards(connection.input_node, possible_connections)
 		return possible_connections
 
-	def search_loop(self, node, nodes_checked):
+	def search_loop(self, node: NodeGene, nodes_checked: list) -> bool:
 		if node.id in nodes_checked:
 			return False
 		else:
@@ -214,7 +213,7 @@ class Genome:
 							return False
 		return found
 
-	def check_connectivity(self):
+	def check_connectivity(self) -> bool:
 		any_input = False
 		any_output = False
 		for node in self.node_genes:
@@ -227,7 +226,7 @@ class Genome:
 				any_output = True
 		return any_input and any_output
 
-	def connection_from_input(self, node):
+	def connection_from_input(self, node: NodeGene) -> bool:
 		if node.node_type == 'input':
 			return True
 		for connection in self.connection_genes:
@@ -237,7 +236,7 @@ class Genome:
 					return True
 		return False
 	
-	def validate_network(self):
+	def validate_network(self) -> bool:
 		any_output = False
 		for node in self.node_genes:
 			if node.node_type == 'output':
@@ -246,9 +245,7 @@ class Genome:
 					return False
 		return any_output
 
-
-
-	def depth_first_search(self, node, unchecked_connections, max_depth=0):
+	def depth_first_search(self, node: NodeGene, unchecked_connections: list, max_depth: int = 0) -> int:
 		if node.layer is None:
 			node.layer = max_depth
 		elif node.layer < max_depth:
@@ -267,7 +264,7 @@ class Genome:
 					max_depth = max(depth, max_depth)
 		return max_depth
 
-	def tag_layers(self):
+	def tag_layers(self) -> int:
 		for node in self.node_genes:
 			node.layer = None
 		input_nodes = [node for node in self.node_genes if node.node_type == 'input']
@@ -281,7 +278,7 @@ class Genome:
 			node.layer = max_depth
 		return max_depth
 
-	def build_layers(self):
+	def build_layers(self) -> Tuple(list, list, list):
 		layers = []
 		layer_weights = []
 		n_inputs = []
@@ -297,7 +294,7 @@ class Genome:
 		for connection in self.connection_genes:
 			if connection.input_node in layers[0] and connection.enabled:
 				selected_features.append(connection.input_node)
-		selected_features = sorted(set(selected_features))
+		selected_features = sorted(list(set(selected_features)))
 		layers[0] = list(selected_features)
 
 		for i, layer_i in enumerate(layers):
@@ -321,7 +318,7 @@ class Genome:
 
 		return selected_features, layer_weights, n_inputs
 
-	def count_nodes(self):
+	def count_nodes(self) -> Tuple(int, int, int):
 		n_input_nodes = 0
 		n_hidden_nodes = 0
 		n_output_nodes = 0
@@ -334,7 +331,7 @@ class Genome:
 				n_output_nodes += 1
 		return n_input_nodes, n_hidden_nodes, n_output_nodes
 
-	def compatibility_distance(self, other, c):
+	def compatibility_distance(self, other, c : list) -> float:
 		# Get value of N
 		n_max = max(len(self.connection_genes), len(other.connection_genes))
 		n = 1 if n_max < 20 else n_max
@@ -365,14 +362,17 @@ class Genome:
 			n_matching = 1
 		return (c[0] * n_excess / n) + (c[1] * n_disjoint / n) + (c[2] * weight_difference / n_matching)
 
-	def compute_phenotype(self, activation):
+	def compute_phenotype(self, activation: dict) -> None:
 		selected_features, layer_weights, n_inputs = self.build_layers()
-		self.selected_features = torch.tensor(selected_features).type(torch.int32)
 		layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
 		n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
-		self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
+		self.selected_features = torch.tensor(selected_features).type(torch.int32)
+		if self.selected_features.shape[0] == 0:
+			self.phenotype = None
+		else:
+			self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
 
-	def copy(self, with_phenotype=False):
+	def copy(self, with_phenotype: bool = False):
 		genome_copy = Genome()
 		genome_copy.node_genes = [node.copy() for node in self.node_genes]
 		genome_copy.connection_genes = [connection.copy() for connection in self.connection_genes]
@@ -386,7 +386,7 @@ class Genome:
 			genome_copy.phenotype = self.phenotype.copy()
 		return genome_copy
 
-	def describe(self):
+	def describe(self) -> None:
 		print('Node genes:')
 		for node in self.node_genes:
 			print(f'Node {node.id}, type {node.node_type}, layer {node.layer}')

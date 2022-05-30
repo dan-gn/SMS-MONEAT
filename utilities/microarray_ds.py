@@ -1,8 +1,9 @@
+from random import random
 import pandas as pd
 import numpy as np
 from scipy.io import arff
 import arff as arfff
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold, StratifiedKFold, train_test_split
 
 class MicroarrayDataset:
 
@@ -26,6 +27,16 @@ class MicroarrayDataset:
 
 	def split(self, trn_size=0.8, random_state=None):
 		return train_test_split(self.x, self.y, test_size=1-trn_size, random_state=random_state, stratify=self.y)
+
+	def cross_validation(self, k_folds=10, n_repeats=1, random_state=None):
+		if n_repeats <= 1:
+			rkf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=random_state)
+		else:
+			rkf = RepeatedStratifiedKFold(n_splits=k_folds, n_repeats=n_repeats, random_state=random_state)
+		for i, (train_index, test_index) in enumerate(rkf.split(self.x, self.y)):
+			yield i, self.x[train_index], self.x[test_index], self.y[train_index], self.y[test_index]
+
+
 		
 def merge_datasets(a, b, filename):
 	df = pd.concat([a.df, b.df])

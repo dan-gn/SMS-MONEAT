@@ -5,7 +5,7 @@ from utilities.stats_utils import geometric_mean
 
 class Ann_PyTorch(nn.Module):
 
-	def __init__(self, layer_weights, n_inputs, activation):
+	def __init__(self, layer_weights: list, n_inputs: list, activation: dict) -> None:
 
 		super().__init__()
 
@@ -25,18 +25,18 @@ class Ann_PyTorch(nn.Module):
 		self.set_layer_weights(layer_weights)
 
 
-	def set_activation_functions(self):
+	def set_activation_functions(self) -> None:
 		self.activation_f1 = self.activation['hidden_activation_function']
 		self.activation_c1 = self.activation['hidden_activation_coeff']
 		self.activation_f2 = self.activation['output_activation_function']
 		self.activation_c2 = self.activation['output_activation_coeff']
 
-	def set_layer_weights(self, layer_weights):
+	def set_layer_weights(self, layer_weights: list) -> None:
 		with torch.no_grad():
 			for i, layer in enumerate(self.layers):
 				layer.weight = nn.Parameter(layer_weights[i])
 
-	def forward(self, x):
+	def forward(self, x: torch.Tensor) -> torch.Tensor:
 		for i, layer in enumerate(self.layers[:-1]):
 			y = layer(x) / self.n_inputs[i]
 			y = self.activation_f1(self.activation_c1 * y)

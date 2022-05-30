@@ -20,7 +20,9 @@ __date__ = "30/09/2021"
 Required libraries
 """
 import numpy as np
-import math
+import torch
+
+from typing import Tuple
 
 """
 Class
@@ -34,7 +36,7 @@ FS-NEAT
 """
 class FS_NEAT(NEAT):
 
-	def initialize_population(self):
+	def initialize_population(self) -> None:
 		"""
 		For each network in the intial population, randomly select an input and an output and add a link connecting them.
 		"""
@@ -57,7 +59,7 @@ class FS_NEAT(NEAT):
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 
-	def evaluate(self, genome, x, y, build_model=True):
+	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple(np.float32, np.float32, np.float32):
 		"""
 		Encoding genomes to actual artifial neural network (ANN) to compute fitness.
 		We should consider that NEAT tries to maximize the fitness, while most common methods
