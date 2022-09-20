@@ -10,7 +10,8 @@ from algorithms.neat import set_seed
 from models.genotype import MultiObjectiveGenome as Genome
 from utilities.evaluation import eval_model
 from utilities.ga_utils import tournament_selection
-from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
+from utilities.moea_utils import non_dominated_sorting_2, get_hv_contribution
+from utilities.moea_utils import add_genome_nds, remove_genome_nds, create_fronts
 from utilities.data_utils import check_repeated_rows, choose_repeated_index
 from utilities.ml_utils import get_batch
 
@@ -20,7 +21,7 @@ from sklearn.model_selection import train_test_split
 BATCH_PROP = 1.0
 VALIDATION_PROP = 0.4
 
-class SMS_NEAT(N3O):
+class SMS_MONEAT(N3O):
 
 	def __init__(self, problem: dict, params: dict) -> None:
 		super().__init__(problem, params)
@@ -72,7 +73,7 @@ class SMS_NEAT(N3O):
 	def evaluate_population(self, x: torch.Tensor, y: torch.Tensor) -> None:
 		for member in self.population:
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, False)
-		_ = non_dominated_sorting(self.population)
+		_ = non_dominated_sorting_2(self.population)
 
 	def compute_selection_prob(self) -> np.array:
 		c = np.array([member.rank+1 for member in self.population], dtype="float32") 
@@ -147,9 +148,12 @@ class SMS_NEAT(N3O):
 		return child
 
 	def reduce_population(self) -> None:
-		front = non_dominated_sorting(self.population)
+		#front = non_dominated_sorting_2(self.population)
+		front = create_fronts(self.population)
+		print(len(front), len(self.population))
 		if len(front[-1]) == 1:
 			self.population.remove(front[-1][0])
+			remove_genome_nds(self.population, front[-1][0])
 		else:
 			f = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
 			if check_repeated_rows(f):
@@ -158,6 +162,7 @@ class SMS_NEAT(N3O):
 				hv = get_hv_contribution(f)
 				r = np.argmin(hv[1:]) + 1
 			self.population.remove(front[-1][r])
+			remove_genome_nds(self.population, front[-1][r])
 
 	def choose_solution(self) -> None:
 		self.population = sorted(self.population, key=lambda x: x.fitness[0])
@@ -183,7 +188,7 @@ class SMS_NEAT(N3O):
 			set_seed(seed)
 		# self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
 		self.initialize_population()
-		_ = non_dominated_sorting(self.population)
+		_ = non_dominated_sorting_2(self.population)
 		self.archive = SpeciesArchive(self.n_population, self.population)
 		for i in range(self.max_iterations):
 			# Get batch
@@ -194,10 +199,14 @@ class SMS_NEAT(N3O):
 			offspring = self.next_generation()
 			if BATCH_PROP < 1.0:
 				offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
+			# Update Non-Dominated Sorting variables from population and offsprin
+			add_genome_nds(self.population, offspring)
+			# Add Offspring to population
 			self.population.append(offspring)
-			self.archive.add(offspring)
 			# Reduce population
 			self.reduce_population()
+			# Add to archive
+			# self.archive.add(offspring)
 			# Display run info
 			if i % 4500 == 0:
 				self.evaluate_population(self.x_train, self.y_train)

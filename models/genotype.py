@@ -404,6 +404,20 @@ class MultiObjectiveGenome(Genome):
 		self.dominates_to = []
 		self.n_dominated_by = 0
 
+	def copy(self, with_phenotype: bool = False):
+		genome_copy = MultiObjectiveGenome()
+		genome_copy.node_genes = [node.copy() for node in self.node_genes]
+		genome_copy.connection_genes = [connection.copy() for connection in self.connection_genes]
+		genome_copy.set_weight_limits(self.weight_min_value, self.weight_max_value)
+		genome_copy.fitness = self.fitness
+		genome_copy.shared_fitness = self.shared_fitness
+		genome_copy.accuracy = self.accuracy
+		genome_copy.g_mean = self.g_mean
+		if with_phenotype:
+			genome_copy.selected_features = self.selected_features
+			genome_copy.phenotype = self.phenotype.copy()
+		return genome_copy
+
 	def describe(self) -> None:
 		print('Node genes:')
 		for node in self.node_genes:

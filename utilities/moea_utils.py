@@ -152,7 +152,6 @@ def create_fronts(population: List[Genome]):
 	return front
 
 
-
 def get_hv_contribution(front: List[Genome]):
 	best_fitness = np.argmax(front, axis=0)
 	reference = np.max(front, axis=0)
