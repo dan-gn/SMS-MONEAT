@@ -7,8 +7,8 @@ from typing import Tuple
 
 from algorithms.n3o import N3O
 from algorithms.neat import set_seed
-from models.genotype import Genome
-from models.ann_pytorch import eval_model
+from models.genotype import MultiObjectiveGenome as Genome
+from utilities.evaluation import eval_model
 from utilities.ga_utils import tournament_selection
 from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
 from utilities.data_utils import check_repeated_rows, choose_repeated_index
@@ -57,7 +57,7 @@ class SMS_NEAT(N3O):
 			# Add member to population
 			self.population.append(member)
 
-	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple(np.float23, np.array, np.float32):
+	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple[np.float32, np.array, np.float32]:
 		if build_model:
 			genome.compute_phenotype(self.activation)
 		if genome.selected_features.shape[0] == 0:
@@ -81,14 +81,14 @@ class SMS_NEAT(N3O):
 			c /= mean_cost
 		return np.exp(-self.beta * c)
 
-	def select_parents(self) -> Tuple(Genome, Genome):
+	def select_parents(self) -> Tuple[Genome, Genome]:
 		index = [i for i in range(self.n_population)]
 		parent1 = tournament_selection(index, self.probs, self.n_competitors)
 		index.remove(parent1)
 		parent2 = tournament_selection(index, self.probs, self.n_competitors)
 		return self.population[parent1], self.population[parent2]
 
-	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
+	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple[Genome, bool]:
 		"""
 		Works similary as the NEAT crossover operator, but if the parent with lower fitness has an input that the other
 		parent does not, and the input is connected to a node present in the other parent, there is a 50% chance of the
@@ -177,7 +177,6 @@ class SMS_NEAT(N3O):
 			_, fitness, _ = self.evaluate(member, self.x_train, self.y_train, True)
 			if (fitness[0] < self.best_solution_archive.fitness[0]) or (fitness[0] == self.best_solution_archive.fitness[0] and fitness[1] < self.best_solution_archive.fitness[1]):
 				self.best_solution_archive = member.copy(with_phenotype=True)
-
 
 	def run(self, seed: int = None, debug: bool = False) -> None:
 		if seed is not None:

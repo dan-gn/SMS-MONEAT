@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-from utilities.stats_utils import geometric_mean
-
 class Ann_PyTorch(nn.Module):
 
 	def __init__(self, layer_weights: list, n_inputs: list, activation: dict) -> None:
@@ -48,16 +46,3 @@ class Ann_PyTorch(nn.Module):
 	def copy(self):
 		return Ann_PyTorch(self.layer_weights, self.n_inputs, self.activation)
 
-
-
-
-
-def eval_model(model, x, y, fitness_function, l2_parameter, w):
-	with torch.no_grad():
-		y_predict = model(x)
-		n = x.shape[0]
-		# loss = torch.nn.functional.binary_cross_entropy(y_predict, y)
-		loss = fitness_function(y, y_predict) + ((l2_parameter * w) / (2 * n))
-		acc = (y == torch.round(y_predict)).type(torch.float32).mean()
-		g_mean = geometric_mean(y, y_predict)
-	return loss, acc, g_mean

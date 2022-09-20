@@ -73,7 +73,7 @@ class N3O(FS_NEAT):
 	def get_guided_input_prob(self, pvalue : np.array) -> np.array:
 		return softmax(-np.log10(pvalue))
 
-	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
+	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple[Genome, bool]:
 		"""
 		Works similary as the NEAT crossover operator, but if the parent with lower fitness has an input that the other
 		parent does not, and the input is connected to a node present in the other parent, there is a 50% chance of the
@@ -184,7 +184,7 @@ class N3O(FS_NEAT):
 		if random.uniform(0, 1) <= self.swap_input_prob:
 			self.swap_input_mutation(genome)
 
-	def elitism(self) -> Tuple(list, int):
+	def elitism(self) -> Tuple[list, int]:
 		"""
 		Preserves the best individuals from each generation.
 		"""

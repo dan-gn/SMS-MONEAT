@@ -83,7 +83,7 @@ class Genome:
 				innovation_number += 1
 		return innovation_number
 
-	def connect_one_input(self, innovation_number: int) -> Tuple(ConnectionGene, int):
+	def connect_one_input(self, innovation_number: int) -> Tuple[ConnectionGene, int]:
 		# Get input and output nodes
 		input_node_ids = []
 		output_node_ids = []
@@ -278,7 +278,7 @@ class Genome:
 			node.layer = max_depth
 		return max_depth
 
-	def build_layers(self) -> Tuple(list, list, list):
+	def build_layers(self) -> Tuple[list, list, list]:
 		layers = []
 		layer_weights = []
 		n_inputs = []
@@ -318,7 +318,7 @@ class Genome:
 
 		return selected_features, layer_weights, n_inputs
 
-	def count_nodes(self) -> Tuple(int, int, int):
+	def count_nodes(self) -> Tuple[int, int, int]:
 		n_input_nodes = 0
 		n_hidden_nodes = 0
 		n_output_nodes = 0
@@ -396,3 +396,19 @@ class Genome:
 		print(f'Fitness: {self.fitness}')
 
 
+class MultiObjectiveGenome(Genome):
+
+	def __init__(self, node_genes: list = None, connection_genes: list = None, min_value: float = 1e-6, max_value: float = 1.0) -> None:
+		super().__init__(node_genes, connection_genes, min_value, max_value)
+		self.rank = None
+		self.dominates_to = []
+		self.n_dominated_by = 0
+
+	def describe(self) -> None:
+		print('Node genes:')
+		for node in self.node_genes:
+			print(f'Node {node.id}, type {node.node_type}, layer {node.layer}')
+		print('Connection genes:')
+		for connection in self.connection_genes:
+			print(f'Connection {connection.innovation_number}: Input node id = {connection.input_node}, Output node id = {connection.output_node}, Weight = {connection.weight}, Enabled = {connection.enabled}')
+		print(f'Fitness: {self.fitness}, Rank: {self.rank}, Sp: {len(self.dominates_to)}, Np: {self.n_dominated_by}')

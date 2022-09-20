@@ -29,7 +29,7 @@ Class
 """
 from algorithms.neat import NEAT
 from models.genotype import Genome
-from models.ann_pytorch import eval_model
+from utilities.evaluation import eval_model
 
 """
 FS-NEAT
@@ -59,7 +59,7 @@ class FS_NEAT(NEAT):
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 
-	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple(np.float32, np.float32, np.float32):
+	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple[np.float32, np.float32, np.float32]:
 		"""
 		Encoding genomes to actual artifial neural network (ANN) to compute fitness.
 		We should consider that NEAT tries to maximize the fitness, while most common methods

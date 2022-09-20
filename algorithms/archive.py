@@ -55,13 +55,14 @@ class SpeciesArchive:
 		front = non_dominated_sorting(population)
 		if len(front[-1]) == 1:
 			return front[-1][0]
+		elif len(front[-1]) == 2:
+			return front[-1][0] if front[-1][0].fitness[0] <= front[-1][1].fitness[0] else front[-1][0]
 		else:
 			f = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
 			if check_repeated_rows(f):
 				r = choose_repeated_index(f)
 			else:
-				hv = get_hv_contribution(f)
-				r = np.argmin(hv[1:]) + 1
+				r = np.argmin(get_hv_contribution(f))
 			return front[-1][r]
 
 	def get_full_population(self) -> list:

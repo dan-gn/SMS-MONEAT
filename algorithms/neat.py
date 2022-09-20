@@ -32,8 +32,7 @@ Models
 """
 from models.genotype import Genome, NodeGene
 from models.species import Species
-from models.ann import ArtificialNeuralNetwork
-from models.ann_pytorch import Ann_PyTorch, eval_model
+from utilities.evaluation import eval_model
 from utilities.ga_utils import polynomial_mutation, tournament_selection, compute_parent_selection_prob
 from utilities.ml_utils import get_batch
 
@@ -124,7 +123,7 @@ class NEAT:
 			if member.fitness > self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 
-	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple(np.float32, np.float32, np.float32):
+	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple[np.float32, np.float32, np.float32]:
 		"""
 		Encoding genomes to actual artifial neural network (ANN) to compute fitness.
 		We should consider that NEAT tries to maximize the fitness, while most common methods
@@ -165,7 +164,7 @@ class NEAT:
 			offspring_distribution[i] -= 1
 		return offspring_distribution
 
-	def select_parents(self, species: list) -> Tuple(Genome, Genome):
+	def select_parents(self, species: list) -> Tuple[Genome, Genome]:
 		parent1 = tournament_selection(species.member_index, self.probs, self.n_competitors)
 		if random.uniform(0, 1) <= self.interspecies_mating_rate or species.get_size() == 1:
 			other_species = random.choice(self.species)
@@ -174,7 +173,7 @@ class NEAT:
 			parent2 = tournament_selection(species.member_index, self.probs, self.n_competitors)
 		return self.population[parent1], self.population[parent2]
 
-	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
+	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple[Genome, bool]:
 		"""
 		When crossing over, the genes in both genomes with the same innovation numbers are lined up.
 		These genes are called matching genes. Genes that do not match are either disjoint or exceess,
@@ -201,7 +200,7 @@ class NEAT:
 		else:
 			return self.crossover_same_fitness(genome1, genome2)
 
-	def crossover_same_fitness(self, genome1: Genome, genome2: Genome) -> Tuple(Genome, bool):
+	def crossover_same_fitness(self, genome1: Genome, genome2: Genome) -> Tuple[Genome, bool]:
 		node_genes_id = []
 		connection_genes = []
 		# Find matching genes
@@ -375,7 +374,9 @@ class NEAT:
 				if random.uniform(0, 1) < self.crossover_prob:
 					cross = True
 					parent1, parent2 = self.select_parents(s)
-					while True:
+					attempts = 0
+					while attempts < 10:
+						attempts += 1
 						child, succeeded = self.crossover(parent1, parent2)
 						if succeeded:
 							break
@@ -457,7 +458,7 @@ class NEAT:
 			logging.basicConfig(filename="test_mean.log", level=logging.INFO)
 		if seed is not None:
 			set_seed(seed)
-		self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
+		# self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
 		# Variable to store best solution
 		self.best_solution = Genome()
 		self.best_solution.fitness = -math.inf
@@ -466,16 +467,16 @@ class NEAT:
 		self.training_fitness[:] = np.nan
 		self.training_accuracy = np.copy(self.training_fitness)
 		self.training_gmean = np.copy(self.training_fitness)
-		self.testing_fitness = np.copy(self.training_fitness)
-		self.testing_accuracy = np.copy(self.training_fitness)
-		self.testing_gmean = np.copy(self.training_fitness)
+		# self.testing_fitness = np.copy(self.training_fitness)
+		# self.testing_accuracy = np.copy(self.training_fitness)
+		# self.testing_gmean = np.copy(self.training_fitness)
 		# Initalize population
 		self.initialize_population()
 		self.training_accuracy[0], self.training_fitness[0], self.training_gmean[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-		self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
+		# self.testing_accuracy[0], self.testing_fitness[0], self.testing_gmean[0] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
 		# Best solution in test dataset
-		self.best_solution_test = self.best_solution.copy()
-		self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[0, 0], self.testing_fitness[0, 0]
+		# self.best_solution_test = self.best_solution.copy()
+		# self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[0, 0], self.testing_fitness[0, 0]
 		# List to store species, initalized empty
 		self.species = []
 		# Evolve population
@@ -495,11 +496,12 @@ class NEAT:
 			self.population = self.next_generation()
 			# Store history of fitness and accuracy from best solution in both datasets
 			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
-			self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
-			if self.testing_fitness[i+1, 0] > self.best_solution_test.fitness:
-				self.best_solution_test = self.best_solution.copy()
-				self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[i+1, 0], self.testing_fitness[i+1, 0]
+			# self.testing_accuracy[i+1], self.testing_fitness[i+1], self.testing_gmean[i+1] =  self.evaluate(self.best_solution, self.x_val, self.y_val, False)
+			# if self.testing_fitness[i+1, 0] > self.best_solution_test.fitness:
+			# 	self.best_solution_test = self.best_solution.copy()
+			# 	self.best_solution_test.g_mean, self.best_solution_test.fitness = self.testing_gmean[i+1, 0], self.testing_fitness[i+1, 0]
 			# Display progress
 			if i % 50 == 0:
 				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
-				print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
+				# print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Test fit = {self.testing_fitness[i+1][0]:.4f}, Acc = {self.testing_accuracy[i+1][0]:.4f}, Gmean = {self.testing_gmean[i+1][0]:.4f};  Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
+				print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')

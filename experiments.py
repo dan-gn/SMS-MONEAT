@@ -1,9 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
+
 import os
 from pathlib import Path
 import pickle
+
+import time
+
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from utilities.microarray_ds import MicroarrayDataset
@@ -17,9 +21,9 @@ from algorithms.sms_neat import SMS_NEAT
 
 datasets = []
 
-datasets.append('breastCancer-full')
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full')
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
 # datasets.append('Breast_GSE22820')
 # datasets.append('Breast_GSE42568')
@@ -27,18 +31,18 @@ datasets.append('prostate_tumorVSNormal-full')
 # datasets.append('Breast_GSE70947')
 # datasets.append('Colorectal_GSE8671')
 # datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE14317')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE14317') # Only 7
 # datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270')
-# datasets.append('Leukemia_GSE71935')
+datasets.append('Leukemia_GSE63270')
+# datasets.append('Leukemia_GSE71935') # Only 9
 # datasets.append('Liver_GSE14520_U133A')
-# # datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232')
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232')
 # datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE11682')
-# datasets.append('Prostate_GSE46602')
+datasets.append('Prostate_GSE11682')
+datasets.append('Prostate_GSE46602')
 
 seed = 0
 k_folds = 10
@@ -138,8 +142,9 @@ if __name__ == '__main__':
 				model = N3O(problem, params)
 			elif algorithm == 'sms_neat':
 				model = SMS_NEAT(problem, params)
-
+			start = time.time()
 			model.run(i, debug)
+			time_exec = time.time()- start
 			# neat.best_solution.describe()
 
 			"""
@@ -159,7 +164,7 @@ if __name__ == '__main__':
 				print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
 			if save_results:
-				result = {'seed' : seed, 'cv_it' : i, 'model' : model}
+				result = {'seed' : seed, 'cv_it' : i, 'model' : model, 'time' : time_exec}
 				problem['fitness_function'] = 'torch_fitness_function'	
 				results_filename = f"{filename}_MinMaxSc_{i}.pkl"
 				with open(f'{results_path}/{results_filename}', 'wb') as f:
