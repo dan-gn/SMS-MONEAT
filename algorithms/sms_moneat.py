@@ -73,7 +73,7 @@ class SMS_MONEAT(N3O):
 	def evaluate_population(self, x: torch.Tensor, y: torch.Tensor) -> None:
 		for member in self.population:
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, False)
-		_ = non_dominated_sorting_2(self.population)
+		_ = create_fronts(self.population)
 
 	def compute_selection_prob(self) -> np.array:
 		c = np.array([member.rank+1 for member in self.population], dtype="float32") 
@@ -126,7 +126,12 @@ class SMS_MONEAT(N3O):
 							offspring.connection_genes.append(connection_b.copy())
 			return offspring, offspring.validate_network()
 		else:
-			return self.crossover_same_fitness(genome1, genome2)
+			offspring = Genome()
+			offspring.set_weight_limits(self.weight_min_value, self.weight_max_value)
+			temp, validation_flag = self.crossover_same_fitness(genome1, genome2)
+			offspring.node_genes = list(temp.node_genes)
+			offspring.connection_genes = list(temp.connection_genes)
+			return offspring, validation_flag
 
 	def next_generation(self) -> Genome:
 		self.generation_add_node = []
@@ -150,7 +155,6 @@ class SMS_MONEAT(N3O):
 	def reduce_population(self) -> None:
 		#front = non_dominated_sorting_2(self.population)
 		front = create_fronts(self.population)
-		print(len(front), len(self.population))
 		if len(front[-1]) == 1:
 			self.population.remove(front[-1][0])
 			remove_genome_nds(self.population, front[-1][0])
@@ -159,8 +163,9 @@ class SMS_MONEAT(N3O):
 			if check_repeated_rows(f):
 				r = choose_repeated_index(f)
 			else:
+				# NORMALIZE OBJECTIVES
 				hv = get_hv_contribution(f)
-				r = np.argmin(hv[1:]) + 1
+				r = np.argmin(hv) 
 			self.population.remove(front[-1][r])
 			remove_genome_nds(self.population, front[-1][r])
 
@@ -199,16 +204,16 @@ class SMS_MONEAT(N3O):
 			offspring = self.next_generation()
 			if BATCH_PROP < 1.0:
 				offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
-			# Update Non-Dominated Sorting variables from population and offsprin
+			# Update Non-Dominated Sorting variables from population and offspring
 			add_genome_nds(self.population, offspring)
 			# Add Offspring to population
 			self.population.append(offspring)
 			# Reduce population
 			self.reduce_population()
 			# Add to archive
-			# self.archive.add(offspring)
+			self.archive.add(offspring)
 			# Display run info
-			if i % 4500 == 0:
+			if i % 500 == 0:
 				self.evaluate_population(self.x_train, self.y_train)
 				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 				population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)

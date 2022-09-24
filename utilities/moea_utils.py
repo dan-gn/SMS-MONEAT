@@ -117,6 +117,8 @@ def add_genome_nds(population: List[Genome], genome: Genome):
 		elif dominate(member, genome):
 			member.dominates_to.append(genome)
 			genome.n_dominated_by += 1
+	if genome.n_dominated_by == 0:
+		genome.rank = 0
 
 def remove_genome_nds(population: List[Genome], genome: Genome):
 	for member in population:
@@ -152,9 +154,9 @@ def create_fronts(population: List[Genome]):
 	return front
 
 
-def get_hv_contribution(front: List[Genome]):
+def get_hv_contribution(front: List[Genome], delta: float=0.5):
 	best_fitness = np.argmax(front, axis=0)
-	reference = np.max(front, axis=0)
+	reference = np.max(front, axis=0) + delta
 	hv = HyperVolume(reference)
 	volume = hv.compute(front)
 	volume_contribution = np.ones(front.shape[0]) * volume

@@ -12,7 +12,7 @@ from utilities.scalers import MeanScaler
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from algorithms.n3o import N3O
-from algorithms.sms_neat import SMS_NEAT
+from algorithms.sms_moneat import SMS_NEAT
 
 
 datasets = []

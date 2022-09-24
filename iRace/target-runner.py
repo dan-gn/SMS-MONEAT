@@ -12,7 +12,7 @@ from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from utilities.hv import HyperVolume
 from utilities.moea_utils import non_dominated_sorting
-from algorithms.sms_neat import SMS_NEAT
+from algorithms.sms_moneat import SMS_NEAT
 
 configuration_id = sys.argv[1]
 instance_id = sys.argv[2]

@@ -36,6 +36,15 @@ class MicroarrayDataset:
 		for i, (train_index, test_index) in enumerate(rkf.split(self.x, self.y)):
 			yield i, self.x[train_index], self.x[test_index], self.y[train_index], self.y[test_index]
 
+	def cross_validation_3splits(self, k_folds=10, n_repeats=1, random_state=None):
+		if n_repeats <= 1:
+			rkf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=random_state)
+		else:
+			rkf = RepeatedStratifiedKFold(n_splits=k_folds, n_repeats=n_repeats, random_state=random_state)
+		for i, (train_index, test_index) in enumerate(rkf.split(self.x, self.y)):
+			x_train, x_val, y_train, y_val = train_test_split(self.x[train_index], self.y[train_index], test_size=len(test_index), random_state=random_state, stratify=self.y[train_index])
+			yield i, x_train, x_val, self.x[test_index], y_train, y_val, self.y[test_index]
+
 
 		
 def merge_datasets(a, b, filename):

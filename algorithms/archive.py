@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import random
 from itertools import chain
+import copy
 
 from models.genotype import Genome
 from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
@@ -62,28 +63,32 @@ class SpeciesArchive:
 			if check_repeated_rows(f):
 				r = choose_repeated_index(f)
 			else:
+				# NORMALIZE OBJECTIVES
 				r = np.argmin(get_hv_contribution(f))
 			return front[-1][r]
 
 	def get_full_population(self) -> list:
 		return list(chain.from_iterable([species.members for species in self.archive]))
 
+	def get_worst_of_each_species(self) -> list:
+		return [species.members[-1] for species in self.archive]
+
 	def reduce_archive(self, species: Species = None) -> None:
 		if species is None:
-			all_species = self.get_full_population()
+			all_species = self.get_worst_of_each_species()
 			x = self.choose_element_to_remove(all_species)
 			for species in self.archive:
 				if x in species.members:
 					species.remove_member(x)
 					break
 		else:
-			species.sort_members()
 			species.members.pop()
 		if species.get_size() == 0:
 			self.archive.remove(species)
 		self.current_size -= 1
 
-	def add(self, new_member: Genome) -> None:
+	def add(self, genome: Genome) -> None:
+		new_member = copy.deepcopy(genome)
 		# Set flag to know if new member has been already added to any existing species to False
 		added = False
 		self.current_size += 1
@@ -92,6 +97,7 @@ class SpeciesArchive:
 			# Add new member to species which belongs to
 			if self.compare(species.get_random_member(), new_member):
 				species.add_member(new_member)
+				species.sort_members()
 				added = True
 				break
 		# If new member does not belong to any existing species create a new one

@@ -286,12 +286,17 @@ class MultiList:
 if __name__ == "__main__":
 
     import numpy as np
+    import time
+
     # Example:
-    referencePoint = np.array([2, 2, 2])
+    n = 100
+    referencePoint = np.array([n, n])
+    start = time.time()
     hv = HyperVolume(referencePoint)
-    front = [[1,0,1], [0,1,0]]
+    front = [[i, n-i] for i in range(n+1)]
     volume = hv.compute(np.array(front))
     print(volume)
+    print(time.time() - start)
 
             
             
