@@ -13,7 +13,7 @@ class Species:
 
 	def add_member(self, index: int, member: Genome) -> None:
 		self.member_index.append(index)
-		if member.fitness > self.champion.fitness:
+		if member.fitness < self.champion.fitness:
 			self.champion = member.copy(with_phenotype=True)
 			self.stagnant_generations = 0
 

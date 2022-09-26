@@ -65,7 +65,7 @@ class N3O(FS_NEAT):
 			# Add member to population
 			self.population.append(member)
 			# Keep track of the best solution found
-			if member.fitness > self.best_solution.fitness:
+			if member.fitness < self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 			if self.debug:
 				self.describe(member)
@@ -80,7 +80,7 @@ class N3O(FS_NEAT):
 		offspring inheriting that input.
 		"""
 		if genome1.fitness != genome2.fitness:
-			parents = sorted([genome1, genome2], key=lambda x: -x.fitness)
+			parents = sorted([genome1, genome2], key=lambda x: x.fitness)
 			offspring = parents[0].copy()
 			for connection_a in offspring.connection_genes:
 				connection_b = parents[1].get_connection_gene(connection_a.innovation_number)
@@ -189,7 +189,7 @@ class N3O(FS_NEAT):
 		Preserves the best individuals from each generation.
 		"""
 		offspring = []
-		sorted_pop = sorted(self.population, key=lambda x: -x.fitness)
+		sorted_pop = sorted(self.population, key=lambda x: x.fitness)
 		k = int(self.n_population * self.elitism_prop)
 		remaining_offspring_space = self.n_population - k
 		for i in range(k):

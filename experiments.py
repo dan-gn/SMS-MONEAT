@@ -21,41 +21,42 @@ from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 
 datasets = []
 
-datasets.append('breastCancer-full')
-## datasets.append('ALL-AML-full')
-## datasets.append('prostate_tumorVSNormal-full')
-#
-## datasets.append('Breast_GSE22820')
-## datasets.append('Breast_GSE42568')
-## datasets.append('Breast_GSE59246')
-## datasets.append('Breast_GSE70947')
-## datasets.append('Colorectal_GSE8671')
-## datasets.append('Colorectal_GSE32323')
-#datasets.append('Colorectal_GSE44076')
-#datasets.append('Colorectal_GSE44861')
-## datasets.append('Leukemia_GSE14317') # Only 7
-## datasets.append('Leukemia_GSE33615')
-#datasets.append('Leukemia_GSE63270')
-## datasets.append('Leukemia_GSE71935') # Only 9
-## datasets.append('Liver_GSE14520_U133A')
-#datasets.append('Liver_GSE50579')
-#datasets.append('Liver_GSE62232')
-## datasets.append('Prostate_GSE6919_U95Av2')
-#datasets.append('Prostate_GSE11682')
-#datasets.append('Prostate_GSE46602')
+# datasets.append('breastCancer-full')
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
+
+# datasets.append('Breast_GSE22820')
+# datasets.append('Breast_GSE42568')
+# datasets.append('Breast_GSE59246')
+# datasets.append('Breast_GSE70947')
+# datasets.append('Colorectal_GSE8671')
+datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE33615')
+# datasets.append('Leukemia_GSE63270')
+# datasets.append('Liver_GSE14520_U133A')
+# datasets.append('Liver_GSE50579')
+# datasets.append('Liver_GSE62232')
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE11682')
+# datasets.append('Prostate_GSE46602')
+
+# datasets.append('Leukemia_GSE14317') # Only 7
+# datasets.append('Leukemia_GSE71935') # Only 9
 
 seed = 0
 k_folds = 10
-n_repeats = 1
-save_results = False
+n_repeats = 3
+save_results = True
 debug = False
-algorithm = 'sms_neat'
+algorithm = 'n3o'
 	
 
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 18000,
+	'max_iterations' : 200,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -97,7 +98,10 @@ if __name__ == '__main__':
 			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
-		for i, x_train, x_test, y_train, y_test in ds.cross_validation(k_folds, n_repeats, seed):
+		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_3splits(k_folds, n_repeats, seed):
+
+			if i < 18:
+				continue
 
 			print(f'Seed = {seed}, test = {i}')
 			print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')
@@ -106,6 +110,7 @@ if __name__ == '__main__':
 			# print(f'Statistical Filtering...')
 			filter = KruskalWallisFilter(threshold=0.01)
 			x_train, features_selected = filter.fit_transform(x_train, y_train)
+			x_val, _ = filter.transform(x_val)
 			x_test, _ = filter.transform(x_test)
 			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
 
@@ -113,20 +118,26 @@ if __name__ == '__main__':
 			# print(f'Scaling datasets...')
 			scaler = MinMaxScaler()
 			x_train = scaler.fit_transform(x_train)
+			x_val = scaler.transform(x_val)
 			x_test = scaler.transform(x_test)
 
 			# print(f'Final preprocessing data steps...')
 			y_train = np.expand_dims(y_train, axis=1)
+			y_val = np.expand_dims(y_val, axis=1)
 			y_test = np.expand_dims(y_test, axis=1)
 
 			x_train = torch.from_numpy(x_train).type(torch.float32)
 			y_train = torch.from_numpy(y_train).type(torch.float32)
+			x_val = torch.from_numpy(x_val).type(torch.float32)
+			y_val = torch.from_numpy(y_val).type(torch.float32)
 			x_test = torch.from_numpy(x_test).type(torch.float32)
 			y_test = torch.from_numpy(y_test).type(torch.float32)
 
 			problem = {
 				'x_train' : x_train,
 				'y_train' : y_train,
+				'x_val' : x_val,
+				'y_val' : y_val,
 				'x_test' : x_test,
 				'y_test' : y_test,
 				'kw_htest_pvalue' : filter.p_value,
@@ -150,18 +161,39 @@ if __name__ == '__main__':
 			"""
 			DISPLAY RESULTS
 			"""
+			print(f'Time Execution: {time_exec}')
+
+			print('Best solution: Train Dataset')
 			input_nodes, hidden_nodes, output_nodes = model.best_solution.count_nodes()
 			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution.selected_features.shape[0]}')
-
 			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_train, model.y_train)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-
+			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_val, model.y_val)
+			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_test, model.y_test)
 			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-			if algorithm == 'sms_neat':
-				acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-				print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			print('Best solution: Val Dataset')
+			input_nodes, hidden_nodes, output_nodes = model.best_solution_val.count_nodes()
+			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_val.selected_features.shape[0]}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_train, model.y_train)
+			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_val, model.y_val)
+			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+
+			print('Best solution: Arch Dataset')
+			input_nodes, hidden_nodes, output_nodes = model.best_solution_archive.count_nodes()
+			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_archive.selected_features.shape[0]}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
+			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
+			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+
+			print('\n')
 
 			if save_results:
 				result = {'seed' : seed, 'cv_it' : i, 'model' : model, 'time' : time_exec}

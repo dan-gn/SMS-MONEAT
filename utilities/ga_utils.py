@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 def simulated_binary_crossover(x, eta):
 	pass
@@ -29,6 +30,6 @@ def compute_parent_selection_prob(population, beta=1):
 	# and divide by the mean of the array to avoid overflow while computing exponential
 	fitness = np.array([member.shared_fitness for member in population]) 
 	mean_fitness = np.mean(fitness)
-	if mean_fitness != 0:
+	if mean_fitness != 0 and mean_fitness != math.inf:
 		fitness /= mean_fitness
 	return np.exp(-beta * fitness)

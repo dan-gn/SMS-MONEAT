@@ -4,4 +4,7 @@
 *.png
 *.pyc
 *.csv
+*.RData
+*.RHistory
+*.Rdata
 *.arff

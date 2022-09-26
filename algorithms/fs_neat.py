@@ -21,6 +21,7 @@ Required libraries
 """
 import numpy as np
 import torch
+import math
 
 from typing import Tuple
 
@@ -56,7 +57,7 @@ class FS_NEAT(NEAT):
 			# Evaluate member fitness
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train, True)
 			# Keep track of the best solution found
-			if member.fitness > self.best_solution.fitness:
+			if member.fitness < self.best_solution.fitness:
 				self.best_solution = member.copy(with_phenotype=True)
 
 	def evaluate(self, genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple[np.float32, np.float32, np.float32]:
@@ -76,12 +77,12 @@ class FS_NEAT(NEAT):
 		if build_model:
 			genome.compute_phenotype(self.activation)
 		if genome.selected_features.shape[0] == 0:
-			return None, 0, 0
+			return None, math.inf, 0
 		x_prima = x.index_select(1, genome.selected_features)
 		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
 		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
 		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
-		fitness = 100 - loss
-		if fitness < 0:
-			print(f'Fitness negativo: {fitness}')
-		return acc, fitness.detach().numpy(), gmean
+		# fitness = 100 - loss
+		# if fitness < 0:
+		# 	print(f'Fitness negativo: {fitness}')
+		return acc, loss.detach().numpy(), gmean
