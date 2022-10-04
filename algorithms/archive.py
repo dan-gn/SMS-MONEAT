@@ -5,8 +5,8 @@ from itertools import chain
 import copy
 
 from models.genotype import Genome
-from utilities.moea_utils import non_dominated_sorting, get_hv_contribution
-from utilities.data_utils import check_repeated_rows, choose_repeated_index
+from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting
+from utilities.data_utils import choose_repeated_index
 
 class Species:
 
@@ -55,17 +55,19 @@ class SpeciesArchive:
 	def choose_element_to_remove(self, population: list) -> Genome:
 		front = non_dominated_sorting(population)
 		if len(front[-1]) == 1:
-			return front[-1][0]
+			remove_index = 0
 		elif len(front[-1]) == 2:
-			return front[-1][0] if front[-1][0].fitness[0] <= front[-1][1].fitness[0] else front[-1][0]
+			remove_index =  0 if front[-1][0].fitness[0] <= front[-1][1].fitness[0] else 1
+		elif len(front[-1]) == 3:
+			front_fitness = np.array([list(p.fitness) for p in front[-1]])
+			remove_index = 3 - np.argmin(front_fitness, axis=0).sum()
 		else:
-			f = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
-			if check_repeated_rows(f):
-				r = choose_repeated_index(f)
-			else:
-				# NORMALIZE OBJECTIVES
-				r = np.argmin(get_hv_contribution(f))
-			return front[-1][r]
+			front_fitness = np.array([list(p.fitness) for p in front[-1]])
+			remove_index, _ = choose_repeated_index(front_fitness)
+			if remove_index is None:
+				front_fitness *= np.array([1, 0.1]) # Normalize objective
+				remove_index = choose_min_hv_contribution(front_fitness)
+		return front[-1][remove_index]
 
 	def get_full_population(self) -> list:
 		return list(chain.from_iterable([species.members for species in self.archive]))

@@ -12,10 +12,10 @@ def choose_repeated_index(A):
 		row = np.random.randint(0, repeated.shape[0])
 		row_idx = np.argwhere((A == repeated[row]).all(axis=1)).squeeze()
 		chosen_row = np.random.choice(row_idx)
-		return chosen_row
+		return chosen_row, True
 	else:
-		return None
+		return None, False
 
 if __name__ == '__main__':
-	A = np.array([[0,0], [1,1], [1,1]])
+	A = np.array([[0,0], [0,0], [1,1], [1,1]])
 	print(choose_repeated_index(A))

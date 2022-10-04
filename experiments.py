@@ -25,22 +25,24 @@ datasets = []
 # datasets.append('ALL-AML-full')
 # datasets.append('prostate_tumorVSNormal-full')
 
-# datasets.append('Breast_GSE22820')
+# datasets.append('Breast_GSE22820') # 19
 # datasets.append('Breast_GSE42568')
 # datasets.append('Breast_GSE59246')
 # datasets.append('Breast_GSE70947')
 # datasets.append('Colorectal_GSE8671')
-datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE32323') 
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE22529_U133A') # N3O # 18
+# datasets.append('Leukemia_GSE22529_U133B') # N3O
 # datasets.append('Leukemia_GSE33615')
 # datasets.append('Leukemia_GSE63270')
-# datasets.append('Liver_GSE14520_U133A')
+# datasets.append('Liver_GSE14520_U133A') 
 # datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232')
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE11682')
-# datasets.append('Prostate_GSE46602')
+# datasets.append('Liver_GSE62232') # 15
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE11682')
+datasets.append('Prostate_GSE46602')
 
 # datasets.append('Leukemia_GSE14317') # Only 7
 # datasets.append('Leukemia_GSE71935') # Only 9
@@ -50,13 +52,13 @@ k_folds = 10
 n_repeats = 3
 save_results = True
 debug = False
-algorithm = 'n3o'
+algorithm = 'sms_moneat'
 	
 
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 200,
+	'max_iterations' : 18000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -100,7 +102,7 @@ if __name__ == '__main__':
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_3splits(k_folds, n_repeats, seed):
 
-			if i < 18:
+			if i < -1:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -151,7 +153,7 @@ if __name__ == '__main__':
 			print(f'Traning model...')
 			if algorithm == 'n3o':
 				model = N3O(problem, params)
-			elif algorithm == 'sms_neat':
+			elif algorithm == 'sms_moneat':
 				model = SMS_NEAT(problem, params)
 			start = time.time()
 			model.run(i, debug)

@@ -154,54 +154,39 @@ def create_fronts(population: List[Genome]):
 	return front
 
 
-def get_hv_contribution(front: List[Genome], delta: float=0.5):
-	best_fitness = np.argmax(front, axis=0)
+def get_hv_contribution(front: List[float], delta: float=0.1):
+	# Find best for each objective
+	best_single_objective = np.argmin(front, axis=0)
+	# Define reference value
 	reference = np.max(front, axis=0) + delta
 	hv = HyperVolume(reference)
+	# Compute hypervolume with all solutions
 	volume = hv.compute(front)
+	# Compute hypervolume contribution for each solution
 	volume_contribution = np.ones(front.shape[0]) * volume
 	for i, p in enumerate(front):
 		front_p = np.delete(front, i, axis=0)
 		volume_i = hv.compute(front_p)
 		volume_contribution[i] -= volume_i
-	max_contribution = max(volume_contribution)
-	volume_contribution[best_fitness[0]] = max_contribution + 1
-	volume_contribution[best_fitness[1]] = max_contribution + 1
+	# Keep best for each objective
+	volume_contribution[best_single_objective] += max(volume_contribution)
 	return volume_contribution
+
+def choose_min_hv_contribution(front: List[float], delta: float=0.1):
+	volume_contribution = get_hv_contribution(front, delta)
+	min_contribution_index = np.argwhere(volume_contribution == np.min(volume_contribution))
+	return np.random.choice(min_contribution_index.squeeze(axis=1))
 
 
 if __name__ == '__main__':
-	population = [Genome() for i in range(5)]
-	population[0].fitness = [0, 1]
-	population[1].fitness = [1, 0]
-	population[2].fitness = [2, 1]
-	population[3].fitness = [3, 4]
-	population[4].fitness = [4, 3]
+	import time
+	n = 50
+	front = [[i, n-i] for i in range(n)]
+	front = np.array(front)
 
-	front = non_dominated_sorting_2(population)
+	# volume_contribution = get_hv_contribution(front)
+	# min_contribution_index = np.argwhere(volume_contribution == np.min(volume_contribution))
 
-	for member in population:
-		member.describe()
-	print('\n')
-
-	new_genome = Genome()
-	new_genome.fitness = [1, 2]
-	add_genome_nds(population, new_genome)
-	population.append(new_genome)
-
-	for member in population:
-		member.describe()
-	print('\n')
-
-	remove_genome_nds(population, population[2])
-	population.pop(2)
-	front = create_fronts(population)
-
-	for member in population:
-		member.describe()
-
-	for f in front:
-		print(len(f))
-
-
-	
+	start_time = time.time()
+	print(choose_min_hv_contribution(front))
+	print(time.time() - start_time)

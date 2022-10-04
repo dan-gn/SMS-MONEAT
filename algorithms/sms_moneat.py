@@ -4,13 +4,14 @@ import random
 import math
 
 from typing import Tuple
+from typing import List
 
 from algorithms.n3o import N3O
 from algorithms.neat import set_seed
 from models.genotype import MultiObjectiveGenome as Genome
 from utilities.evaluation import eval_model
 from utilities.ga_utils import tournament_selection
-from utilities.moea_utils import non_dominated_sorting_2, get_hv_contribution
+from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting_2, get_hv_contribution
 from utilities.moea_utils import add_genome_nds, remove_genome_nds, create_fronts
 from utilities.data_utils import check_repeated_rows, choose_repeated_index
 from utilities.ml_utils import get_batch
@@ -153,57 +154,45 @@ class SMS_MONEAT(N3O):
 		return child
 
 	def reduce_population(self) -> None:
-		#front = non_dominated_sorting_2(self.population)
 		front = create_fronts(self.population)
 		if len(front[-1]) == 1:
-			self.population.remove(front[-1][0])
-			remove_genome_nds(self.population, front[-1][0])
+			remove_index = 0
 		else:
-			f = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
-			if check_repeated_rows(f):
-				r = choose_repeated_index(f)
-			else:
-				# NORMALIZE OBJECTIVES
-				hv = get_hv_contribution(f)
-				r = np.argmin(hv) 
-			self.population.remove(front[-1][r])
-			remove_genome_nds(self.population, front[-1][r])
+			front_fitness = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
+			remove_index, _ = choose_repeated_index(front_fitness)
+			if remove_index is None:
+				front_fitness *= np.array([1, 0.1]) # Normalize objective
+				remove_index = choose_min_hv_contribution(front_fitness)
+		self.population.remove(front[-1][remove_index])
+		remove_genome_nds(self.population, front[-1][remove_index])
 
-	def choose_solution(self) -> None:
-		self.population = sorted(self.population, key=lambda x: x.fitness[0])
-		self.best_solution = self.population[0].copy(with_phenotype=True)
-		# self.best_solution_test = Genome()
-		# self.best_solution_test.fitness = np.ones(2) * math.inf
-		# for member in self.population:
-		# 	_, fitness, _ = self.evaluate(member, self.x_val, self.y_val, True)
-		# 	if (fitness[0] < self.best_solution_test.fitness[0]) or (fitness[0] == self.best_solution_test.fitness[0] and fitness[1] < self.best_solution_test.fitness[1]):
-		# 		self.best_solution_test = member.copy(with_phenotype=True)
-
-	def choose_solution_archive(self) -> None:
-		archive_population = self.archive.get_full_population()
-		self.best_solution_archive = Genome()
-		self.best_solution_archive.fitness = np.ones(2) * math.inf
-		for member in archive_population:
-			_, fitness, _ = self.evaluate(member, self.x_train, self.y_train, True)
-			if (fitness[0] < self.best_solution_archive.fitness[0]) or (fitness[0] == self.best_solution_archive.fitness[0] and fitness[1] < self.best_solution_archive.fitness[1]):
-				self.best_solution_archive = member.copy(with_phenotype=True)
+	def choose_solution(self, population: List[Genome], x, y) -> Genome:
+		solution = Genome()
+		n_objectives = len(population[0].fitness)
+		solution.fitness = np.ones(n_objectives) * math.inf
+		for member in population:
+			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, True)
+			if member.fitness[0] < solution.fitness[0]:
+				solution = member.copy(True)
+			elif member.fitness[0] == solution.fitness[0] and member.g_mean > solution.g_mean:
+				solution = member.copy(True)
+		return solution
 
 	def run(self, seed: int = None, debug: bool = False) -> None:
 		if seed is not None:
 			set_seed(seed)
-		# self.x_train, self.x_val, self.y_train, self.y_val = self.split_test_dataset(random_state = seed)
 		self.initialize_population()
 		_ = non_dominated_sorting_2(self.population)
 		self.archive = SpeciesArchive(self.n_population, self.population)
 		for i in range(self.max_iterations):
 			# Get batch
-			if i % 100 == 0 and BATCH_PROP < 1.0:
-				x_batch, y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP, random_state=i)
-				self.evaluate_population(x_batch, y_batch)
+			# if i % 100 == 0 and BATCH_PROP < 1.0:
+			# 	x_batch, y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP, random_state=i)
+			# 	self.evaluate_population(x_batch, y_batch)
 			# Get offspring
 			offspring = self.next_generation()
-			if BATCH_PROP < 1.0:
-				offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
+			# if BATCH_PROP < 1.0:
+			# 	offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
 			# Update Non-Dominated Sorting variables from population and offspring
 			add_genome_nds(self.population, offspring)
 			# Add Offspring to population
@@ -213,11 +202,13 @@ class SMS_MONEAT(N3O):
 			# Add to archive
 			self.archive.add(offspring)
 			# Display run info
-			if i % 500 == 0:
-				self.evaluate_population(self.x_train, self.y_train)
-				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
-				population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
-				print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
-		self.choose_solution()
-		self.choose_solution_archive()
+			# if i % 5000 == 0:
+			# 	if BATCH_PROP < 1.0:
+			# 		self.evaluate_population(self.x_train, self.y_train)
+			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
+			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
+			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
+		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+		self.best_solution_val = self.choose_solution(self.population, self.x_val, self.y_val)
+		self.best_solution_archive = self.choose_solution(self.archive.get_full_population(), self.x_val, self.y_val)
 		
