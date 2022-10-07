@@ -289,12 +289,13 @@ if __name__ == "__main__":
     import time
 
     # Example:
-    n = 100
+    n = 1000
     referencePoint = np.array([n, n])
     start = time.time()
     hv = HyperVolume(referencePoint)
     front = [[i, n-i] for i in range(n+1)]
-    volume = hv.compute(np.array(front))
+    for i in range(n):
+        volume = hv.compute(np.array([x for j, x in enumerate(front) if j!=i]))
     print(volume)
     print(time.time() - start)
 

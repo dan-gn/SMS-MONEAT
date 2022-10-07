@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def check_repeated_rows(A):
 	unq, count = np.unique(A, axis=0, return_counts=True)
@@ -17,5 +18,11 @@ def choose_repeated_index(A):
 		return None, False
 
 if __name__ == '__main__':
-	A = np.array([[0,0], [0,0], [1,1], [1,1]])
+	n = 10000
+	A = [[i, n-i] for i in range(n)]
+	A.extend(A)
+	A.extend(A)
+
+	start = time.time()
 	print(choose_repeated_index(A))
+	print(time.time() - start)

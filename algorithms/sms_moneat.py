@@ -65,10 +65,11 @@ class SMS_MONEAT(N3O):
 		if genome.selected_features.shape[0] == 0:
 			return None, np.array([math.inf, math.inf]), 0
 		x_prima = x.index_select(1, genome.selected_features)
-		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
-		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
+		# connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
+		# mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
+		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, genome.mean_square_weights)
 		fitness = np.array([loss, genome.selected_features.shape[0]])
+		# fitness = np.array([false_negative, false_positive, genome.selected_features.shape[0]])
 		return acc, fitness, gmean
 
 	def evaluate_population(self, x: torch.Tensor, y: torch.Tensor) -> None:
@@ -77,7 +78,7 @@ class SMS_MONEAT(N3O):
 		_ = create_fronts(self.population)
 
 	def compute_selection_prob(self) -> np.array:
-		c = np.array([member.rank+1 for member in self.population], dtype="float32") 
+		c = np.array([member.rank for member in self.population], dtype="float32") 
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
 			c /= mean_cost
@@ -145,11 +146,12 @@ class SMS_MONEAT(N3O):
 				attempts += 1
 				child, succeeded = self.crossover(parent1, parent2)
 				if succeeded:
+					self.mutate(child)
 					break
 		else:
 			parent, _ = self.select_parents()
 			child = parent.copy()
-		self.mutate(child)
+			self.mutate(child)
 		child.accuracy, child.fitness, child.g_mean = self.evaluate(child, self.x_train, self.y_train, True)
 		return child
 

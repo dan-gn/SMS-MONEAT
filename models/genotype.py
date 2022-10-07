@@ -4,7 +4,6 @@ NEAT's genetic encoding scheme
 import random
 import numpy as np
 import torch
-import torch.nn as nn
 from typing import Tuple
 from models.ann_pytorch import Ann_PyTorch
 
@@ -60,6 +59,7 @@ class Genome:
 		self.accuracy = None
 		self.g_mean = None
 		self.phenotype = None
+		self.mean_square_weights = None
 
 	def create_node_genes(self, n_inputs: list, n_outputs: list) -> None:
 		for id in range(n_inputs):
@@ -364,13 +364,16 @@ class Genome:
 
 	def compute_phenotype(self, activation: dict) -> None:
 		selected_features, layer_weights, n_inputs = self.build_layers()
-		layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
-		n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
 		self.selected_features = torch.tensor(selected_features).type(torch.int32)
 		if self.selected_features.shape[0] == 0:
 			self.phenotype = None
+			self.mean_square_weights = 0
 		else:
+			layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
+			n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
 			self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
+			n_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
+			self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / n_connections
 
 	def copy(self, with_phenotype: bool = False):
 		genome_copy = Genome()
@@ -383,6 +386,7 @@ class Genome:
 		genome_copy.g_mean = self.g_mean
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
+			genome_copy.mean_square_weights = self.mean_square_weights
 			genome_copy.phenotype = self.phenotype.copy()
 		return genome_copy
 
@@ -415,6 +419,7 @@ class MultiObjectiveGenome(Genome):
 		genome_copy.g_mean = self.g_mean
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
+			genome_copy.mean_square_weights = self.mean_square_weights
 			genome_copy.phenotype = self.phenotype.copy()
 		return genome_copy
 

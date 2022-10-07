@@ -1,12 +1,15 @@
 import numpy as np
-
-from typing import List
+import pygmo 
 
 import sys
 import os
+
+from typing import List
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
+
 from utilities.hv import HyperVolume
 from models.genotype import MultiObjectiveGenome as Genome
 
@@ -172,15 +175,33 @@ def get_hv_contribution(front: List[float], delta: float=0.1):
 	volume_contribution[best_single_objective] += max(volume_contribution)
 	return volume_contribution
 
+def compute_hv_contribution(front: List[float], delta: float=0.1):
+	# Find best for each objective
+	best_single_objective = np.argmin(front, axis=0)
+	# Define reference value
+	reference = np.max(front, axis=0) + delta
+	hv = pygmo.hypervolume(front)
+	total_hv = hv.compute(reference)
+	hv_contribution = np.ones(front.shape[0]) * total_hv	
+	for i in range(front.shape[0]):
+		hv = pygmo.hypervolume([x for j, x in enumerate(front) if j!=i])
+		hv_contribution -= hv.compute(reference)
+	# Keep best for each objective
+	hv_contribution[best_single_objective] += max(hv_contribution)
+	return hv_contribution
+
+
 def choose_min_hv_contribution(front: List[float], delta: float=0.1):
-	volume_contribution = get_hv_contribution(front, delta)
+	volume_contribution = compute_hv_contribution(front, delta)
 	min_contribution_index = np.argwhere(volume_contribution == np.min(volume_contribution))
 	return np.random.choice(min_contribution_index.squeeze(axis=1))
 
 
 if __name__ == '__main__':
 	import time
-	n = 50
+	np.random.seed(0)
+
+	n = 1000
 	front = [[i, n-i] for i in range(n)]
 	front = np.array(front)
 

@@ -79,9 +79,9 @@ class FS_NEAT(NEAT):
 		if genome.selected_features.shape[0] == 0:
 			return None, math.inf, 0
 		x_prima = x.index_select(1, genome.selected_features)
-		connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
-		mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, mean_weight)
+		# connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
+		# mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
+		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, genome.mean_square_weights)
 		# fitness = 100 - loss
 		# if fitness < 0:
 		# 	print(f'Fitness negativo: {fitness}')

@@ -29,7 +29,7 @@ class KruskalWallisFilter:
 			self.feature_selected = np.argwhere(self.p_value < temp_threshold)
 			if self.feature_selected.shape[0] > 0:
 				break
-			temp_threshold = self.threshold * i
+			temp_threshold = self.threshold * (i+2)
 			print(f'All features were removed. Trying with new threshold = {temp_threshold}')
 		return self.transform(x)
 
