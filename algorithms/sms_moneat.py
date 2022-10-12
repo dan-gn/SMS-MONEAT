@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import random
 import math
+import copy
 
 from typing import Tuple
 from typing import List
@@ -20,16 +21,13 @@ from algorithms.archive import SpeciesArchive
 from sklearn.model_selection import train_test_split
 
 BATCH_PROP = 1.0
-VALIDATION_PROP = 0.4
 
 class SMS_MONEAT(N3O):
 
 	def __init__(self, problem: dict, params: dict) -> None:
 		super().__init__(problem, params)
 		self.beta = 1
-
-	def split_test_dataset(self, random_state: int = None):
-		return train_test_split(self.x_train, self.y_train, test_size=VALIDATION_PROP, random_state=random_state, stratify=self.y_train)
+		self.objective_norm = np.array([0, 0.1])
 
 	def initialize_population(self) -> None:
 		"""
@@ -163,15 +161,13 @@ class SMS_MONEAT(N3O):
 			front_fitness = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:
-				front_fitness *= np.array([1, 0.1]) # Normalize objective
+				front_fitness *= self.objective_norm # Normalize objective
 				remove_index = choose_min_hv_contribution(front_fitness)
 		self.population.remove(front[-1][remove_index])
 		remove_genome_nds(self.population, front[-1][remove_index])
 
 	def choose_solution(self, population: List[Genome], x, y) -> Genome:
-		solution = Genome()
-		n_objectives = len(population[0].fitness)
-		solution.fitness = np.ones(n_objectives) * math.inf
+		solution = copy.deepcopy(self.best_solution)
 		for member in population:
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, True)
 			if member.fitness[0] < solution.fitness[0]:
@@ -185,7 +181,7 @@ class SMS_MONEAT(N3O):
 			set_seed(seed)
 		self.initialize_population()
 		_ = non_dominated_sorting_2(self.population)
-		self.archive = SpeciesArchive(self.n_population, self.population)
+		self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
 		for i in range(self.max_iterations):
 			# Get batch
 			# if i % 100 == 0 and BATCH_PROP < 1.0:
@@ -210,7 +206,10 @@ class SMS_MONEAT(N3O):
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
 			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
+		n_objectives = len(self.population[0].fitness)
+		self.best_solution = Genome()
+		self.best_solution.fitness = np.ones(n_objectives) * math.inf
 		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		self.best_solution_val = self.choose_solution(self.population, self.x_val, self.y_val)
-		self.best_solution_archive = self.choose_solution(self.archive.get_full_population(), self.x_val, self.y_val)
+		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		

@@ -31,8 +31,9 @@ class Species:
 
 class SpeciesArchive:
 
-	def __init__(self, max_size: int, population: list = None) -> None:
+	def __init__(self, max_size: int, objective_norm: np.array, population: list = None) -> None:
 		self.max_size = max_size
+		self.objective_norm = objective_norm
 		self.current_size = 0
 		self.archive = []
 		if population is not None:
@@ -65,7 +66,7 @@ class SpeciesArchive:
 			front_fitness = np.array([list(p.fitness) for p in front[-1]])
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:
-				front_fitness *= np.array([1, 0.1]) # Normalize objective
+				front_fitness *= self.objective_norm # Normalize objective
 				remove_index = choose_min_hv_contribution(front_fitness)
 		return front[-1][remove_index]
 

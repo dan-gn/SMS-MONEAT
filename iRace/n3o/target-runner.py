@@ -1,18 +1,17 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import math
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 import sys
-sys.path.insert(0, '..')
+sys.path.insert(0, '../..')
 
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
-from utilities.hv import HyperVolume
-from utilities.moea_utils import non_dominated_sorting
-from algorithms.sms_moneat import SMS_NEAT
+from algorithms.n3o import N3O
 
 configuration_id = sys.argv[1]
 instance_id = sys.argv[2]
@@ -22,7 +21,7 @@ irace_params = sys.argv[5:]
 # N_POPULATION = int(irace_params[1])
 # N_ITERATIONS = int(irace_params[3])
 N_POPULATION = 100
-N_ITERATIONS = 4000
+N_ITERATIONS = 200
 CROSSOVER_PROB = float(irace_params[1])
 ADD_INPUT_PROB = float(irace_params[3])
 SWAP_INPUT_PROB = float(irace_params[5])
@@ -31,7 +30,7 @@ ADD_NODE_PROB = float(irace_params[9])
 WEIGHT_MUTATION_PROB = float(irace_params[11])
 
 dataset = instance.split('/')[-1]
-trn_size = 0.7
+trn_size = 0.70
 debug = False
 
 
@@ -57,7 +56,7 @@ params = {
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
 	'compatibility_distance_coeff' : [1.0, 1.0, 0.4],
-	'stagnant_generations_threshold' : 100,
+	'stagnant_generations_threshold' : math.inf,
 	'champion_elitism_threshold' : 5,
 	'elitism_prop' : 0.1,
 	'initial_weight_limits' : [-1, 1],
@@ -66,7 +65,7 @@ params = {
 
 # Read microarray dataset
 import os
-ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\..\\datasets\\CUMIDA\\{dataset}.arff')
+ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\..\\..\\datasets\\CUMIDA\\{dataset}.arff')
 x, y = ds.get_full_dataset()
 
 # Split dataset into training and testing dataset
@@ -93,6 +92,8 @@ y_test = torch.from_numpy(y_test).type(torch.float32)
 problem = {
 	'x_train' : x_train,
 	'y_train' : y_train,
+	'x_val' : x_test,
+	'y_val' : y_test,
 	'x_test' : x_test,
 	'y_test' : y_test,
 	'kw_htest_pvalue' : filter.p_value,
@@ -104,19 +105,10 @@ problem = {
 TRAIN MODEL
 """
 # Training the model
-model = SMS_NEAT(problem, params)
+model = N3O(problem, params)
 model.run(seed, debug=False)
 
-
-# acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
-
-reference = np.array([10, 10])
-alpha = 10
-
-hv = HyperVolume(reference)
-front = non_dominated_sorting(model.population)
-fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0]])
-unq, count = np.unique(fitness, axis=0, return_counts=True)
-target = -hv.compute(unq)
-
+for member in model.population:
+	_, fitness, _ = model.evaluate(member, model.x_test, model.y_test, True)
+target = np.mean([member.fitness for member in model.population])
 print(target)

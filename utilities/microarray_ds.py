@@ -14,7 +14,7 @@ class MicroarrayDataset:
 		dataset = arff.loadarff(filename)
 		df = pd.DataFrame(dataset[0])
 		self.labels = {label:i for i, label in enumerate(df.iloc[:, -1].unique())}
-		df.iloc[:, -1] = df.iloc[:, -1].replace(self.labels)
+		df[df.columns[-1]] = df.iloc[:, -1].replace(self.labels)
 		x = df.iloc[:, :-1].to_numpy(dtype=np.float32)
 		y = df.iloc[:, -1].to_numpy(dtype=np.float32)
 		return x, y, pd.DataFrame(dataset[0])
@@ -42,8 +42,32 @@ class MicroarrayDataset:
 		else:
 			rkf = RepeatedStratifiedKFold(n_splits=k_folds, n_repeats=n_repeats, random_state=random_state)
 		for i, (train_index, test_index) in enumerate(rkf.split(self.x, self.y)):
-			x_train, x_val, y_train, y_val = train_test_split(self.x[train_index], self.y[train_index], test_size=len(test_index), random_state=random_state, stratify=self.y[train_index])
+			x_train, x_val, y_train, y_val = train_test_split(self.x[train_index], self.y[train_index], test_size=len(test_index)*2, random_state=random_state, stratify=self.y[train_index])
 			yield i, x_train, x_val, self.x[test_index], y_train, y_val, self.y[test_index]
+		
+	def cross_validation_experiment(self, k_folds=10, n_repeats=1, random_state=None):
+		if n_repeats <= 1:
+			rkf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=random_state)
+		else:
+			rkf = RepeatedStratifiedKFold(n_splits=k_folds, n_repeats=n_repeats, random_state=random_state)
+		cv = [{'train': train_index, 'test': test_index} for train_index, test_index in rkf.split(self.x, self.y)]
+		for i in range(k_folds*n_repeats):
+			if ((i+2) % k_folds) == 0:
+				cv[i]['val'] = np.concatenate((cv[i+1]['test'], cv[i+2-k_folds]['test']))	
+			elif ((i+1) % k_folds) == 0:
+				cv[i]['val'] = np.concatenate((cv[i+1-k_folds]['test'], cv[i+2-k_folds]['test']))	
+			else:
+				cv[i]['val'] = np.concatenate((cv[i+1]['test'], cv[i+2]['test']))	
+			cv[i]['train'] = np.array([x for x in cv[i]['train'] if x not in cv[i]['val']])
+
+			yield i, self.x[cv[i]['train']], self.x[cv[i]['val']], self.x[cv[i]['test']], self.y[cv[i]['train']], self.y[cv[i]['val']], self.y[cv[i]['test']]
+
+			
+
+
+		
+
+
 
 
 		
@@ -83,5 +107,3 @@ if __name__ == '__main__':
 	x, y = ds_full.get_full_dataset()
 	print(x.shape, y.shape)
 	
-
-

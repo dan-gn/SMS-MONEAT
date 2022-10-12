@@ -21,28 +21,28 @@ from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 
 datasets = []
 
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE42568')
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')
-# datasets.append('Colorectal_GSE8671') # N3O 19
-# datasets.append('Colorectal_GSE32323') 
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE42568')
+datasets.append('Breast_GSE59246') 
+# datasets.append('Breast_GSE70947')	
+# datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
+# datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
 # datasets.append('Leukemia_GSE22529_U133A') 
 # datasets.append('Leukemia_GSE22529_U133B') 
 # datasets.append('Leukemia_GSE33615')
 # datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') #N3O 15
-datasets.append('Liver_GSE50579')
-datasets.append('Liver_GSE62232') 
-datasets.append('Prostate_GSE6919_U95Av2')
-datasets.append('Prostate_GSE11682')
-datasets.append('Prostate_GSE46602')
+# datasets.append('Liver_GSE14520_U133A') 
+# datasets.append('Liver_GSE50579')
+# datasets.append('Liver_GSE62232') 
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE11682')
+# datasets.append('Prostate_GSE46602')
 
 # datasets.append('Leukemia_GSE14317') # Only 7
 # datasets.append('Leukemia_GSE71935') # Only 9
@@ -52,7 +52,7 @@ k_folds = 10
 n_repeats = 3
 save_results = True
 debug = False
-algorithm = 'n3o'
+algorithm = 'sms_moneat'
 	
 
 params = {
@@ -97,12 +97,15 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
-		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_3splits(k_folds, n_repeats, seed):
+		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
 
-			if i < -1:
+			# if i < -1:
+			# if i < 10 or i >= 20:	
+			# if i < 20:
+			if i >= 10:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
