@@ -1,6 +1,5 @@
 *.pkl
 *.log
-*.txt
 *.png
 *.pyc
 *.csv

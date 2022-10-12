@@ -1,0 +1,2 @@
+crossover_prob		add_input_prob		swap_input_prob		add_connection_prob		add_node_prob		weight_mutation_prob
+0.75				0.05				0.05				0.05					0.03				0.04

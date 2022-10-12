@@ -1,0 +1,5 @@
+# 1:            		2:                   		3: 4:      		5:
+crossover_prob          "--crossover_prob "         r  (0.5, 1.0)
+add_connection_prob     "--add_connection_prob "    r  (0, 0.15)
+add_node_prob			"--add_node_prob "			r  (0, 0.15)
+weight_mutation_prob	"--weight_mutation_prob "	r  (0, 0.15)
