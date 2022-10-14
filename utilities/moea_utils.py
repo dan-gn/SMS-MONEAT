@@ -202,7 +202,8 @@ if __name__ == '__main__':
 	np.random.seed(0)
 
 	n = 1000
-	front = [[i, n-i] for i in range(n)]
+	# front = [[i, n-i] for i in range(n)]
+	front = [[0,0]]
 	front = np.array(front)
 
 	# volume_contribution = get_hv_contribution(front)

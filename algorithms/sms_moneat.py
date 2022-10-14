@@ -158,7 +158,7 @@ class SMS_MONEAT(N3O):
 		if len(front[-1]) == 1:
 			remove_index = 0
 		else:
-			front_fitness = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
+			front_fitness = np.array([list(p.fitness) for p in front[-1]])
 			front_fitness *= self.objective_norm # Normalize objective
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:

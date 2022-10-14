@@ -21,13 +21,13 @@ from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 
 datasets = []
 
-datasets.append('breastCancer-full') 
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full') 
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
-datasets.append('Breast_GSE22820') 
-datasets.append('Breast_GSE42568')
-datasets.append('Breast_GSE59246') 
+# datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE42568')
+# datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
 # datasets.append('Colorectal_GSE32323')
@@ -46,11 +46,12 @@ datasets.append('Breast_GSE59246')
 
 # datasets.append('Leukemia_GSE14317') # Only 7
 # datasets.append('Leukemia_GSE71935') # Only 9
+datasets.append('Liver_GSE57957')
 
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = True
+save_results = False
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -105,7 +106,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i >= 10:
+			if i != 0:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
