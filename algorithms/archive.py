@@ -59,14 +59,11 @@ class SpeciesArchive:
 			remove_index = 0
 		elif len(front[-1]) == 2:
 			remove_index =  0 if front[-1][0].fitness[0] <= front[-1][1].fitness[0] else 1
-		elif len(front[-1]) == 3:
-			front_fitness = np.array([list(p.fitness) for p in front[-1]])
-			remove_index = 3 - np.argmin(front_fitness, axis=0).sum()
 		else:
 			front_fitness = np.array([list(p.fitness) for p in front[-1]])
+			front_fitness *= self.objective_norm # Normalize objective
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:
-				front_fitness *= self.objective_norm # Normalize objective
 				remove_index = choose_min_hv_contribution(front_fitness)
 		return front[-1][remove_index]
 
@@ -76,16 +73,13 @@ class SpeciesArchive:
 	def get_worst_of_each_species(self) -> list:
 		return [species.members[-1] for species in self.archive]
 
-	def reduce_archive(self, species: Species = None) -> None:
-		if species is None:
-			all_species = self.get_worst_of_each_species()
-			x = self.choose_element_to_remove(all_species)
-			for species in self.archive:
-				if x in species.members:
-					species.remove_member(x)
-					break
-		else:
-			species.members.pop()
+	def reduce_archive(self) -> None:
+		all_species = self.get_worst_of_each_species()
+		x = self.choose_element_to_remove(all_species)
+		for species in self.archive:
+			if x in species.members:
+				species.remove_member(x)
+				break
 		if species.get_size() == 0:
 			self.archive.remove(species)
 		self.current_size -= 1
@@ -101,6 +95,10 @@ class SpeciesArchive:
 			if self.compare(species.get_random_member(), new_member):
 				species.add_member(new_member)
 				species.sort_members()
+				if species.get_size() > 5:
+					species.members.pop()
+					self.current_size -= 1
+					return
 				added = True
 				break
 		# If new member does not belong to any existing species create a new one
@@ -110,7 +108,4 @@ class SpeciesArchive:
 			self.archive.append(species)
 		# Check for archive overflow
 		if self.check_overflow():
-			if species.get_size() > 5:
-				self.reduce_archive(species)
-			else:
-				self.reduce_archive()
+			self.reduce_archive()

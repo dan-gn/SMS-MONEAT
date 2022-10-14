@@ -140,7 +140,7 @@ class SMS_MONEAT(N3O):
 		if random.uniform(0, 1) < self.crossover_prob:
 			parent1, parent2 = self.select_parents()
 			attempts = 0
-			while attempts < 10:
+			while attempts < 5:
 				attempts += 1
 				child, succeeded = self.crossover(parent1, parent2)
 				if succeeded:
@@ -159,9 +159,9 @@ class SMS_MONEAT(N3O):
 			remove_index = 0
 		else:
 			front_fitness = np.array(sorted([list(p.fitness) for p in front[-1]], key=lambda x: x[0]))
+			front_fitness *= self.objective_norm # Normalize objective
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:
-				front_fitness *= self.objective_norm # Normalize objective
 				remove_index = choose_min_hv_contribution(front_fitness)
 		self.population.remove(front[-1][remove_index])
 		remove_genome_nds(self.population, front[-1][remove_index])
@@ -181,7 +181,7 @@ class SMS_MONEAT(N3O):
 			set_seed(seed)
 		self.initialize_population()
 		_ = non_dominated_sorting_2(self.population)
-		self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
+		# self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
 		for i in range(self.max_iterations):
 			# Get batch
 			# if i % 100 == 0 and BATCH_PROP < 1.0:
@@ -198,7 +198,7 @@ class SMS_MONEAT(N3O):
 			# Reduce population
 			self.reduce_population()
 			# Add to archive
-			self.archive.add(offspring)
+			# self.archive.add(offspring)
 			# Display run info
 			# if i % 5000 == 0:
 			# 	if BATCH_PROP < 1.0:
@@ -206,10 +206,10 @@ class SMS_MONEAT(N3O):
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
 			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
-		n_objectives = len(self.population[0].fitness)
-		self.best_solution = Genome()
-		self.best_solution.fitness = np.ones(n_objectives) * math.inf
-		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
-		self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		# n_objectives = len(self.population[0].fitness)
+		# self.best_solution = Genome()
+		# self.best_solution.fitness = np.ones(n_objectives) * math.inf
+		# self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+		# self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		# self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		

@@ -386,7 +386,7 @@ class NEAT:
 					cross = True
 					parent1, parent2 = self.select_parents(s)
 					attempts = 0
-					while attempts < 10:
+					while attempts < 5:
 						attempts += 1
 						child, succeeded = self.crossover(parent1, parent2)
 						if succeeded:
