@@ -21,9 +21,9 @@ from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 
 datasets = []
 
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 # datasets.append('Breast_GSE22820') 
 # datasets.append('Breast_GSE42568')
@@ -46,7 +46,7 @@ datasets = []
 
 # datasets.append('Leukemia_GSE14317') # Only 7
 # datasets.append('Leukemia_GSE71935') # Only 9
-datasets.append('Liver_GSE57957')
+# datasets.append('Liver_GSE57957')
 
 seed = 0
 k_folds = 10
@@ -189,15 +189,15 @@ if __name__ == '__main__':
 			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
 			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-			print('Best solution: Arch Dataset')
-			input_nodes, hidden_nodes, output_nodes = model.best_solution_archive.count_nodes()
-			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_archive.selected_features.shape[0]}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
-			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
-			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			# print('Best solution: Arch Dataset')
+			# input_nodes, hidden_nodes, output_nodes = model.best_solution_archive.count_nodes()
+			# print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_archive.selected_features.shape[0]}')
+			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
+			# print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
+			# print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+			# print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
 			print('\n')
 

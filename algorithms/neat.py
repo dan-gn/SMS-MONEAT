@@ -276,7 +276,7 @@ class NEAT:
 						offspring.connection_genes[-1].enabled = True
 		if not offspring.connection_genes:
 			return offspring, False
-		return offspring, offspring.check_connectivity()
+		return offspring, offspring.validate_network()
 
 	def mutate_weights(self, genome: Genome) -> None:
 		for connection in genome.connection_genes:

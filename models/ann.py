@@ -13,9 +13,11 @@ from typing import Tuple
 from collections.abc import Callable
 
 from models.genotype import Genome, NodeGene, ConnectionGene
-from models.ann_pytorch import Ann_PyTorch, eval_model
+from models.ann_pytorch import Ann_PyTorch
+from utilities.evaluation import eval_model
 from utilities.fitness_functions import torch_fitness_function, fitness_function
 from utilities.activation_functions import Gaussian, gaussian
+from utilities.stats_utils import geometric_mean
 
 class ArtificialNeuralNetwork:
 
@@ -91,7 +93,7 @@ class ArtificialNeuralNetwork:
 		y_predict = np.expand_dims(y_predict, axis=1)
 		return y.shape[0] - np.sum(np.square(y - y_predict))
 
-	def eval_model(self, X: np.array, y: np.array, fitness_function: Callable[[np.array, np.array], np.float32], l2_parameter: np.float32) -> Tuple(np.flot32, np.float32):
+	def eval_model(self, X: np.array, y: np.array, fitness_function: Callable[[np.array, np.array], np.float32], l2_parameter: np.float32):
 		n = y.shape[0]
 		w = np.mean([connection.weight**2 for connection in self.connections if connection.enabled])
 		y_predict = self.predict(X)
@@ -111,15 +113,16 @@ if __name__ == '__main__':
 	node_genes.append(NodeGene(3, 'output'))
 
 	connection_genes = []
-	connection_genes.append(ConnectionGene(0, 2, 0, 1, True))
+	# connection_genes.append(ConnectionGene(0, 2, 0, 1, True))
 	connection_genes.append(ConnectionGene(0, 3, 1, -2, True))
-	connection_genes.append(ConnectionGene(2, 3, 2, -3, True))
-	connection_genes.append(ConnectionGene(1, 2, 2, -4, False))
+	connection_genes.append(ConnectionGene(1, 3, 1, -2, True))
+	# connection_genes.append(ConnectionGene(2, 3, 2, -3, True))
+	# connection_genes.append(ConnectionGene(1, 2, 2, -4, True))
 
 	genome = Genome(node_genes, connection_genes)
 
-	x = np.array([[1, 2]])
-	y = np.array([[0]])
+	x = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+	y = np.array([0, 1, 1, 0])
 	l2_parameter = 0.5
 
 	"ANN PyTorch"
@@ -136,9 +139,7 @@ if __name__ == '__main__':
 
 	genome.compute_phenotype(activation)
 	x_prima = x_torch.index_select(1, genome.selected_features)
-	connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
-	mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
-	loss, acc = eval_model(genome.phenotype, x_prima, y_torch, f, l2_parameter, mean_weight)
+	loss, acc, gmean = eval_model(genome.phenotype, x_prima, y_torch, f, l2_parameter, genome.mean_square_weights)
 	fitness = 100 - loss
 	print(f'Fitness: {fitness}, Accuracy: {acc}')
 
@@ -153,3 +154,11 @@ if __name__ == '__main__':
 	loss, acc = model.eval_model(x, y, f2, l2_parameter)
 	fitness = 100 - loss
 	print(f'Fitness: {fitness}, Accuracy: {acc}')
+
+
+	w = np.mean([connection.weight**2 for connection in model.connections if connection.enabled])
+	y_predict = model.predict(x)
+	y_predict = np.expand_dims(y_predict, axis=1)
+	n = x.shape[0]
+	loss = torch_fitness_function(y_torch, torch.Tensor(y_predict)) + ((l2_parameter * w) / (2 * n))
+	print(100 - loss)

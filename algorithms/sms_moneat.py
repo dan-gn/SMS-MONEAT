@@ -7,14 +7,14 @@ import copy
 from typing import Tuple
 from typing import List
 
+from models.genotype import MultiObjectiveGenome as Genome
 from algorithms.n3o import N3O
 from algorithms.neat import set_seed
-from models.genotype import MultiObjectiveGenome as Genome
 from utilities.evaluation import eval_model
 from utilities.ga_utils import tournament_selection
-from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting_2, get_hv_contribution
+from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting_2
 from utilities.moea_utils import add_genome_nds, remove_genome_nds, create_fronts
-from utilities.data_utils import check_repeated_rows, choose_repeated_index
+from utilities.data_utils import choose_repeated_index
 from utilities.ml_utils import get_batch
 
 from algorithms.archive import SpeciesArchive
@@ -63,8 +63,6 @@ class SMS_MONEAT(N3O):
 		if genome.selected_features.shape[0] == 0:
 			return None, np.array([math.inf, math.inf]), 0
 		x_prima = x.index_select(1, genome.selected_features)
-		# connection_weights = [connection.weight for connection in genome.connection_genes if connection.enabled]
-		# mean_weight = np.mean(np.square(np.array(connection_weights))) if connection_weights else 0
 		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, genome.mean_square_weights)
 		fitness = np.array([loss, genome.selected_features.shape[0]])
 		# fitness = np.array([false_negative, false_positive, genome.selected_features.shape[0]])
@@ -206,10 +204,10 @@ class SMS_MONEAT(N3O):
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
 			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
-		# n_objectives = len(self.population[0].fitness)
-		# self.best_solution = Genome()
-		# self.best_solution.fitness = np.ones(n_objectives) * math.inf
-		# self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		# self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		n_objectives = len(self.population[0].fitness)
+		self.best_solution = Genome()
+		self.best_solution.fitness = np.ones(n_objectives) * math.inf
+		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		# self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		

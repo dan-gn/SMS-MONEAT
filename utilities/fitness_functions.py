@@ -3,7 +3,7 @@ import torch
 
 def fitness_function(y, y_predict):
 	classes = np.unique(y)
-	fitness = np.zeros_like(classes)
+	fitness = np.zeros_like(classes, dtype=np.float32)
 	y_predict[y_predict == 0] = np.nextafter(0., 1.)
 	y_predict[y_predict == 1] = np.nextafter(1., 0.)
 	for i, q in enumerate(classes):

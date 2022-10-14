@@ -1,6 +1,12 @@
 """
 NEAT's genetic encoding scheme
 """
+import os
+import sys
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
 import random
 import numpy as np
 import torch
@@ -198,33 +204,33 @@ class Genome:
 					possible_connections = self.discard_backwards(connection.input_node, possible_connections)
 		return possible_connections
 
-	def search_loop(self, node: NodeGene, nodes_checked: list) -> bool:
-		if node.id in nodes_checked:
-			return False
-		else:
-			found = False
-			nodes_checked.append(node.id)
-			for connection in self.connection_genes:
-				if connection.input_node == node.id:
-					found = True
-					output_node = self.get_node_gene(connection.output_node)
-					if output_node.node_type == 'hidden':
-						if not self.search_loop(output_node, list(nodes_checked)):	
-							return False
-		return found
+	# def search_loop(self, node: NodeGene, nodes_checked: list) -> bool:
+	# 	if node.id in nodes_checked:
+	# 		return False
+	# 	else:
+	# 		found = False
+	# 		nodes_checked.append(node.id)
+	# 		for connection in self.connection_genes:
+	# 			if connection.input_node == node.id:
+	# 				found = True
+	# 				output_node = self.get_node_gene(connection.output_node)
+	# 				if output_node.node_type == 'hidden':
+	# 					if not self.search_loop(output_node, list(nodes_checked)):	
+	# 						return False
+	# 	return found
 
-	def check_connectivity(self) -> bool:
-		any_input = False
-		any_output = False
-		for node in self.node_genes:
-			if node.node_type == 'input':
-				any_input = True
-				nodes_checked = []
-				if not self.search_loop(node, nodes_checked):
-					return False
-			elif node.node_type == 'output':
-				any_output = True
-		return any_input and any_output
+	# def check_connectivity(self) -> bool:
+	# 	any_input = False
+	# 	any_output = False
+	# 	for node in self.node_genes:
+	# 		if node.node_type == 'input':
+	# 			any_input = True
+	# 			nodes_checked = []
+	# 			if not self.search_loop(node, nodes_checked):
+	# 				return False
+	# 		elif node.node_type == 'output':
+	# 			any_output = True
+	# 	return any_input and any_output
 
 	def connection_from_input(self, node: NodeGene) -> bool:
 		if node.node_type == 'input':
@@ -236,7 +242,7 @@ class Genome:
 					return True
 		return False
 	
-	def validate_network(self) -> bool:
+	def is_input_to_output_connection(self) -> bool:
 		any_output = False
 		for node in self.node_genes:
 			if node.node_type == 'output':
@@ -244,6 +250,59 @@ class Genome:
 				if not self.connection_from_input(node):
 					return False
 		return any_output
+
+	def validate_network(self) -> bool:
+		# Check if any input node exists
+		input_nodes = [node.id for node in self.node_genes if node.node_type == 'input']
+		if not input_nodes:
+			return False
+		# Check if any output node exists
+		output_nodes = [node.id for node in self.node_genes if node.node_type == 'output']
+		if not output_nodes:
+			return False
+		# Check for any loops
+		unchecked_nodes = [node.id for node in self.node_genes]
+		unchecked_connections = [connection for connection in self.connection_genes if connection.enabled]
+		for node in self.node_genes:
+			if node.id in unchecked_nodes:
+				unchecked_nodes.remove(node.id)
+				for connection in unchecked_connections:
+					if connection.input_node == node.id:
+						unchecked_connections.remove(connection)
+						output_node = self.get_node_gene(connection.output_node)
+						if output_node.node_type != 'output':
+							path = [node.id]
+							valid = self.validate_path_to_output(output_node, path, unchecked_nodes, unchecked_connections)
+							if valid and output_node.id in unchecked_nodes:
+								unchecked_nodes.remove(output_node.id)
+							elif not valid:
+								return False
+		# Check for any connection from input to output
+		if self.is_input_to_output_connection():
+			return True
+		else:
+			return False
+
+	def validate_path_to_output(self, node: NodeGene, path: list, unchecked_nodes: list[NodeGene], unchecked_connections: list[ConnectionGene]):
+		if node.node_type == 'output':
+			return True
+		elif node.id in path:
+			return False
+		else:
+			path.append(node.id)
+		for connection in list(unchecked_connections):
+			if connection.input_node == node.id:
+				unchecked_connections.remove(connection)
+				if connection.output_node in path:
+					return False
+				elif connection.output_node in unchecked_nodes:
+					output_node = self.get_node_gene(connection.output_node)
+					valid = self.validate_path_to_output(output_node, path, unchecked_nodes, unchecked_connections)
+					if valid:
+						unchecked_nodes.remove(output_node.id)
+					else:
+						return False
+		return True
 
 	def depth_first_search(self, node: NodeGene, unchecked_connections: list, max_depth: int = 0) -> int:
 		if node.layer is None:
@@ -264,57 +323,100 @@ class Genome:
 					max_depth = max(depth, max_depth)
 		return max_depth
 
+	# def tag_layers(self) -> int:
+	# 	for node in self.node_genes:
+	# 		node.layer = None
+	# 	input_nodes = [node for node in self.node_genes if node.node_type == 'input']
+	# 	output_nodes = [node for node in self.node_genes if node.node_type == 'output']
+	# 	unchecked_connections = [connection for connection in self.connection_genes if connection.enabled]
+	# 	max_depth = 0
+	# 	for node in input_nodes:
+	# 		depth = self.depth_first_search(node, unchecked_connections)
+	# 		max_depth = max(depth, max_depth)
+	# 	for node in output_nodes:
+	# 		node.layer = max_depth
+	# 	return max_depth
+
 	def tag_layers(self) -> int:
 		for node in self.node_genes:
 			node.layer = None
-		input_nodes = [node for node in self.node_genes if node.node_type == 'input']
-		output_nodes = [node for node in self.node_genes if node.node_type == 'output']
-		unchecked_connections = [connection for connection in self.connection_genes if connection.enabled]
+		valid = False
 		max_depth = 0
+		input_nodes = [node for node in self.node_genes if node.node_type == 'input']
 		for node in input_nodes:
-			depth = self.depth_first_search(node, unchecked_connections)
-			max_depth = max(depth, max_depth)
-		for node in output_nodes:
-			node.layer = max_depth
-		return max_depth
+			path = [node.id]
+			depth, valid_path = self.walk_onwards(node, 0, path)
+			if valid_path:
+				# print('a', node.id, depth, max_depth)
+				node.layer = 0
+				max_depth = max(depth, max_depth)
+				valid = True
+		return max_depth, valid
+
+	def walk_onwards(self, node, depth, path):
+		if node.node_type == 'output':
+			# print('b', node.id, depth, None)
+			return depth, True
+		else:
+			valid_path = False
+			max_depth = depth + 1
+			for connection in self.connection_genes:
+				if connection.input_node == node.id and connection.enabled:
+					if connection.output_node in path:
+						return None, False
+					output_node = self.get_node_gene(connection.output_node)
+					if output_node.layer is not None:
+						if output_node.layer >= max_depth:
+							# print('c', node.id, depth, max_depth)
+							return max_depth, True
+					this_path = list(path)
+					this_path.append(output_node.id)
+					path_depth, valid = self.walk_onwards(output_node, depth + 1, this_path)
+					if valid:
+						# print('d', node.id, depth, max_depth)
+						valid_path = True
+						max_depth = max(path_depth, max_depth)
+						for layer, id in enumerate(this_path):
+							x = self.get_node_gene(id)
+							x.layer = layer
+		return max_depth, valid_path
 
 	def build_layers(self) -> Tuple[list, list, list]:
 		layers = []
 		layer_weights = []
 		n_inputs = []
-
-		max_depth = self.tag_layers()
-
-		self.node_genes = sorted(self.node_genes, key = lambda x: x.id)
-		for i in range(max_depth + 1):
-			layer_i = [node.id for node in self.node_genes if node.layer == i]
-			layers.append(layer_i)
-
 		selected_features = []
-		for connection in self.connection_genes:
-			if connection.input_node in layers[0] and connection.enabled:
-				selected_features.append(connection.input_node)
-		selected_features = sorted(list(set(selected_features)))
-		layers[0] = list(selected_features)
 
-		for i, layer_i in enumerate(layers):
-			if i == max_depth:
-				break
-			in_features = len(layer_i)
-			out_features = len(layers[i+1])
-			weights = np.zeros((out_features, in_features), dtype=np.float32)
-			inputs = np.zeros(out_features)
+		max_depth, valid = self.tag_layers()
+
+		if valid:
+			
+			self.node_genes = sorted(self.node_genes, key = lambda x: x.id)
+			layers = [[node.id for node in self.node_genes if node.layer == i] for i in range(max_depth + 1)]
 			for connection in self.connection_genes:
-				if connection.input_node in layer_i and connection.output_node in layers[i+1]:
-					row = layers[i+1].index(connection.output_node)
-					col = layer_i.index(connection.input_node)
-					weights[row, col] = connection.weight
-					inputs[row] += 1
+				if connection.input_node in layers[0] and connection.enabled:
+					selected_features.append(connection.input_node)
+			selected_features = sorted(list(set(selected_features)))
+			layers[0] = list(selected_features)
 
-			layer_i.extend(layers[i+1])
-			layers[i+1] = list(layer_i)
-			layer_weights.append(weights)
-			n_inputs.append(inputs)
+			for i, layer_i in enumerate(layers):
+				if i == max_depth:
+					break
+				in_features = len(layer_i)
+				out_features = len(layers[i+1])
+				weights = np.zeros((out_features, in_features), dtype=np.float32)
+				inputs = np.zeros(out_features)
+				for connection in self.connection_genes:
+					if connection.input_node in layer_i and connection.output_node in layers[i+1]:
+						row = layers[i+1].index(connection.output_node)
+						col = layer_i.index(connection.input_node)
+						weights[row, col] = connection.weight
+						inputs[row] += 1
+
+				layer_i.extend(layers[i+1])
+				layers[i+1] = list(layer_i)
+				layer_weights.append(weights)
+				n_inputs.append(inputs)
 
 		return selected_features, layer_weights, n_inputs
 
@@ -431,3 +533,30 @@ class MultiObjectiveGenome(Genome):
 		for connection in self.connection_genes:
 			print(f'Connection {connection.innovation_number}: Input node id = {connection.input_node}, Output node id = {connection.output_node}, Weight = {connection.weight}, Enabled = {connection.enabled}')
 		print(f'Fitness: {self.fitness}, Rank: {self.rank}, Sp: {len(self.dominates_to)}, Np: {self.n_dominated_by}')
+
+
+if __name__ == '__main__':
+
+	genome = Genome()
+
+	genome.node_genes.append(NodeGene(0, 'input'))
+	genome.node_genes.append(NodeGene(1, 'input'))
+	genome.node_genes.append(NodeGene(2, 'output'))
+	genome.node_genes.append(NodeGene(3, 'hidden'))
+	genome.node_genes.append(NodeGene(4, 'hidden'))
+
+	genome.connection_genes.append(ConnectionGene(0, 4, 0, 1, True))
+	genome.connection_genes.append(ConnectionGene(1, 3, 1, 1, True))
+	genome.connection_genes.append(ConnectionGene(3, 2, 2, 1, True))
+	genome.connection_genes.append(ConnectionGene(4, 2, 3, 1, True))
+	# genome.connection_genes.append(ConnectionGene(1, 4, 4, 1, True))
+
+
+	print(genome.validate_network())
+	print(genome.tag_layers())
+	selected_features, layer_weights, n_inputs = genome.build_layers()
+	print(f'fs: {selected_features}')
+	print(f'layers: {layer_weights}')
+	print(f'n_inputs: {n_inputs}')
+	# genome.describe()
+
