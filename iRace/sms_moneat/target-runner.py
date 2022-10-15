@@ -4,6 +4,9 @@ import torch.nn as nn
 import math
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+
 import sys
 sys.path.insert(0, '../..')
 

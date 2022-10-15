@@ -347,7 +347,6 @@ class Genome:
 			path = [node.id]
 			depth, valid_path = self.walk_onwards(node, 0, path)
 			if valid_path:
-				# print('a', node.id, depth, max_depth)
 				node.layer = 0
 				max_depth = max(depth, max_depth)
 				valid = True
@@ -355,7 +354,6 @@ class Genome:
 
 	def walk_onwards(self, node, depth, path):
 		if node.node_type == 'output':
-			# print('b', node.id, depth, None)
 			return depth, True
 		else:
 			valid_path = False
@@ -367,18 +365,19 @@ class Genome:
 					output_node = self.get_node_gene(connection.output_node)
 					if output_node.layer is not None:
 						if output_node.layer >= max_depth:
-							# print('c', node.id, depth, max_depth)
-							return max_depth, True
+							# return max_depth, True
+							valid_path = True
+							continue
 					this_path = list(path)
 					this_path.append(output_node.id)
 					path_depth, valid = self.walk_onwards(output_node, depth + 1, this_path)
 					if valid:
-						# print('d', node.id, depth, max_depth)
 						valid_path = True
 						max_depth = max(path_depth, max_depth)
 						for layer, id in enumerate(this_path):
 							x = self.get_node_gene(id)
-							x.layer = layer
+							if x.layer is None or x.layer < layer:
+								x.layer = layer
 		return max_depth, valid_path
 
 	def build_layers(self) -> Tuple[list, list, list]:
@@ -393,11 +392,10 @@ class Genome:
 			
 			self.node_genes = sorted(self.node_genes, key = lambda x: x.id)
 			layers = [[node.id for node in self.node_genes if node.layer == i] for i in range(max_depth + 1)]
-			for connection in self.connection_genes:
-				if connection.input_node in layers[0] and connection.enabled:
-					selected_features.append(connection.input_node)
+			selected_features = [connection.input_node for connection in self.connection_genes if connection.input_node in layers[0] and connection.enabled]
 			selected_features = sorted(list(set(selected_features)))
 			layers[0] = list(selected_features)
+			
 
 			for i, layer_i in enumerate(layers):
 				if i == max_depth:
@@ -544,19 +542,23 @@ if __name__ == '__main__':
 	genome.node_genes.append(NodeGene(2, 'output'))
 	genome.node_genes.append(NodeGene(3, 'hidden'))
 	genome.node_genes.append(NodeGene(4, 'hidden'))
+	genome.node_genes.append(NodeGene(5, 'hidden'))
 
+	genome.connection_genes.append(ConnectionGene(0, 2, 0, 1, True))
+	genome.connection_genes.append(ConnectionGene(0, 3, 0, 1, True))
 	genome.connection_genes.append(ConnectionGene(0, 4, 0, 1, True))
-	genome.connection_genes.append(ConnectionGene(1, 3, 1, 1, True))
-	genome.connection_genes.append(ConnectionGene(3, 2, 2, 1, True))
-	genome.connection_genes.append(ConnectionGene(4, 2, 3, 1, True))
-	# genome.connection_genes.append(ConnectionGene(1, 4, 4, 1, True))
+	genome.connection_genes.append(ConnectionGene(1, 2, 1, 1, True))
+	genome.connection_genes.append(ConnectionGene(3, 4, 2, 1, True))
+	genome.connection_genes.append(ConnectionGene(4, 2, 4, 1, True))
+	genome.connection_genes.append(ConnectionGene(4, 5, 3, 1, True))
+	genome.connection_genes.append(ConnectionGene(5, 2, 4, 1, True))
 
 
 	print(genome.validate_network())
 	print(genome.tag_layers())
-	selected_features, layer_weights, n_inputs = genome.build_layers()
-	print(f'fs: {selected_features}')
-	print(f'layers: {layer_weights}')
-	print(f'n_inputs: {n_inputs}')
-	# genome.describe()
+	# selected_features, layer_weights, n_inputs = genome.build_layers()
+	# print(f'fs: {selected_features}')
+	# print(f'layers: {layer_weights}')
+	# print(f'n_inputs: {n_inputs}')
+	genome.describe()
 

@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.feature_selection import GenericUnivariateSelect
 import torch
 import random
 import math
@@ -204,10 +205,10 @@ class SMS_MONEAT(N3O):
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
 			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
-		n_objectives = len(self.population[0].fitness)
-		self.best_solution = Genome()
-		self.best_solution.fitness = np.ones(n_objectives) * math.inf
-		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		# n_objectives = len(self.population[0].fitness)
+		# self.best_solution = Genome()
+		# self.best_solution.fitness = np.ones(n_objectives) * math.inf
+		# self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+		# self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		# self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		

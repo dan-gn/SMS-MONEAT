@@ -18,18 +18,18 @@ from utilities.activation_functions import Gaussian
 from algorithms.n3o import N3O
 from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 
 datasets = []
 
-datasets.append('breastCancer-full') 
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full') 
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
 # datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE42568')
 # datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
 # datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
@@ -42,14 +42,18 @@ datasets.append('prostate_tumorVSNormal-full')
 # datasets.append('Liver_GSE62232') 
 # datasets.append('Prostate_GSE6919_U95Av2')
 # datasets.append('Prostate_GSE11682')
-# datasets.append('Prostate_GSE46602')
 
 # datasets.append('Leukemia_GSE14317') # Only 7
+
+""" IRACE """
 # datasets.append('Leukemia_GSE71935') # Only 9
 # datasets.append('Liver_GSE57957')
+# datasets.append('Prostate_GSE46602')
+# datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
+datasets.append('Breast_GSE42568')
 
 seed = 0
-k_folds = 10
+k_folds = 5
 n_repeats = 3
 save_results = False
 debug = False
