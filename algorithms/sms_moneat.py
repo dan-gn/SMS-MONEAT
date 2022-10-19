@@ -109,10 +109,7 @@ class SMS_MONEAT(N3O):
 							connection_a.enabled = True
 			# Add inputs from parent with lowest fitness to offspring if this input has a connection to an existing node
 			# in offspring
-			current_input_nodes = []
-			for node in offspring.node_genes:
-				if node.node_type == 'input':
-					current_input_nodes.append(node.id)
+			current_input_nodes = [node.id for node in offspring.node_genes if node.node_type == 'input']
 			current_input_nodes = list(set(current_input_nodes))
 
 			for connection_b in parents[1].connection_genes:

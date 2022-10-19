@@ -338,7 +338,6 @@ class NEAT:
 		Mutation in NEAT can change both connection weights and network structures.
 		Connection weights mutate as in any NE system, with each connection either perturbated or not in each generation.
 		Structural mutation occurs in two ways: add node and add connection operators.
-
 		"""
 		# Weight mutation
 		self.mutate_weights(genome)
