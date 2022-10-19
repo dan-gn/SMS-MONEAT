@@ -1,18 +1,3 @@
-# Breast_GSE22820
-# Breast_GSE59246
-# Breast_GSE70947
-# breastCancer-full
-# Colorectal_GSE32323
-# Colorectal_GSE44076
-# Colorectal_GSE44861
-# Leukemia_GSE33615
-# Leukemia_GSE63270
-# ALL-AML-full
-# Liver_GSE14520_U133A
-# Liver_GSE62232
-# Prostate_GSE6919_U95Av2
-# Prostate_GSE11682
-# prostate_tumorVSNormal-full
 Breast_GSE42568
 Colorectal_GSE8671
 Leukemia_GSE14317
