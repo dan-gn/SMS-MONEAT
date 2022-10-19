@@ -23,6 +23,8 @@ warnings.simplefilter("ignore", UserWarning)
 
 datasets = []
 
+
+""" TESTING """
 # datasets.append('breastCancer-full') 
 # datasets.append('ALL-AML-full')
 # datasets.append('prostate_tumorVSNormal-full')
@@ -43,8 +45,6 @@ datasets = []
 # datasets.append('Prostate_GSE6919_U95Av2')
 # datasets.append('Prostate_GSE11682')
 
-# datasets.append('Leukemia_GSE14317') # Only 7
-
 """ IRACE """
 # datasets.append('Leukemia_GSE71935') # Only 9
 # datasets.append('Liver_GSE57957')
@@ -53,9 +53,9 @@ datasets = []
 datasets.append('Breast_GSE42568')
 
 seed = 0
-k_folds = 5
+k_folds = 10
 n_repeats = 3
-save_results = False
+save_results = True
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -69,15 +69,15 @@ params = {
 	'output_activation_function' : Gaussian(),
 	'output_activation_coeff' : 1,
 	'regularization_parameter' : 0.5,
-	'crossover_prob' : 0.6157,
+	'crossover_prob' : 0.6157 if algorithm=='n3o' else 0.5662,
 	'n_competitors' : 2,
 	'disable_node_prob' : 0.75,
 	'interspecies_mating_rate' : 0.001,
-	'add_input_prob' : 0.1247,
-	'swap_input_prob' : 0.1245,
-	'add_connection_prob' : 0.0923,
-	'add_node_prob' : 0.0480,
-	'weight_mutation_prob' : 0.0830,
+	'add_input_prob' : 0.1247 if algorithm=='n3o' else 0.1226,
+	'swap_input_prob' : 0.1245 if algorithm=='n3o' else 0.0972,
+	'add_connection_prob' : 0.0923 if algorithm=='n3o' else 0.1352,
+	'add_node_prob' : 0.0480 if algorithm=='n3o' else 0.1390,
+	'weight_mutation_prob' : 0.0830 if algorithm=='n3o' else 0.0498,
 	'pol_mutation_distr' : 5,
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i != 0:
+			if i < -1:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -193,15 +193,15 @@ if __name__ == '__main__':
 			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
 			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
-			# print('Best solution: Arch Dataset')
-			# input_nodes, hidden_nodes, output_nodes = model.best_solution_archive.count_nodes()
-			# print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_archive.selected_features.shape[0]}')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
-			# print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
-			# print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-			# print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			print('Best solution: Arch Dataset')
+			input_nodes, hidden_nodes, output_nodes = model.best_solution_archive.count_nodes()
+			print(f'Best solution topology: [{input_nodes}, {hidden_nodes}, {output_nodes}], FS: {model.best_solution_archive.selected_features.shape[0]}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
+			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
+			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 
 			print('\n')
 

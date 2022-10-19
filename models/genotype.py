@@ -66,6 +66,7 @@ class Genome:
 		self.g_mean = None
 		self.phenotype = None
 		self.mean_square_weights = None
+		self.valid = None
 
 	def create_node_genes(self, n_inputs: list, n_outputs: list) -> None:
 		for id in range(n_inputs):
@@ -75,13 +76,8 @@ class Genome:
 	
 	def connect_all(self) -> int:
 		innovation_number = 0
-		input_nodes_index = []
-		output_nodes_index = []
-		for i, node in enumerate(self.node_genes):
-			if node.node_type == 'input':
-				input_nodes_index.append(i)
-			else:
-				output_nodes_index.append(i)
+		input_nodes_index = [i for i, node in enumerate(self.node_genes) if node.node_type == 'input']
+		output_nodes_index = [i for i, node in enumerate(self.node_genes) if node.node_type == 'output']
 		for i in input_nodes_index:
 			for j in output_nodes_index:
 				connection = ConnectionGene(self.node_genes[i].id, self.node_genes[j].id, innovation_number)
@@ -91,13 +87,8 @@ class Genome:
 
 	def connect_one_input(self, innovation_number: int) -> Tuple[ConnectionGene, int]:
 		# Get input and output nodes
-		input_node_ids = []
-		output_node_ids = []
-		for node in self.node_genes:
-			if node.node_type == 'input':
-				input_node_ids.append(node.id)
-			elif node.node_type == 'output':
-				output_node_ids.append(node.id)
+		input_node_ids = [node.id for node in self.node_genes if node.node_type == 'input']
+		output_node_ids = [node.id for node in self.node_genes if node.node_type == 'output']
 		# Choose one input and one output
 		input_node = random.choice(input_node_ids)	
 		output_node = random.choice(output_node_ids)	
@@ -179,11 +170,7 @@ class Genome:
 				break
 
 	def get_possible_connections(self, input_node_id: int) -> list:
-		possible_connections = []
-		for node in self.node_genes:
-			# Discard same node and input nodes
-			if node.id != input_node_id and node.node_type != 'input':
-				possible_connections.append(node.id)
+		possible_connections = [node.id for node in self.node_genes if node.id != input_node_id and node.node_type != 'input']
 		for connection in self.connection_genes:
 			# Discard nodes which are already connected to this node
 			if connection.input_node == input_node_id:
@@ -252,6 +239,7 @@ class Genome:
 		return any_output
 
 	def validate_network(self) -> bool:
+		self.valid = False
 		# Check if any input node exists
 		input_nodes = [node.id for node in self.node_genes if node.node_type == 'input']
 		if not input_nodes:
@@ -279,6 +267,7 @@ class Genome:
 								return False
 		# Check for any connection from input to output
 		if self.is_input_to_output_connection():
+			self.valid = True
 			return True
 		else:
 			return False
@@ -463,17 +452,19 @@ class Genome:
 		return (c[0] * n_excess / n) + (c[1] * n_disjoint / n) + (c[2] * weight_difference / n_matching)
 
 	def compute_phenotype(self, activation: dict) -> None:
-		selected_features, layer_weights, n_inputs = self.build_layers()
-		self.selected_features = torch.tensor(selected_features).type(torch.int32)
-		if self.selected_features.shape[0] == 0:
-			self.phenotype = None
-			self.mean_square_weights = 0
-		else:
-			layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
-			n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
-			self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
-			n_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
-			self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / n_connections
+		if self.valid:
+			selected_features, layer_weights, n_inputs = self.build_layers()
+			if self.selected_features.shape[0] >= 1:
+				self.selected_features = torch.tensor(selected_features).type(torch.int32)
+				layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
+				n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
+				self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
+				n_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
+				self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / n_connections
+				return
+		self.selected_features = torch.empty().type(torch.int32)
+		self.phenotype = None
+		self.mean_square_weights = 0
 
 	def copy(self, with_phenotype: bool = False):
 		genome_copy = Genome()

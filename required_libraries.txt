@@ -1,10 +1,10 @@
 Pip: conda install pip
 Conda-Forge: conda config --env --add channels conda-forge
 Conda channel: conda config --env --set channel_priority strict
+Pygmo: conda install pygmo
 Numpy: conda install numpy
 PyTorch: conda install pytorch torchvision torchaudio cpuonly -c pytorch
 TorchMetrics: pip install torchmetrics
 Scikit-Learn: pip install -U scikit-learn
 Pandas: pip install pandas
 Arff: pip install arff
-Pygmo: conda install pygmo
