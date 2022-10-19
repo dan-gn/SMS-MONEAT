@@ -66,7 +66,7 @@ class Genome:
 		self.g_mean = None
 		self.phenotype = None
 		self.mean_square_weights = None
-		self.valid = None
+		self.valid = True
 
 	def create_node_genes(self, n_inputs: list, n_outputs: list) -> None:
 		for id in range(n_inputs):
@@ -454,7 +454,7 @@ class Genome:
 	def compute_phenotype(self, activation: dict) -> None:
 		if self.valid:
 			selected_features, layer_weights, n_inputs = self.build_layers()
-			if self.selected_features.shape[0] >= 1:
+			if len(selected_features) >= 1:
 				self.selected_features = torch.tensor(selected_features).type(torch.int32)
 				layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
 				n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
@@ -462,7 +462,7 @@ class Genome:
 				n_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
 				self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / n_connections
 				return
-		self.selected_features = torch.empty().type(torch.int32)
+		self.selected_features = torch.tensor([], dtype=torch.int32)
 		self.phenotype = None
 		self.mean_square_weights = 0
 
