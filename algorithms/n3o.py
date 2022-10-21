@@ -192,7 +192,7 @@ class N3O(FS_NEAT):
 		sorted_pop = sorted(self.population, key=lambda x: x.fitness)
 		k = int(self.n_population * self.elitism_prop)
 		remaining_offspring_space = self.n_population - k
-		offspring = [member.copy(with_phenotype=True) for member in sorted_pop[k]]
+		offspring = [member.copy(with_phenotype=True) for member in sorted_pop[:k]]
 		# for i in range(k):
 		#	sorted_pop[i].accuracy, sorted_pop[i].fitness, sorted_pop[i].g_mean = self.evaluate(sorted_pop[i], self.x_batch, self.y_batch, False)
 		#	offspring.append(sorted_pop[i].copy(with_phenotype=True))

@@ -76,6 +76,7 @@ def non_dominated_sorting_2(population: List[Genome]):
 	for j, p in enumerate(population):
 		# Sp -> individuals dominated by p in the population
 		p.dominates_to = []
+		p.n_dominated_by = 0
 		# Iterate for each individual 'q' different from 'p'
 		for k, q in enumerate(population):
 			if j != k:

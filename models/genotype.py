@@ -475,6 +475,7 @@ class Genome:
 		genome_copy.shared_fitness = self.shared_fitness
 		genome_copy.accuracy = self.accuracy
 		genome_copy.g_mean = self.g_mean
+		genome_copy.valid = self.valid
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
 			genome_copy.mean_square_weights = self.mean_square_weights
@@ -508,6 +509,7 @@ class MultiObjectiveGenome(Genome):
 		genome_copy.shared_fitness = self.shared_fitness
 		genome_copy.accuracy = self.accuracy
 		genome_copy.g_mean = self.g_mean
+		genome_copy.valid = self.valid
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
 			genome_copy.mean_square_weights = self.mean_square_weights

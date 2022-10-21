@@ -5,7 +5,7 @@ from itertools import chain
 import copy
 
 from models.genotype import Genome
-from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting
+from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorting_2
 from utilities.data_utils import choose_repeated_index
 
 class Species:
@@ -54,7 +54,7 @@ class SpeciesArchive:
 		return True if self.current_size > self.max_size else False
 
 	def choose_element_to_remove(self, population: list) -> Genome:
-		front = non_dominated_sorting(population)
+		front = non_dominated_sorting_2(population)
 		if len(front[-1]) == 1:
 			remove_index = 0
 		elif len(front[-1]) == 2:
@@ -72,6 +72,9 @@ class SpeciesArchive:
 
 	def get_worst_of_each_species(self) -> list:
 		return [species.members[-1] for species in self.archive]
+
+	def get_best_of_each_species(self) -> list:
+		return [species.members[0] for species in self.archive]
 
 	def reduce_archive(self) -> None:
 		all_species = self.get_worst_of_each_species()

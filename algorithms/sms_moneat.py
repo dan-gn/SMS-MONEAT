@@ -17,6 +17,7 @@ from utilities.moea_utils import choose_min_hv_contribution, non_dominated_sorti
 from utilities.moea_utils import add_genome_nds, remove_genome_nds, create_fronts
 from utilities.data_utils import choose_repeated_index
 from utilities.ml_utils import get_batch
+from utilities.record import Record
 
 from algorithms.archive import SpeciesArchive
 from sklearn.model_selection import train_test_split
@@ -127,6 +128,7 @@ class SMS_MONEAT(N3O):
 			temp, validation_flag = self.crossover_same_fitness(genome1, genome2)
 			offspring.node_genes = list(temp.node_genes)
 			offspring.connection_genes = list(temp.connection_genes)
+			offspring.valid = validation_flag
 			return offspring, validation_flag
 
 	def next_generation(self) -> Genome:
@@ -138,10 +140,12 @@ class SMS_MONEAT(N3O):
 			attempts = 0
 			while attempts < 5:
 				attempts += 1
-				child, succeeded = self.crossover(parent1, parent2)
-				if succeeded:
+				child, succeed = self.crossover(parent1, parent2)
+				if succeed:
 					self.mutate(child)
 					break
+			if not succeed:
+				self.n_invalid_nets += 1
 		else:
 			parent, _ = self.select_parents()
 			child = parent.copy()
@@ -178,6 +182,12 @@ class SMS_MONEAT(N3O):
 		self.initialize_population()
 		_ = non_dominated_sorting_2(self.population)
 		self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
+		self.n_invalid_nets = 0
+		# Initialize record
+		self.record = Record(self.max_iterations)
+		self.record.update(self.population, iteration_num=0)
+		self.record_archive = Record(self.max_iterations)
+		self.record.update(self.archive.get_full_population(), iteration_num=0)
 		for i in range(self.max_iterations):
 			# Get batch
 			# if i % 100 == 0 and BATCH_PROP < 1.0:
@@ -195,13 +205,16 @@ class SMS_MONEAT(N3O):
 			self.reduce_population()
 			# Add to archive
 			self.archive.add(offspring)
+			# Store in record
+			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+			self.record.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
-			# if i % 5000 == 0:
+			# if i % 500 == 0:
 			# 	if BATCH_PROP < 1.0:
 			# 		self.evaluate_population(self.x_train, self.y_train)
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
-			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}')
+			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}')
 		n_objectives = len(self.population[0].fitness)
 		self.best_solution = Genome()
 		self.best_solution.fitness = np.ones(n_objectives) * math.inf

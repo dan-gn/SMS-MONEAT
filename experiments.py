@@ -29,33 +29,36 @@ datasets = []
 # datasets.append('ALL-AML-full')
 # datasets.append('prostate_tumorVSNormal-full')
 
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') 
-# datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232') 
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE11682')
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE59246') 
+datasets.append('Breast_GSE70947')	
+datasets.append('Colorectal_GSE25070')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
+datasets.append('Leukemia_GSE63270') 
+datasets.append('Liver_GSE14520_U133A') 
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232') 
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE6919_U95B')
+datasets.append('Prostate_GSE6919_U95C')
+datasets.append('Prostate_GSE11682')
 
 """ IRACE """
 # datasets.append('Leukemia_GSE71935') # Only 9
 # datasets.append('Liver_GSE57957')
 # datasets.append('Prostate_GSE46602')
 # datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
-datasets.append('Breast_GSE42568')
+# datasets.append('Breast_GSE42568')
 
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = True
+save_results = False
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -110,7 +113,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i < -1:
+			if i >= 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -171,7 +174,7 @@ if __name__ == '__main__':
 			"""
 			DISPLAY RESULTS
 			"""
-			print(f'Time Execution: {time_exec}')
+			print(f'Time Execution: {time_exec}, invalid_nets: {model.n_invalid_nets}')
 
 			print('Best solution: Train Dataset')
 			input_nodes, hidden_nodes, output_nodes = model.best_solution.count_nodes()

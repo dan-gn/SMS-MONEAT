@@ -35,6 +35,7 @@ from models.species import Species
 from utilities.evaluation import eval_model
 from utilities.ga_utils import polynomial_mutation, tournament_selection, compute_parent_selection_prob
 from utilities.ml_utils import get_batch
+from utilities.record import Record, BestInidividualRecord
 
 """
 Constants
@@ -274,8 +275,9 @@ class NEAT:
 				if not offspring.connection_genes[-1].enabled:
 					if random.uniform(0, 1) > self.disable_node_prob:
 						offspring.connection_genes[-1].enabled = True
-		if not offspring.connection_genes:
-			return offspring, False
+		# if not offspring.connection_genes:
+		# 	offspring.valid = False
+		# 	return offspring, False
 		return offspring, offspring.validate_network()
 
 	def mutate_weights(self, genome: Genome) -> None:
@@ -387,9 +389,11 @@ class NEAT:
 					attempts = 0
 					while attempts < 5:
 						attempts += 1
-						child, succeeded = self.crossover(parent1, parent2)
-						if succeeded:
+						child, succeed = self.crossover(parent1, parent2)
+						if succeed:
 							break
+					if not succeed:
+						self.n_invalid_nets +=1
 				else:
 					cross = False
 					parent, _ = self.select_parents(s)
@@ -484,19 +488,19 @@ class NEAT:
 		# Variable to store best solution
 		self.best_solution = Genome()
 		self.best_solution.fitness = math.inf
-		# Create arrays to store model fitness and accuracy on each iteration for training and test datasets
-		self.training_fitness = np.empty((self.max_iterations + 1, 1))
-		self.training_fitness[:] = np.nan
-		self.training_accuracy = np.copy(self.training_fitness)
-		self.training_gmean = np.copy(self.training_fitness)
 		# Initalize population
 		self.initialize_population()
-		self.training_accuracy[0], self.training_fitness[0], self.training_gmean[0] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
+		# Create arrays to store model fitness and accuracy on each iteration for training and test datasets
+		self.record = Record()
+		self.record.update(self.population, iteration_num=0)
+		self.best_solution_record = BestInidividualRecord()
+		self.best_solution_record.update(self.best_solution, iteration_num=0)
 		# List to store species, initalized empty
 		self.species = []
 		# Initialize Archive
 		self.archive = NEATArchive(self.n_population)
 		self.archive.add(self.population)
+		self.n_invalid_nets = 0
 		# Evolve population
 		for i in range(self.max_iterations):
 			if debug:
@@ -513,11 +517,13 @@ class NEAT:
 			self.population = self.next_generation()
 			self.archive.add(self.population)
 			# Store history of fitness and accuracy from best solution in both datasets
-			self.training_accuracy[i+1], self.training_fitness[i+1], self.training_gmean[i+1] = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
+			self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
+			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+			self.best_solution_record.update(self.best_solution, iteration_num=i+1)
 			# Display progress
-			# if i % 10 == 0:
-				# n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
-				# print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
+			if i % 5 == 0:
+				n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
+				print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
 		self.best_solution_val = self.choose_solution(self.population)
 		self.best_solution_archive = self.choose_solution(self.archive.population)
 		
