@@ -58,7 +58,7 @@ datasets.append('Prostate_GSE11682')
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = False
+save_results = True
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i >= 15:
+			if i < 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
