@@ -4,6 +4,9 @@ import torch.nn as nn
 import math
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+
 import sys
 sys.path.insert(0, '../..')
 
@@ -108,7 +111,7 @@ TRAIN MODEL
 model = N3O(problem, params)
 model.run(seed, debug=False)
 
-for member in model.population:
+for member in model.archive.population:
 	_, fitness, _ = model.evaluate(member, model.x_test, model.y_test, True)
-target = np.mean([member.fitness for member in model.population])
+target = np.mean([member.fitness for member in model.archive.population if member.accuracy is not None])
 print(target)

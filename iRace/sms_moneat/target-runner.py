@@ -10,12 +10,6 @@ warnings.simplefilter("ignore", UserWarning)
 import sys
 sys.path.insert(0, '../..')
 
-# import os
-# current = os.path.dirname(os.path.realpath(__file__))
-# parent = os.path.dirname(current)
-# sys.path.append(os.path.dirname(parent))
-
-
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
 from utilities.fitness_functions import torch_fitness_function
@@ -37,18 +31,6 @@ SWAP_INPUT_PROB = float(irace_params[5])
 ADD_CONNECTION_PROB = float(irace_params[7])
 ADD_NODE_PROB = float(irace_params[9])
 WEIGHT_MUTATION_PROB = float(irace_params[11])
-
-# seed = 1660914376
-# instance = 'D:/Documentos/MCIC/Tesis/Code/NEAT_Microarray/iRace/sms_moneat/Instances/Leukemia_GSE71935'
-# N_POPULATION = 100
-# N_ITERATIONS = 18000
-# CROSSOVER_PROB = 0.5879
-# ADD_INPUT_PROB = 0.0034
-# SWAP_INPUT_PROB = 0.0113
-# ADD_CONNECTION_PROB = 0.1331
-# ADD_NODE_PROB = 0.1451
-# WEIGHT_MUTATION_PROB = 0.0607
-
 
 dataset = instance.split('/')[-1]
 trn_size = 0.70
@@ -87,7 +69,6 @@ params = {
 # Read microarray dataset
 import os
 ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\..\\..\\datasets\\CUMIDA\\{dataset}.arff')
-# ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\datasets\\CUMIDA\\{dataset}.arff')
 x, y = ds.get_full_dataset()
 
 # Split dataset into training and testing dataset

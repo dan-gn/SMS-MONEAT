@@ -14,10 +14,14 @@ class Record:
         self.population = []
 
     def update(self, population: Genome, iteration_num, n_invalid_nets=0):
-        self.loss[iteration_num] = np.mean([member.fitness[0] for member in population])
-        self.fs[iteration_num] = np.mean([member.fitness[1] for member in population])
-        self.accuracy[iteration_num] = np.mean([member.accuracy for member in population])
-        self.g_mean[iteration_num] = np.mean([member.g_mean for member in population])
+        if type(population[0].fitness) == list:
+            self.loss[iteration_num] = np.mean([member.fitness[0] for member in population if member.accuracy is not None])
+            self.fs[iteration_num] = np.mean([member.fitness[1] for member in population if member.accuracy is not None])
+        else:
+            self.loss[iteration_num] = np.mean([member.fitness for member in population if member.accuracy is not None])
+            self.fs[iteration_num] = np.mean([member.selected_features.shape[0] for member in population if member.accuracy is not None])
+        self.accuracy[iteration_num] = np.mean([member.accuracy for member in population if member.accuracy is not None])
+        self.g_mean[iteration_num] = np.mean([member.g_mean for member in population if member.accuracy is not None])
         self.n_invalid_nets[iteration_num] = n_invalid_nets
         self.population.append([member.copy() for member in population])
 
