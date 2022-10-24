@@ -70,10 +70,10 @@ for i, alg in enumerate(algorithms):
             with open(f'{results_path}/{results_filename}', 'rb') as f:
                 results = pickle.load(f)
             model = results[2]['model']
-            # if alg == 'sms_moneat':
-                # model.best_solution = choose_solution_train(model.population, model.x_train, model.y_train)
-                # model.best_solution_val = choose_solution_val(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-                # model.best_solution_archive = choose_solution_val(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+            if alg == 'sms_moneat':
+                model.best_solution = choose_solution_train(model.population, model.x_train, model.y_train)
+                model.best_solution_val = choose_solution_val(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+                model.best_solution_archive = choose_solution_val(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
             train[k] = svm_fs_test(model, model.best_solution)
             val[k] = svm_fs_test(model, model.best_solution_val)
             arch[k] = svm_fs_test(model, model.best_solution_archive)
@@ -82,7 +82,7 @@ for i, alg in enumerate(algorithms):
         data[alg][ds]['arch'] = np.mean(arch)		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-# with open('results_svm_gmean.csv', 'w', newline='') as file:
+# with open('results_svm.csv', 'w', newline='') as file:
 # 	writer = csv.writer(file)
 # 	all_rows = []
 # 	header = ['Dataset']

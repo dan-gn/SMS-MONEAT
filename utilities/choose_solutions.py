@@ -43,7 +43,7 @@ def choose_solution_train(population: List[Genome], x, y) -> Genome:
 		member.valid = True
 		member.accuracy, member.fitness, member.g_mean = evaluate(member, x, y, True)
 	# front = non_dominated_sorting_2(population)
-	sorted_front = sorted(population, key=lambda x: (-x.g_mean, -x.accuracy, x.fitness[0], x.fitness[1]))
+	sorted_front = sorted(population, key=lambda x: (x.fitness[0], -x.g_mean, x.fitness[1]))
 	solution = sorted_front[0].copy(True)
 	return solution
 
@@ -60,10 +60,10 @@ def choose_solution_val(population: List[Genome], x_train, y_train, x_val, y_val
 	for member in population:
 		member.valid = True
 		member.accuracy, member.fitness, member.g_mean = evaluate(member, x_train, y_train, True)
-	sorted_population = sorted(population, key=lambda x: (-x.g_mean, -x.accuracy, x.fitness[0], x.fitness[1]))
+	sorted_population = sorted(population, key=lambda x: (x.fitness[0], -x.g_mean, x.fitness[1]))
 	for member in sorted_population:
 		member.accuracy, member.fitness, member.g_mean = evaluate(member, x_val, y_val, True)
 	# front = non_dominated_sorting_2(sorted_population)
-	sorted_front = sorted(population, key=lambda x: (-x.g_mean, -x.accuracy, x.fitness[0], x.fitness[1]))
+	sorted_front = sorted(population, key=lambda x: (x.fitness[0], -x.g_mean, x.fitness[1]))
 	solution = sorted_front[0].copy(True)
 	return solution

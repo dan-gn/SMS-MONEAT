@@ -19,7 +19,7 @@ class Record:
         self.accuracy[iteration_num] = np.mean([member.accuracy for member in population])
         self.g_mean[iteration_num] = np.mean([member.g_mean for member in population])
         self.n_invalid_nets[iteration_num] = n_invalid_nets
-        self.population.append(population)
+        self.population.append([member.copy() for member in population])
 
 class BestInidividualRecord(Record):
 
