@@ -491,17 +491,19 @@ class NEAT:
 		self.best_solution.fitness = math.inf
 		# Initalize population
 		self.initialize_population()
-		# Create arrays to store model fitness and accuracy on each iteration for training and test datasets
-		self.record = Record(self.max_iterations)
-		self.record.update(self.population, iteration_num=0)
-		self.best_solution_record = BestInidividualRecord(self.max_iterations)
-		self.best_solution_record.update(self.best_solution, iteration_num=0)
 		# List to store species, initalized empty
 		self.species = []
 		# Initialize Archive
 		self.archive = NEATArchive(self.n_population)
 		self.archive.add(self.population)
 		self.n_invalid_nets = 0
+		# Create arrays to store model fitness and accuracy on each iteration for training and test datasets
+		self.record = Record(self.max_iterations)
+		self.record.update(self.population, iteration_num=0)
+		self.record_archive = Record(self.max_iterations)
+		self.record_archive.update(self.archive.population)
+		self.best_solution_record = BestInidividualRecord(self.max_iterations)
+		self.best_solution_record.update(self.best_solution, iteration_num=0)
 		# Evolve population
 		for i in range(self.max_iterations):
 			if debug:
@@ -517,9 +519,11 @@ class NEAT:
 			# Compute new generation by crossover and mutation operators
 			self.population = self.next_generation()
 			self.archive.add(self.population[:-self.k_offspring])
+			# Evaluate best solution on full dataset
+			# self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			# Store history of fitness and accuracy from best solution in both datasets
-			self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+			self.record_archive.update(self.archive.population)
 			self.best_solution_record.update(self.best_solution, iteration_num=i+1)
 			# Display progress
 			# if i % 5 == 0:

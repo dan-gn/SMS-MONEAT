@@ -34,6 +34,7 @@ class SpeciesArchive:
 	def __init__(self, max_size: int, objective_norm: np.array, population: list = None) -> None:
 		self.max_size = max_size
 		self.objective_norm = objective_norm
+		self.max_species_size = 5
 		self.current_size = 0
 		self.archive = []
 		if population is not None:
@@ -98,7 +99,7 @@ class SpeciesArchive:
 			if self.compare(species.get_random_member(), new_member):
 				species.add_member(new_member)
 				species.sort_members()
-				if species.get_size() > 5:
+				if species.get_size() > self.max_species_size:
 					species.members.pop()
 					self.current_size -= 1
 					return
