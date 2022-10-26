@@ -59,7 +59,7 @@ class NEATArchive:
 		self.population = []
 
 	def add(self, population) -> None:
-		population_copy = [member.copy() for member in population]
+		population_copy = [member.copy(True) for member in population]
 		self.population.extend(population_copy)
 		self.population = sorted(self.population, key=lambda x: x.fitness)[:self.size]
 
@@ -504,7 +504,7 @@ class NEAT:
 		self.record = Record(self.max_iterations)
 		self.record.update(self.population, iteration_num=0)
 		self.record_archive = Record(self.max_iterations)
-		self.record_archive.update(self.archive.population)
+		self.record_archive.update(self.archive.population, iteration_num=0)
 		self.best_solution_record = BestInidividualRecord(self.max_iterations)
 		self.best_solution_record.update(self.best_solution, iteration_num=0)
 		# Evolve population
@@ -526,7 +526,7 @@ class NEAT:
 			# self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			# Store history of fitness and accuracy from best solution in both datasets
 			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-			self.record_archive.update(self.archive.population)
+			self.record_archive.update(self.archive.population, iteration_num=i+1)
 			self.best_solution_record.update(self.best_solution, iteration_num=i+1)
 			# Display progress
 			# if i % 5 == 0:

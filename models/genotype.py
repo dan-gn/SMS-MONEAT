@@ -66,6 +66,8 @@ class Genome:
 		self.g_mean = None
 		self.phenotype = None
 		self.mean_square_weights = None
+		self.n_hidden = None
+		self.n_active_connections = None
 		self.valid = True
 
 	def create_node_genes(self, n_inputs: list, n_outputs: list) -> None:
@@ -385,6 +387,7 @@ class Genome:
 			selected_features = sorted(list(set(selected_features)))
 			layers[0] = list(selected_features)
 			
+			self.n_hidden = len([node.id for node in self.node_genes if node.layer != 0 and node.layer != max_depth])
 
 			for i, layer_i in enumerate(layers):
 				if i == max_depth:
@@ -459,8 +462,8 @@ class Genome:
 				layer_weights = [torch.from_numpy(w).type(torch.float32) for w in layer_weights]
 				n_inputs = [torch.from_numpy(n).type(torch.float32) for n in n_inputs]
 				self.phenotype = Ann_PyTorch(layer_weights, n_inputs, activation)
-				n_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
-				self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / n_connections
+				self.n_active_connections = torch.tensor([torch.count_nonzero(w) for w in layer_weights]).sum()
+				self.mean_square_weights = torch.tensor([torch.square(w).sum() for w in layer_weights]).sum() / self.n_active_connections
 				return
 		self.selected_features = torch.tensor([], dtype=torch.int32)
 		self.phenotype = None
@@ -476,6 +479,8 @@ class Genome:
 		genome_copy.accuracy = self.accuracy
 		genome_copy.g_mean = self.g_mean
 		genome_copy.valid = self.valid
+		genome_copy.n_hidden = self.n_hidden
+		genome_copy.n_active_connections = self.n_active_connections
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
 			genome_copy.mean_square_weights = self.mean_square_weights
@@ -510,6 +515,8 @@ class MultiObjectiveGenome(Genome):
 		genome_copy.accuracy = self.accuracy
 		genome_copy.g_mean = self.g_mean
 		genome_copy.valid = self.valid
+		genome_copy.n_hidden = self.n_hidden
+		genome_copy.n_active_connections = self.n_active_connections
 		if with_phenotype:
 			genome_copy.selected_features = self.selected_features
 			genome_copy.mean_square_weights = self.mean_square_weights

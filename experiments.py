@@ -60,7 +60,7 @@ k_folds = 10
 n_repeats = 3
 save_results = True
 debug = False
-algorithm = 'sms_moneat'
+algorithm = 'n3o'
 	
 
 params = {
@@ -72,15 +72,15 @@ params = {
 	'output_activation_function' : Gaussian(),
 	'output_activation_coeff' : 1,
 	'regularization_parameter' : 0.5,
-	'crossover_prob' : 0.6839 if algorithm=='n3o' else 0.5662,
+	'crossover_prob' : 0.5925 if algorithm=='n3o' else 0.5662,
 	'n_competitors' : 2,
 	'disable_node_prob' : 0.75,
 	'interspecies_mating_rate' : 0.001,
-	'add_input_prob' : 0.0115 if algorithm=='n3o' else 0.1226,
-	'swap_input_prob' : 0.1153 if algorithm=='n3o' else 0.0972,
-	'add_connection_prob' : 0.0646 if algorithm=='n3o' else 0.1352,
-	'add_node_prob' : 0.0422 if algorithm=='n3o' else 0.1390,
-	'weight_mutation_prob' : 0.1328 if algorithm=='n3o' else 0.0498,
+	'add_input_prob' : 0.0016 if algorithm=='n3o' else 0.1226,
+	'swap_input_prob' : 0.1239 if algorithm=='n3o' else 0.0972,
+	'add_connection_prob' : 0.0874 if algorithm=='n3o' else 0.1352,
+	'add_node_prob' : 0.1339 if algorithm=='n3o' else 0.1390,
+	'weight_mutation_prob' : 0.0980 if algorithm=='n3o' else 0.0498,
 	'pol_mutation_distr' : 5,
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i >= 15:
+			if i < 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
