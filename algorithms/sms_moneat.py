@@ -206,8 +206,9 @@ class SMS_MONEAT(N3O):
 			# Add to archive
 			self.archive.add(offspring)
 			# Store in record
-			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-			self.record.update(self.archive.get_full_population(), iteration_num=i+1)
+			if i+1 % 90 == 0:
+				self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+				self.record.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
 			# if i % 500 == 0:
 			# 	if BATCH_PROP < 1.0:

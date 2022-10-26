@@ -23,37 +23,41 @@ class Record:
         self.n_active_connections = np.copy(self.loss)
         self.n_nodes = np.copy(self.loss)
         self.n_connections = np.copy(self.loss)
-        # self.population = []
-        # self.iteration_num = 0
+        self.population = []
+        self.iteration_num = 0
 
     def update(self, population: List[Genome], iteration_num, n_invalid_nets=0):
-        # self.population.append([copy.deepcopy(member) for member in population])
-        # self.iteration_num = iteration_num
+        self.population.append([copy.deepcopy(member) for member in population])
+        self.iteration_num = iteration_num
         self.n_invalid_nets[iteration_num] = n_invalid_nets
-        if isinstance(population[0], Genome):
-            self.loss[iteration_num] = np.mean([member.fitness[0] for member in population if member.accuracy is not None])
-            self.fs[iteration_num] = np.mean([member.fitness[1] for member in population if member.accuracy is not None])
-        else:
-            self.loss[iteration_num] = np.mean([member.fitness for member in population if member.accuracy is not None])
-            self.fs[iteration_num] = np.mean([member.selected_features.shape[0] for member in population if member.accuracy is not None])
-        self.accuracy[iteration_num] = np.mean([member.accuracy for member in population if member.accuracy is not None])
-        self.g_mean[iteration_num] = np.mean([member.g_mean for member in population if member.accuracy is not None])
-        self.n_nodes[iteration_num] = np.mean([len(member.node_genes) for member in population if member.accuracy is not None])
-        self.n_connections[iteration_num] = np.mean([len(member.connection_genes) for member in population if member.accuracy is not None])
-        self.n_active_connections[iteration_num] = np.mean([member.n_active_connections for member in population if member.accuracy is not None])
-        self.n_hidden[iteration_num] = np.mean([member.n_hidden for member in population if member.accuracy is not None])
+        # if isinstance(population[0], Genome):
+        #     self.loss[iteration_num] = np.mean([member.fitness[0] for member in population if member.accuracy is not None])
+        #     self.fs[iteration_num] = np.mean([member.fitness[1] for member in population if member.accuracy is not None])
+        # else:
+        #     self.loss[iteration_num] = np.mean([member.fitness for member in population if member.accuracy is not None])
+        #     self.fs[iteration_num] = np.mean([member.selected_features.shape[0] for member in population if member.accuracy is not None])
+        # self.accuracy[iteration_num] = np.mean([member.accuracy for member in population if member.accuracy is not None])
+        # self.g_mean[iteration_num] = np.mean([member.g_mean for member in population if member.accuracy is not None])
+        # self.n_nodes[iteration_num] = np.mean([len(member.node_genes) for member in population if member.accuracy is not None])
+        # self.n_connections[iteration_num] = np.mean([len(member.connection_genes) for member in population if member.accuracy is not None])
+        # self.n_active_connections[iteration_num] = np.mean([member.n_active_connections for member in population if member.accuracy is not None])
+        # self.n_hidden[iteration_num] = np.mean([member.n_hidden for member in population if member.accuracy is not None])
 
 
-    # def compute_info(self):
-    #     for i in range(self.iteration_num):
-    #         if type(self.population[0][0].fitness) == list:
-    #             self.loss[i] = np.mean([member.fitness[0] for member in self.population[i] if member.accuracy is not None])
-    #             self.fs[i] = np.mean([member.fitness[1] for member in self.population[i] if member.accuracy is not None])
-    #         else:
-    #             self.loss[i] = np.mean([member.fitness for member in self.population[i] if member.accuracy is not None])
-    #             self.fs[i] = np.mean([member.selected_features.shape[0] for member in self.population[i] if member.accuracy is not None])
-    #         self.accuracy[i] = np.mean([member.accuracy for member in self.population[i] if member.accuracy is not None])
-    #         self.g_mean[i] = np.mean([member.g_mean for member in self.population[i] if member.accuracy is not None])
+    def compute_info(self):
+        for i in range(self.iteration_num):
+            if isinstance(self.population[0][0], Genome):
+                self.loss[i] = np.mean([member.fitness[0] for member in self.population[i] if member.accuracy is not None])
+                self.fs[i] = np.mean([member.fitness[1] for member in self.population[i] if member.accuracy is not None])
+            else:
+                self.loss[i] = np.mean([member.fitness for member in self.population[i] if member.accuracy is not None])
+                self.fs[i] = np.mean([member.selected_features.shape[0] for member in self.population[i] if member.accuracy is not None])
+            self.accuracy[i] = np.mean([member.accuracy for member in self.population[i] if member.accuracy is not None])
+            self.g_mean[i] = np.mean([member.g_mean for member in self.population[i] if member.accuracy is not None])
+            self.n_nodes[i] = np.mean([len(member.node_genes) for member in self.population[i] if member.accuracy is not None])
+            self.n_connections[i] = np.mean([len(member.connection_genes) for member in self.population[i] if member.accuracy is not None])
+            self.n_active_connections[i] = np.mean([member.n_active_connections for member in self.population[i] if member.accuracy is not None])
+            self.n_hidden[i] = np.mean([member.n_hidden for member in self.population[i] if member.accuracy is not None])
         
             
 
