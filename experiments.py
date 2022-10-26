@@ -25,9 +25,9 @@ datasets = []
 
 
 """ TESTING """
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 datasets.append('Breast_GSE22820') 
 datasets.append('Breast_GSE59246') 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 10 or i >= 20:	
 			# if i < 20:
-			if i < 15:
+			if i >= 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')

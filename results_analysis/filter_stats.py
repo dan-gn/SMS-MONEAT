@@ -3,6 +3,7 @@ import os
 import sys
 import pickle
 import csv
+from statistics import stdev
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -25,15 +26,15 @@ for ds in datasets:
             results = pickle.load(f)
         model = results[2]['model']
         kw_fs[k] = model.x_train.shape[1]
-    data[ds] = np.mean(kw_fs)
-    print(f'Dataset: {ds}; FS: {np.mean(kw_fs)}')
+    data[ds] = {'mean': np.mean(kw_fs), 'std': stdev(kw_fs)}
+    print(f'Dataset: {ds}; FS: {np.mean(kw_fs)}, Std: {stdev(kw_fs)}')
 
 
 with open('results_kw.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     all_rows = []
-    header = ['Dataset', 'FS']
+    header = ['Dataset', 'FS', 'Std']
     all_rows.append(header)
-    all_rows.extend([[ds, data[ds]] for ds in datasets])
+    all_rows.extend([[ds, data[ds]['mean'], data[ds]['std']] for ds in datasets])
     writer.writerows(all_rows)
 

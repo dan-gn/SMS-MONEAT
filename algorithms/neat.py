@@ -63,6 +63,9 @@ class NEATArchive:
 		self.population.extend(population_copy)
 		self.population = sorted(self.population, key=lambda x: x.fitness)[:self.size]
 
+	def get_full_population(self):
+		return self.population
+
 
 
 class NEAT:

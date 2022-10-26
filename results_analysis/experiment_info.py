@@ -29,3 +29,9 @@ datasets.append('Prostate_GSE6919_U95Av2')
 datasets.append('Prostate_GSE6919_U95B')
 datasets.append('Prostate_GSE6919_U95C')
 datasets.append('Prostate_GSE11682')
+
+# datasets.append('Leukemia_GSE71935') # Only 9
+# datasets.append('Liver_GSE57957')
+# datasets.append('Prostate_GSE46602')
+# datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
+# datasets.append('Breast_GSE42568')
