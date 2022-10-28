@@ -25,9 +25,9 @@ datasets = []
 
 
 """ TESTING """
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 datasets.append('Breast_GSE22820') 
 datasets.append('Breast_GSE59246') 
@@ -58,7 +58,7 @@ datasets.append('Prostate_GSE11682')
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = True
+save_results = False
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -162,12 +162,13 @@ if __name__ == '__main__':
 			"""
 
 			print(f'Traning model...')
+			record = {}
 			if algorithm == 'n3o':
 				model = N3O(problem, params)
 			elif algorithm == 'sms_moneat':
 				model = SMS_NEAT(problem, params)
 			start = time.time()
-			model.run(i, debug)
+			record['population'], record['archive'] = model.run(i, debug)
 			time_exec = time.time()- start
 			# neat.best_solution.describe()
 
@@ -214,4 +215,6 @@ if __name__ == '__main__':
 				results_filename = f"{filename}_MinMaxSc_{i}.pkl"
 				with open(f'{results_path}/{results_filename}', 'wb') as f:
 					pickle.dump([problem, params, result], f)
+				with open(f'{results_path}/{results_filename}_record', 'wb') as f:
+					pickle.dump(record, f)
 				problem['fitness_function'] = torch_fitness_function	

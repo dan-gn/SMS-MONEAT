@@ -10,22 +10,21 @@ sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms
-from utilities.choose_solutions import N3O_SolutionSelector, SolutionSelector, choose_solution_train, choose_solution_val
+from utilities.choose_solutions import SolutionSelector
 
 alg = 'sms_moneat'
 iterations =  18000
 data = {}
 
 
-for i in range(0, 6):
-    alpha = i * 0.1
-    beta = 0.5 - alpha
-    w = np.array([alpha, beta] * 2)
-    selector = SolutionSelector(method='WSum', pareto_front=False, w = w)
-    print(w)
+for ds in datasets:
+    for i in range(0, 6):
+        alpha = i * 0.1
+        beta = 0.5 - alpha
+        w = np.array([alpha, beta] * 2)
+        selector = SolutionSelector(method='WSum', pareto_front=False, w = w)
 
-    for ds in datasets:
-        data[alg][ds] = {}
+        data[ds] = {}
         results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt\\{ds}"
         time = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
@@ -45,12 +44,12 @@ for i in range(0, 6):
             _, _, arch[k] = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
             val_fs[k] = model.best_solution_val.selected_features.shape[0]
             arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
-        data[alg][ds]['time'] = np.mean(time)		
-        data[alg][ds]['val'] = np.mean(val)		
-        data[alg][ds]['val_fs'] = np.mean(val_fs)		
-        data[alg][ds]['arch'] = np.mean(arch)		
-        data[alg][ds]['arch_fs'] = np.mean(arch_fs)		
-        print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Val {np.mean(val)}, Arch {np.mean(arch)}')
+        data[ds]['time'] = np.mean(time)		
+        data[ds]['val'] = np.mean(val)		
+        data[ds]['val_fs'] = np.mean(val_fs)		
+        data[ds]['arch'] = np.mean(arch)		
+        data[ds]['arch_fs'] = np.mean(arch_fs)		
+        print(f'Algorithm: {alg}; Dataset: {ds}; w {w}; Val {np.mean(val)}, Arch {np.mean(arch)}')
 
 with open('results_weights.csv', 'w', newline='') as file:
 	writer = csv.writer(file)

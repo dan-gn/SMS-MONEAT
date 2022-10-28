@@ -95,12 +95,12 @@ class SolutionSelector:
 
 	def weighted_sum_selector(self, population: List[Genome], x, y):
 		if self.w is None:
-			w = np.array([1/2, 0, 1/2])
+			w = np.array([0.35, 0, 0.15])
 		for member in population:
 			member.valid = True
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x, y, True)
 			z = np.array([member.fitness[0], member.fitness[1], 1-member.g_mean])
-			member.wsum = weighted_sum(z, w)
+			member.wsum = weighted_sum(z, self.w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
 		return sorted_population[0]
@@ -116,7 +116,7 @@ class SolutionSelector:
 			z.extend([member.fitness[0], 1-member.g_mean])
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x_val, y_val, True)
 			z.extend([member.fitness[0], 1-member.g_mean])
-			member.wsum = weighted_sum(np.array(z), w)
+			member.wsum = weighted_sum(np.array(z), self.w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
 		return sorted_population[0]

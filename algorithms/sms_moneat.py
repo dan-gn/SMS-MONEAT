@@ -184,10 +184,10 @@ class SMS_MONEAT(N3O):
 		self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
 		self.n_invalid_nets = 0
 		# Initialize record
-		self.record = Record(self.max_iterations)
-		self.record.update(self.population, iteration_num=0)
-		self.record_archive = Record(self.max_iterations)
-		self.record.update(self.archive.get_full_population(), iteration_num=0)
+		record = Record(self.max_iterations)
+		record.update(self.population, iteration_num=0)
+		record_archive = Record(self.max_iterations)
+		record_archive.update(self.archive.get_full_population(), iteration_num=0)
 		for i in range(self.max_iterations):
 			# Get batch
 			# if i % 100 == 0 and BATCH_PROP < 1.0:
@@ -206,9 +206,9 @@ class SMS_MONEAT(N3O):
 			# Add to archive
 			self.archive.add(offspring)
 			# Store in record
-			if i+1 % 90 == 0:
-				self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-				self.record.update(self.archive.get_full_population(), iteration_num=i+1)
+			if (i+1) % 180 == 0:
+				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+				record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
 			# if i % 500 == 0:
 			# 	if BATCH_PROP < 1.0:
@@ -222,4 +222,5 @@ class SMS_MONEAT(N3O):
 		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
 		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		return record, record_archive
 		
