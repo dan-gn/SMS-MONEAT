@@ -36,14 +36,12 @@ for i, alg in enumerate(algorithms):
 				results = pickle.load(f)
 			time[k] = results[2]['time']
 			model = results[2]['model']
-			if alg == 'sms_moneat':
-				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
-			else:
-				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+
+			# Choose solutions
+			model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+			model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+			model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+
 			model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True	
 			_, _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
 			_, _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
