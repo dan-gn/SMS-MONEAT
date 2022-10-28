@@ -501,10 +501,10 @@ class NEAT:
 		self.archive.add(self.population)
 		self.n_invalid_nets = 0
 		# Create arrays to store model fitness and accuracy on each iteration for training and test datasets
-		self.record = Record(self.max_iterations)
-		self.record.update(self.population, iteration_num=0)
-		self.record_archive = Record(self.max_iterations)
-		self.record_archive.update(self.archive.population, iteration_num=0)
+		record = Record(self.max_iterations)
+		record.update(self.population, iteration_num=0)
+		record_archive = Record(self.max_iterations)
+		record_archive.update(self.archive.population, iteration_num=0)
 		self.best_solution_record = BestInidividualRecord(self.max_iterations)
 		self.best_solution_record.update(self.best_solution, iteration_num=0)
 		# Evolve population
@@ -525,13 +525,15 @@ class NEAT:
 			# Evaluate best solution on full dataset
 			# self.best_solution.accuracy, self.best_solution.fitness, self.best_solution.g_mean = self.evaluate(self.best_solution, self.x_train, self.y_train, False)
 			# Store history of fitness and accuracy from best solution in both datasets
-			self.record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-			self.record_archive.update(self.archive.population, iteration_num=i+1)
-			self.best_solution_record.update(self.best_solution, iteration_num=i+1)
+			if (i+1) % 2 == 0:
+				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+				record_archive.update(self.archive.population, iteration_num=i+1)
+				self.best_solution_record.update(self.best_solution, iteration_num=i+1)
 			# Display progress
 			# if i % 5 == 0:
 			# 	n_input_nodes, n_hidden_nodes, n_output_nodes = self.best_solution.count_nodes()
 			# 	print(f'It: {i}: Train fit = {self.training_fitness[i+1][0]:.4f}, Acc = {self.training_accuracy[i+1][0]:.4f}, Gmean = {self.training_gmean[i+1][0]:.4f}; Nodes = [{n_input_nodes}, {n_hidden_nodes}, {n_output_nodes}]; Species = {len(self.species)}')
 		self.best_solution_val = self.choose_solution(self.population)
 		self.best_solution_archive = self.choose_solution(self.archive.population)
+		return record, record_archive
 		
