@@ -25,9 +25,9 @@ datasets = []
 
 
 """ TESTING """
-datasets.append('breastCancer-full') 
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full') 
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
 datasets.append('Breast_GSE22820') 
 datasets.append('Breast_GSE59246') 
@@ -60,7 +60,7 @@ k_folds = 10
 n_repeats = 3
 save_results = True
 debug = False
-algorithm = 'n3o'
+algorithm = 'sms_moneat'
 	
 
 params = {
@@ -111,9 +111,9 @@ if __name__ == '__main__':
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
 
 			# if i < -1:
-			# if i < 10 or i >= 20:	
-			# if i < 20:
-			if i < 15:
+			# if i < 15:
+			# if i < 12 or i >= 15:	
+			if i >= 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')

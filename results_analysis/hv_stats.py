@@ -14,7 +14,7 @@ from experiment_info import datasets, algorithms
 from utilities.choose_solutions import evaluate
 
 norm_vector = np.array([1, 0.1])
-reference = [15, 10]
+reference = [15, 5]
 
 data = {}
 
