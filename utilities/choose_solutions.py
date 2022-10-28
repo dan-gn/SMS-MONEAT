@@ -94,21 +94,18 @@ class SolutionSelector:
 		return solution
 
 	def weighted_sum_selector(self, population: List[Genome], x, y):
-		if self.w is None:
-			w = np.array([0.35, 0, 0.15])
+		w = self.w if self.w is not None else np.array([0.35, 0.15])
 		for member in population:
 			member.valid = True
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x, y, True)
-			z = np.array([member.fitness[0], member.fitness[1], 1-member.g_mean])
-			member.wsum = weighted_sum(z, self.w)
+			z = np.array([member.fitness[0], 1-member.g_mean])
+			member.wsum = weighted_sum(z, w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
 		return sorted_population[0]
 
 	def wsum_selector(self, population: List[Genome], x_train, y_train, x_val, y_val):
-		if self.w is None:
-			alpha, beta= 0.35, 0.15
-			w = np.array([alpha, beta, alpha, beta])
+		w = self.w if self.w is not None else np.array([0.35, 0.15, 0.35, 0.15])
 		for member in population:
 			z = []
 			member.valid = True
@@ -116,7 +113,7 @@ class SolutionSelector:
 			z.extend([member.fitness[0], 1-member.g_mean])
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x_val, y_val, True)
 			z.extend([member.fitness[0], 1-member.g_mean])
-			member.wsum = weighted_sum(np.array(z), self.w)
+			member.wsum = weighted_sum(np.array(z), w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
 		return sorted_population[0]

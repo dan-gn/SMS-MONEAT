@@ -10,7 +10,7 @@ sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms
-from utilities.choose_solutions import SolutionSelector, choose_solution_train, choose_solution_val
+from utilities.choose_solutions import SolutionSelector
 
 
 data = {}
@@ -58,7 +58,7 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch_fs'] = np.mean(arch_fs)		
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms-moneat_hpt_wsum_2obj_merge.csv', 'w', newline='') as file:
+with open('results_sms-moneat_hpt_wsum_2obj_merge-35_15.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']

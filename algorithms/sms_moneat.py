@@ -75,8 +75,11 @@ class SMS_MONEAT(N3O):
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, x, y, False)
 		_ = create_fronts(self.population)
 
+	def normalize_fitness(self, fitness):
+		return np.array(fitness) * self.objective_norm
+
 	def compute_selection_prob(self) -> np.array:
-		c = np.array([member.rank for member in self.population], dtype="float32") 
+		c = np.array([np.sum(self.normalize_fitness(member.fitness) * np.array([3/4, 1/4])) for member in self.population], dtype="float32") 
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
 			c /= mean_cost
