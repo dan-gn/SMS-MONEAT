@@ -27,7 +27,7 @@ class Record:
         self.iteration_num = 0
 
     def update(self, population: List[Genome], iteration_num, n_invalid_nets=0):
-        self.population.append([copy.deepcopy(member) for member in population])
+        self.population.append([member.copy(with_phenotype=False) for member in population])
         self.iteration_num = iteration_num
         self.n_invalid_nets[iteration_num] = n_invalid_nets
         # if isinstance(population[0], Genome):
