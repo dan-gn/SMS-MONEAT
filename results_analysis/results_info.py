@@ -16,14 +16,13 @@ from utilities.choose_solutions import N3O_SolutionSelector, SolutionSelector, c
 data = {}
 
 selector = SolutionSelector(method='WSum', pareto_front=False)
-selector_n3o = N3O_SolutionSelector(method='WeightedSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
 	data[alg] = {}
 	iterations = 200 if alg=='n3o' else 18000
 	for ds in datasets:
 		data[alg][ds] = {}
-		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt\\{ds}"
+		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final\\{ds}"
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -42,9 +41,9 @@ for i, alg in enumerate(algorithms):
 				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
 				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
 			else:
-				model.best_solution = selector_n3o.choose(model.population, model.x_train, model.y_train)
-				model.best_solution_val = selector_n3o.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-				model.best_solution_archive = selector_n3o.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
 			model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True	
 			_, _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
 			_, _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
@@ -61,7 +60,7 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch_fs'] = np.mean(arch_fs)		
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms-moneat_hpt_wsum_2obj_merge.csv', 'w', newline='') as file:
+with open('results_n3o_hpt_wsum_2obj_merge.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']
