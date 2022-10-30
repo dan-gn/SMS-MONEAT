@@ -2,8 +2,14 @@ import numpy as np
 import random
 import math
 
-def simulated_binary_crossover(x, eta):
-	pass
+def single_point_crossover(x1, x2):
+	r = np.random.randint(len(x1))
+	child1 = [x1[i] if i <= r else x2[i] for i in range(len(x1))]
+	child2 = [x1[i] if i > r else x2[i] for i in range(len(x1))]
+	return child1, child2
+
+def binary_mutation(x):
+	return 1 - x
 
 def polynomial_mutation(x, eta):
 	r = random.uniform(0, 1)

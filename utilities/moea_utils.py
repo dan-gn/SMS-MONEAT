@@ -112,7 +112,7 @@ def non_dominated_sorting_2(population: List[Genome]):
 	return front
 
 def add_genome_nds(population: List[Genome], genome: Genome):
-	genome.dominated_to = []
+	genome.dominates_to = []
 	genome.n_dominated_by = 0
 	for member in population:
 		if dominate(genome, member):
