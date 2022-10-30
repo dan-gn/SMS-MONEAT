@@ -119,8 +119,19 @@ class SMS_EMOA:
 		return self.population[parent1], self.population[parent2]
 
 	def crossover(self, parent1, parent2):
-		child = Individual()
-		child.genome, _ = single_point_crossover(parent1.genome, parent2.genome)
+		if parent1.rank == parent2.rank:
+			child = Individual(self.n_var)
+			child.genome = np.zeros(self.n_var)
+			for i in range(self.n_var):
+				if parent1.genome[i] or parent2.genome[i]:
+					if np.random.uniform(0, 1) < 0.75:
+						child.genome[i] = 1
+		else:
+			parents = sorted([parent1, parent2], key=lambda x: x.rank)
+			child = parents[0].copy()
+			for i, x in enumerate(parents[1].genome):
+				if x and np.random.uniform(0, 1) < 0.5:
+					child[i] = x
 		return child
 
 	def mutate(self, genome):
