@@ -26,28 +26,28 @@ datasets = []
 
 
 """ TESTING """
+
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE59246') 
+datasets.append('Breast_GSE70947')	
+datasets.append('Colorectal_GSE25070')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
+datasets.append('Leukemia_GSE63270') 
+datasets.append('Liver_GSE14520_U133A') 
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232') 
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE6919_U95B')
+datasets.append('Prostate_GSE6919_U95C')
+datasets.append('Prostate_GSE11682')
 datasets.append('breastCancer-full') 
 datasets.append('ALL-AML-full')
 datasets.append('prostate_tumorVSNormal-full')
-
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE25070')
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') 
-# datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232') 
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE6919_U95B')
-# datasets.append('Prostate_GSE6919_U95C')
-# datasets.append('Prostate_GSE11682')
 
 
 """ IRACE """
@@ -74,7 +74,7 @@ params = {
 	'output_activation_function' : Gaussian(),
 	'output_activation_coeff' : 1,
 	'regularization_parameter' : 0.5,
-	'crossover_prob' : 0.5925 if algorithm=='n3o' else 0.5662,
+	'crossover_prob' : 0.75,
 	'n_competitors' : 2,
 	'disable_node_prob' : 0.75,
 	'interspecies_mating_rate' : 0.001,
@@ -91,7 +91,7 @@ params = {
 	'champion_elitism_threshold' : 5,
 	'elitism_prop' : 0.1,
 	'initial_weight_limits' : [-1, 1],
-	'mutation_prob' : 0.05
+	'mutation_prob' : 0.01
 }
 
 
@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
 			# if i < -1:
 			# if i < 13 or i >= 15:	
-			# if i >= 15:
-			if i < 15:
+			# if i < 15:
+			if i >= 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -129,6 +129,7 @@ if __name__ == '__main__':
 			x_val, _ = filter.transform(x_val)
 			x_test, _ = filter.transform(x_test)
 			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
+			params['mutation_prob'] = 2 / (features_selected.shape[0])
 
 			# Re-Scale datasets
 			# print(f'Scaling datasets...')
