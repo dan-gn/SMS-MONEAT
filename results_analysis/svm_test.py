@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 import pickle
 import csv
+from sklearn.metrics import confusion_matrix
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -25,11 +26,9 @@ def svm_fs_test(model: SMS_MONEAT, genome: Genome):
     x_train = model.x_train.index_select(1, genome.selected_features)
     x_test = model.x_test.index_select(1, genome.selected_features)
     clf = svm.SVC()
-    clf.fit(x_train, model.y_train)
-    y_pred = torch.from_numpy(clf.predict(x_test))
-    y_real = model.y_test.squeeze(dim=1)
-    print(y_real.shape, y_pred.shape)
-    return geometric_mean(y_real.ravel(), y_pred.ravel())
+    clf.fit(x_train, model.y_train.ravel())
+    y_pred = torch.tensor(clf.predict(x_test))
+    return geometric_mean(model.y_test, y_pred)
 
 
 data = {}
@@ -40,7 +39,7 @@ for i, alg in enumerate(algorithms):
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt\\{ds}"
+                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final2\\{ds}"
         train = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
@@ -60,7 +59,7 @@ for i, alg in enumerate(algorithms):
         data[alg][ds]['arch'] = np.mean(arch)		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms_moneat_svm.csv', 'w', newline='') as file:
+with open('results_n3o_svm.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']
