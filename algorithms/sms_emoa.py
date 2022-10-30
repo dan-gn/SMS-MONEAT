@@ -90,18 +90,17 @@ class SMS_EMOA:
 			c = c / mean_cost
 		return np.exp(-self.beta * c)
 
-	def evaluate(self, member, x, y, n_folds = 5):
-		print(np.sum(member.genome))
-		print(np.argwhere(member.genome == 1))
-		features_selected = torch.tensor(np.argwhere(member.genome == 1)).squeeze(dim=1)
-		print(features_selected)
+	def evaluate(self, member, x, y, n_folds = 3):
+		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
+		features_selected = torch.tensor(features_selected)
 		if features_selected.shape[0] < 1:
 			return None, np.array([math.inf, math.inf]), 0
 		x_prima = x.index_select(1, features_selected)
-		loss = np.zeros(n_folds)
-		acc = np.zeros(n_folds)
-		g_mean = np.zeros(n_folds)
-		skf = StratifiedKFold(n_splits=n_folds)
+		k = min(torch.sum(y), n_folds)
+		loss = np.zeros(k)
+		acc = np.zeros(k)
+		g_mean = np.zeros(k)
+		skf = StratifiedKFold(n_splits=k)
 		for i, (train_index, test_index) in enumerate(skf.split(x_prima, y)):
 			model = KNeighborsClassifier(n_neighbors=2)
 			model.fit(x_prima[train_index], y[train_index].ravel())
@@ -126,7 +125,8 @@ class SMS_EMOA:
 
 	def mutate(self, genome):
 		r = np.random.uniform(0, 1, self.n_var)
-		genome = [x if r[i] > self.mutation_prob else binary_mutation(x) for i, x in enumerate(genome)]
+		mutated_genome = [x if r[i] > self.mutation_prob else binary_mutation(x) for i, x in enumerate(genome)]
+		return mutated_genome
 
 	def next_generation(self):
 		self.probs = self.compute_selection_prob()
@@ -135,7 +135,7 @@ class SMS_EMOA:
 			child = self.crossover(parent1, parent2)
 		else: 
 			child = parent1.copy()
-		self.mutate(child.genome)
+		child.genome = self.mutate(child.genome)
 		child.accuracy, child.fitness, child.g_mean = self.evaluate(child, self.x_train, self.y_train)
 		return child
 
