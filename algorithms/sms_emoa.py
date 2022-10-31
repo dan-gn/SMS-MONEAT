@@ -70,7 +70,6 @@ class SMS_EMOA:
 		self.mutation_prob = params['mutation_prob']
 		# Problem parameters
 		self.x_train, self.y_train = problem['x_train'], problem['y_train']
-		self.x_val, self.y_val = problem['x_val'], problem['y_val']
 		self.x_test, self.y_test = problem['x_test'], problem['y_test']
 		self.n_var = self.x_train.shape[1]
 		self.objective_norm = np.array([1, 0.1])
@@ -82,21 +81,26 @@ class SMS_EMOA:
 			member.initialize()
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train)
 			self.population.append(member)
+
+	def weighted_sum(self, fitness):
+		return np.sum(np.array(fitness, dtype=np.float32) * self.objective_norm * np.array((0.9, 0.1)))
 	
 	def compute_selection_prob(self) -> np.array:
-		c = np.array([member.rank for member in self.population])
+		# c = np.array([member.rank for member in self.population])
+		c = np.array([self.weighted_sum(member.fitness) for member in self.population])
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
 			c = c / mean_cost
 		return np.exp(-self.beta * c)
 
-	def evaluate(self, member, x, y, n_folds = 3):
+	def evaluate(self, member, x, y, n_folds = 5):
 		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
 		features_selected = torch.tensor(features_selected)
 		if features_selected.shape[0] < 1:
 			return None, np.array([math.inf, math.inf]), 0
 		x_prima = x.index_select(1, features_selected)
-		k = min(torch.sum(y), n_folds)
+		min_class = min(int(torch.sum(y)), y.shape[0] - int(torch.sum(y)))
+		k = min(min_class, n_folds)
 		loss = np.zeros(k)
 		acc = np.zeros(k)
 		g_mean = np.zeros(k)
@@ -111,6 +115,23 @@ class SMS_EMOA:
 			g_mean[i] = geometric_mean(y_real, y_predict)
 		return acc.mean(), [loss.mean(), features_selected.shape[0]], g_mean.mean()
 
+	def final_evaluate(self, member, x_train, y_train, x_test, y_test):
+		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
+		features_selected = torch.tensor(features_selected)
+		if features_selected.shape[0] < 1:
+			return None, np.array([math.inf, math.inf]), 0
+		x_train_prima = x_train.index_select(1, features_selected)
+		x_test_prima = x_test.index_select(1, features_selected)
+		model = KNeighborsClassifier(n_neighbors=2)
+		model.fit(x_train_prima, y_train.ravel())
+		y_predict = torch.tensor(model.predict(x_test_prima))
+		y_real = y_test.squeeze(dim=1)
+		loss = torch_fitness_function(y_real, y_predict) 
+		acc = (y_real == torch.round(y_predict)).type(torch.float32).mean()
+		g_mean = geometric_mean(y_real, y_predict)
+		return acc, [loss, features_selected.shape[0]], g_mean
+
+
 	def select_parents(self) -> Tuple[Individual, Individual]:
 		index = [i for i in range(self.n_population)]
 		parent1 = tournament_selection(index, self.probs, self.n_competitors)
@@ -119,20 +140,28 @@ class SMS_EMOA:
 		return self.population[parent1], self.population[parent2]
 
 	def crossover(self, parent1, parent2):
-		if parent1.rank == parent2.rank:
-			child = Individual(self.n_var)
-			child.genome = np.zeros(self.n_var)
-			for i in range(self.n_var):
-				if parent1.genome[i] or parent2.genome[i]:
-					if np.random.uniform(0, 1) < 0.75:
-						child.genome[i] = 1
+		# parent1.ws, parent2.ws = self.weighted_sum(parent1.fitness), self.weighted_sum(parent2.fitness)
+		# if parent1.ws == parent2.ws:
+		# 	child = Individual(self.n_var)
+		# 	child.genome = np.zeros(self.n_var)
+		# 	for i in range(self.n_var):
+		# 		if parent1.genome[i] or parent2.genome[i]:
+		# 			if np.random.uniform(0, 1) < 0.75:
+		# 				child.genome[i] = 1
+		# else:
+		# 	parents = sorted([parent1, parent2], key=lambda x: x.ws)
+		# 	child = parents[0].copy()
+		# 	for i, x in enumerate(parents[1].genome):
+		# 		if x and not child.genome[i]:
+		# 			if np.random.uniform(0, 1) < 0.5:
+		# 				child.genome[i] = x
+		child1 = Individual(n_variables=self.n_var)
+		child2 = Individual(n_variables=self.n_var)
+		child1.genome, child2.genome = single_point_crossover(parent1.genome, parent2.genome)
+		if np.sum(child1.genome) >= 1:
+			return child1
 		else:
-			parents = sorted([parent1, parent2], key=lambda x: x.rank)
-			child = parents[0].copy()
-			for i, x in enumerate(parents[1].genome):
-				if x and np.random.uniform(0, 1) < 0.5:
-					child[i] = x
-		return child
+			return child2
 
 	def mutate(self, genome):
 		r = np.random.uniform(0, 1, self.n_var)
@@ -191,5 +220,4 @@ class SMS_EMOA:
 		self.best_solution = Individual()
 		self.best_solution.fitness = np.ones(n_objectives) * math.inf
 		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		return record

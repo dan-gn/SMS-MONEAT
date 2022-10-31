@@ -25,7 +25,7 @@ from utilities.stats_utils import geometric_mean
 def svm_fs_test(model: SMS_MONEAT, genome: Genome):
     x_train = model.x_train.index_select(1, genome.selected_features)
     x_test = model.x_test.index_select(1, genome.selected_features)
-    clf = svm.SVC()
+    clf = svm.SVC(kernel ='rbf', class_weight = 'balanced')
     clf.fit(x_train, model.y_train.ravel())
     y_pred = torch.tensor(clf.predict(x_test))
     return geometric_mean(model.y_test, y_pred)
