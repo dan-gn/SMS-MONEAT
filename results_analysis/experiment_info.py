@@ -27,7 +27,7 @@ datasets.append('breastCancer-full')
 datasets.append('Prostate_GSE6919_U95Av2')
 datasets.append('Prostate_GSE6919_U95B')
 datasets.append('Prostate_GSE6919_U95C')
-# datasets.append('Prostate_GSE11682')
+datasets.append('Prostate_GSE11682')
 datasets.append('prostate_tumorVSNormal-full')
 
 # datasets.append('Leukemia_GSE71935') # Only 9

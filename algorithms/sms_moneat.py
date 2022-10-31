@@ -22,7 +22,6 @@ from utilities.record import Record
 from algorithms.archive import SpeciesArchive
 from sklearn.model_selection import train_test_split
 
-BATCH_PROP = 1.0
 
 class SMS_MONEAT(N3O):
 
@@ -192,22 +191,16 @@ class SMS_MONEAT(N3O):
 			set_seed(seed)
 		self.initialize_population()
 		_ = non_dominated_sorting_2(self.population)
-		self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
+		# self.archive = SpeciesArchive(self.n_population, self.objective_norm, self.population)
 		self.n_invalid_nets = 0
 		# Initialize record
 		record = Record(self.max_iterations)
-		record.update(self.population, iteration_num=0)
+		# record.update(self.population, iteration_num=0)
 		record_archive = Record(self.max_iterations)
-		record_archive.update(self.archive.get_full_population(), iteration_num=0)
+		# record_archive.update(self.archive.get_full_population(), iteration_num=0)
 		for i in range(self.max_iterations):
-			# Get batch
-			# if i % 100 == 0 and BATCH_PROP < 1.0:
-			# 	x_batch, y_batch = get_batch(self.x_train, self.y_train, BATCH_PROP, random_state=i)
-			# 	self.evaluate_population(x_batch, y_batch)
 			# Get offspring
 			offspring = self.next_generation()
-			# if BATCH_PROP < 1.0:
-			# 	offspring.accuracy, offspring.fitness, offspring.g_mean = self.evaluate(offspring, x_batch, y_batch, False)
 			# Update Non-Dominated Sorting variables from population and offspring
 			add_genome_nds(self.population, offspring)
 			# Add Offspring to population
@@ -215,23 +208,21 @@ class SMS_MONEAT(N3O):
 			# Reduce population
 			self.reduce_population()
 			# Add to archive
-			self.archive.add(offspring)
+			# self.archive.add(offspring)
 			# Store in record
-			if (i+1) % 180 == 0:
-				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-				record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
+			# if (i+1) % 180 == 0:
+			# 	record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+			# 	record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
 			# if i % 500 == 0:
-			# 	if BATCH_PROP < 1.0:
-			# 		self.evaluate_population(self.x_train, self.y_train)
 			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
 			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}')
-		n_objectives = len(self.population[0].fitness)
-		self.best_solution = Genome()
-		self.best_solution.fitness = np.ones(n_objectives) * math.inf
-		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
-		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
-		self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		# n_objectives = len(self.population[0].fitness)
+		# self.best_solution = Genome()
+		# self.best_solution.fitness = np.ones(n_objectives) * math.inf
+		# self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+		# self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
+		# self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		return record, record_archive
 		
