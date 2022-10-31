@@ -98,7 +98,7 @@ class SolutionSelector:
 		for member in population:
 			member.valid = True
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x, y, True)
-			z = np.array([member.fitness[0], 1-member.g_mean])
+			z = np.array([member.fitness[0], 1-member.g_mean], dtype=np.float32)
 			member.wsum = weighted_sum(z, w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
@@ -113,7 +113,7 @@ class SolutionSelector:
 			z.extend([member.fitness[0], 1-member.g_mean])
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x_val, y_val, True)
 			z.extend([member.fitness[0], 1-member.g_mean])
-			member.wsum = weighted_sum(np.array(z), w)
+			member.wsum = weighted_sum(np.array(z, dtype = np.float32), w)
 		front = non_dominated_sorting_2(population) if self.pareto_front else population
 		sorted_population = sorted(front, key=lambda x: x.wsum)
 		return sorted_population[0]
