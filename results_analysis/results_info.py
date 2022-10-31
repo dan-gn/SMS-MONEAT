@@ -10,12 +10,12 @@ sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms
-from utilities.choose_solutions import SolutionSelector
+from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
 
 
 data = {}
 
-selector = SolutionSelector(method='WSum', pareto_front=False)
+selector = SolutionSelector2(method='WSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
 	data[alg] = {}
@@ -38,17 +38,23 @@ for i, alg in enumerate(algorithms):
 			model = results[2]['model']
 
 			# Choose solutions
-			model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-			model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-			model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+			if alg != 'sms_emoa':
+				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
+				_, _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
+				_, _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
+				_, _, arch[k] = model.final_evaluate(model.best_solution_archive, model.x_test, model.y_test)
+				train_fs[k] = model.best_solution.selected_features.shape[0]
+				val_fs[k] = model.best_solution_val.selected_features.shape[0]
+				arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
+			else:
+				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
+				train_fs[k] = train_fitness[1]
 
-			model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True	
-			_, _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
-			_, _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
-			_, _, arch[k] = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-			train_fs[k] = model.best_solution.selected_features.shape[0]
-			val_fs[k] = model.best_solution_val.selected_features.shape[0]
-			arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
+			
 		data[alg][ds]['time'] = np.mean(time)		
 		data[alg][ds]['train'] = np.mean(train)		
 		data[alg][ds]['train_fs'] = np.mean(train_fs)		
@@ -58,7 +64,8 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch_fs'] = np.mean(arch_fs)		
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms-moneat_hpt_wsum_2obj_merge-35_15_final.csv', 'w', newline='') as file:
+
+with open('results_sms-emoa_final.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']

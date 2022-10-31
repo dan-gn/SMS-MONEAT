@@ -108,15 +108,16 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final2\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final3\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
-		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
+		# for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
+		for i, x_train, x_test, y_train, y_test in ds.cross_validation(k_folds, n_repeats, seed):
 
 			# if i < -1:
-			# if i < 13 or i >= 15:	
-			# if i < 15:
-			if i >= 15:
+			# if i < 8 or i >= 15:	
+			# if i >= 15:
+			if i < 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -126,35 +127,28 @@ if __name__ == '__main__':
 			# print(f'Statistical Filtering...')
 			filter = KruskalWallisFilter(threshold=0.01)
 			x_train, features_selected = filter.fit_transform(x_train, y_train)
-			x_val, _ = filter.transform(x_val)
 			x_test, _ = filter.transform(x_test)
 			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
-			params['mutation_prob'] = 2 / (features_selected.shape[0])
+			params['mutation_prob'] = 1 / (features_selected.shape[0])
 
 			# Re-Scale datasets
 			# print(f'Scaling datasets...')
 			scaler = MinMaxScaler()
 			x_train = scaler.fit_transform(x_train)
-			x_val = scaler.transform(x_val)
 			x_test = scaler.transform(x_test)
 
 			# print(f'Final preprocessing data steps...')
 			y_train = np.expand_dims(y_train, axis=1)
-			y_val = np.expand_dims(y_val, axis=1)
 			y_test = np.expand_dims(y_test, axis=1)
 
 			x_train = torch.from_numpy(x_train).type(torch.float32)
 			y_train = torch.from_numpy(y_train).type(torch.float32)
-			x_val = torch.from_numpy(x_val).type(torch.float32)
-			y_val = torch.from_numpy(y_val).type(torch.float32)
 			x_test = torch.from_numpy(x_test).type(torch.float32)
 			y_test = torch.from_numpy(y_test).type(torch.float32)
 
 			problem = {
 				'x_train' : x_train,
 				'y_train' : y_train,
-				'x_val' : x_val,
-				'y_val' : y_val,
 				'x_test' : x_test,
 				'y_test' : y_test,
 				'kw_htest_pvalue' : filter.p_value,
@@ -185,29 +179,8 @@ if __name__ == '__main__':
 			print(f'Time Execution: {time_exec}')
 
 			print('Best solution: Train Dataset')
-			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_train, model.y_train)
+			acc, fitness, g_mean = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_val, model.y_val)
-			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution, model.x_test, model.y_test)
-			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-
-			print('Best solution: Val Dataset')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_train, model.y_train)
-			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_val, model.y_val)
-			print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			acc, fitness, g_mean = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
-			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-
-			# print('Best solution: Arch Dataset')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_train, model.y_train)
-			# print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_val, model.y_val)
-			# print(f'Val dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-			# acc, fitness, g_mean = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
-			# print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
-
 			print('\n')
 
 			if save_results:

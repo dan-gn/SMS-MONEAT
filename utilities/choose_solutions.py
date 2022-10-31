@@ -3,6 +3,9 @@ import math
 import torch
 import torch.nn as nn
 
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import StratifiedKFold
+
 from typing import List, Tuple
 
 from models.genotype import Genome
@@ -10,6 +13,8 @@ from utilities.evaluation import eval_model
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from utilities.moea_utils import non_dominated_sorting_2
+from utilities.stats_utils import geometric_mean
+from algorithms.sms_emoa import Individual
 
 activation = {}
 activation['hidden_activation_function'] = nn.Tanh()
@@ -28,6 +33,47 @@ def evaluate(genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool
 	loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, fitness_function, l2_parameter, genome.mean_square_weights)
 	fitness = np.array([loss, genome.selected_features.shape[0]])
 	return acc, fitness, gmean
+
+
+
+def evaluate2(member, x, y, n_folds = 3):
+		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
+		features_selected = torch.tensor(features_selected)
+		if features_selected.shape[0] < 1:
+			return None, np.array([math.inf, math.inf]), 0
+		x_prima = x.index_select(1, features_selected)
+		min_class = min(int(torch.sum(y)), y.shape[0] - int(torch.sum(y)))
+		k = min(min_class, n_folds)
+		loss = np.zeros(k)
+		acc = np.zeros(k)
+		g_mean = np.zeros(k)
+		skf = StratifiedKFold(n_splits=k)
+		for i, (train_index, test_index) in enumerate(skf.split(x_prima, y)):
+			model = KNeighborsClassifier(n_neighbors=2)
+			model.fit(x_prima[train_index], y[train_index].ravel())
+			y_predict = torch.tensor(model.predict(x_prima[test_index]))
+			y_real = y[test_index].squeeze(dim=1)
+			loss[i] = torch_fitness_function(y_real, y_predict) 
+			acc[i] = (y_real == torch.round(y_predict)).type(torch.float32).mean()
+			g_mean[i] = geometric_mean(y_real, y_predict)
+		return acc.mean(), [loss.mean(), features_selected.shape[0]], g_mean.mean()
+
+def evaluate3(member, x_train, y_train, x_test, y_test):
+		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
+		features_selected = torch.tensor(features_selected)
+		if features_selected.shape[0] < 1:
+			return None, np.array([math.inf, math.inf]), 0
+		x_train_prima = x_train.index_select(1, features_selected)
+		x_test_prima = x_test.index_select(1, features_selected)
+		model = KNeighborsClassifier(n_neighbors=2)
+		model.fit(x_train_prima, y_train.ravel())
+		y_predict = torch.tensor(model.predict(x_test_prima))
+		y_real = y_test.squeeze(dim=1)
+		loss = torch_fitness_function(y_real, y_predict) 
+		acc = (y_real == torch.round(y_predict)).type(torch.float32).mean()
+		g_mean = geometric_mean(y_real, y_predict)
+		return acc, [loss, features_selected.shape[0]], g_mean
+
 
 def choose_solution_train(population: List[Genome], x, y) -> Genome:
 	# solution = Genome()
@@ -128,3 +174,33 @@ class SolutionSelector:
 			return sorted_population[0]
 		else:
 			return self.sorting_selector(sorted_population, x_val, y_val)
+
+
+class SolutionSelector2(SolutionSelector):
+
+	def weighted_sum_selector(self, population: List[Genome], x, y):
+		w = self.w if self.w is not None else np.array([0.35, 0.15])
+		for member in population:
+			member.valid = True
+			member.accuracy, member.fitness, member.g_mean = evaluate2(member, x, y)
+			z = np.array([member.fitness[0], 1-member.g_mean])
+			member.wsum = weighted_sum(z, w)
+		front = non_dominated_sorting_2(population) if self.pareto_front else population
+		sorted_population = sorted(front, key=lambda x: x.wsum)
+		return sorted_population[0]
+
+
+	def wsum_selector(self, population: List[Individual], x_train, y_train, x_val, y_val):
+		w = self.w if self.w is not None else np.array([0.35, 0.15, 0.35, 0.15])
+		for member in population:
+			z = []
+			member.valid = True
+			member.accuracy, member.fitness, member.g_mean = evaluate2(member, x_train, y_train)
+			z.extend([member.fitness[0], 1-member.g_mean])
+			member.accuracy, member.fitness, member.g_mean = evaluate2(member, x_val, y_val)
+			z.extend([member.fitness[0], 1-member.g_mean])
+			member.wsum = weighted_sum(np.array(z), w)
+		front = non_dominated_sorting_2(population) if self.pareto_front else population
+		sorted_population = sorted(front, key=lambda x: x.wsum)
+		return sorted_population[0]
+		
