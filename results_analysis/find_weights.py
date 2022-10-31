@@ -18,8 +18,8 @@ data = {}
 
 
 for ds in datasets:
-    for i in range(0, 6):
-        alpha = i * 0.1
+    for i in range(3):
+        alpha = 0.25 + (i * 0.125)
         beta = 0.5 - alpha
         w = np.array([alpha, beta] * 2)
         selector = SolutionSelector(method='WSum', pareto_front=False, w = w)
@@ -51,20 +51,20 @@ for ds in datasets:
         data[ds]['arch_fs'] = np.mean(arch_fs)		
         print(f'Algorithm: {alg}; Dataset: {ds}; w {w}; Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_weights.csv', 'w', newline='') as file:
-	writer = csv.writer(file)
-	all_rows = []
-	header = ['Dataset']
-	subheader = ['']
-	for alg in algorithms:
-		header.extend([alg] * 7)
-		temp = ['time']
-		temp.extend(['gmean', 'fs'] * 3)
-		subheader.extend(temp)
-	all_rows.append(header)
-	all_rows.append(subheader)
-	for ds in datasets:
-		row = [ds]
-		row.extend([value for alg in algorithms for value in data[alg][ds].values()])
-		all_rows.append(row)
-	writer.writerows(all_rows)
+# with open('results_weights.csv', 'w', newline='') as file:
+# 	writer = csv.writer(file)
+# 	all_rows = []
+# 	header = ['Dataset']
+# 	subheader = ['']
+# 	for alg in algorithms:
+# 		header.extend([alg] * 7)
+# 		temp = ['time']
+# 		temp.extend(['gmean', 'fs'] * 3)
+# 		subheader.extend(temp)
+# 	all_rows.append(header)
+# 	all_rows.append(subheader)
+# 	for ds in datasets:
+# 		row = [ds]
+# 		row.extend([value for alg in algorithms for value in data[alg][ds].values()])
+# 		all_rows.append(row)
+# 	writer.writerows(all_rows)

@@ -25,20 +25,20 @@ datasets = []
 
 
 """ TESTING """
-datasets.append('breastCancer-full') 
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full') 
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
-datasets.append('Breast_GSE22820') 
-datasets.append('Breast_GSE59246') 
-datasets.append('Breast_GSE70947')	
-datasets.append('Colorectal_GSE25070')
-datasets.append('Colorectal_GSE32323')
-datasets.append('Colorectal_GSE44076')
-datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE22529_U133A') 
-datasets.append('Leukemia_GSE22529_U133B') 
-datasets.append('Leukemia_GSE33615')
+# datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE59246') 
+# datasets.append('Breast_GSE70947')	
+# datasets.append('Colorectal_GSE25070')
+# datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE22529_U133A') 
+# datasets.append('Leukemia_GSE22529_U133B') 
+# datasets.append('Leukemia_GSE33615')
 datasets.append('Leukemia_GSE63270') 
 datasets.append('Liver_GSE14520_U133A') 
 datasets.append('Liver_GSE50579')
@@ -58,7 +58,7 @@ datasets.append('Prostate_GSE11682')
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = False
+save_results = True
 debug = False
 algorithm = 'sms_moneat'
 	
@@ -105,15 +105,15 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final4\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
 
 			# if i < -1:
-			# if i < 15:
 			# if i < 12 or i >= 15:	
 			if i >= 15:
+			# if i < 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -168,7 +168,7 @@ if __name__ == '__main__':
 			elif algorithm == 'sms_moneat':
 				model = SMS_NEAT(problem, params)
 			start = time.time()
-			record['population'], record['archive'] = model.run(i, debug)
+			record['final'], record['archive'] = model.run(i, debug)
 			time_exec = time.time()- start
 			# neat.best_solution.describe()
 
@@ -176,6 +176,7 @@ if __name__ == '__main__':
 			DISPLAY RESULTS
 			"""
 			print(f'Time Execution: {time_exec}, invalid_nets: {model.n_invalid_nets}')
+			print(f"Record Size: {len(record['final'].population)}, Archive record size: {len(record['archive'].population)}")
 
 			print('Best solution: Train Dataset')
 			input_nodes, hidden_nodes, output_nodes = model.best_solution.count_nodes()
@@ -215,6 +216,6 @@ if __name__ == '__main__':
 				results_filename = f"{filename}_MinMaxSc_{i}.pkl"
 				with open(f'{results_path}/{results_filename}', 'wb') as f:
 					pickle.dump([problem, params, result], f)
-				with open(f'{results_path}/{results_filename}_record', 'wb') as f:
+				with open(f'{results_path}/record_{results_filename}', 'wb') as f:
 					pickle.dump(record, f)
 				problem['fitness_function'] = torch_fitness_function	

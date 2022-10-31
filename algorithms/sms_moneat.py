@@ -29,7 +29,7 @@ class SMS_MONEAT(N3O):
 	def __init__(self, problem: dict, params: dict) -> None:
 		super().__init__(problem, params)
 		self.beta = 1
-		self.objective_norm = np.array([0, 0.1])
+		self.objective_norm = np.array([1, 0.1], dtype=np.float32)
 
 	def initialize_population(self) -> None:
 		"""
@@ -76,13 +76,15 @@ class SMS_MONEAT(N3O):
 		_ = create_fronts(self.population)
 
 	def normalize_fitness(self, fitness):
-		return np.array(fitness) * self.objective_norm
+		return np.array(fitness, dtype=np.float32) * self.objective_norm
 
 	def compute_selection_prob(self) -> np.array:
-		c = np.array([np.sum(self.normalize_fitness(member.fitness) * np.array([3/4, 1/4])) for member in self.population], dtype="float32") 
+		# c = np.array([np.sum(self.normalize_fitness(member.fitness) * np.array([3/4, 1/4])) for member in self.population], dtype="float32") 
+		# c = np.array([member.rank for member in self.population])
+		c = np.array([self.weighted_sum(member) for member in self.population])
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
-			c /= mean_cost
+			c = c / mean_cost
 		return np.exp(-self.beta * c)
 
 	def select_parents(self) -> Tuple[Genome, Genome]:
@@ -92,14 +94,20 @@ class SMS_MONEAT(N3O):
 		parent2 = tournament_selection(index, self.probs, self.n_competitors)
 		return self.population[parent1], self.population[parent2]
 
+	def weighted_sum(self, genome):
+		return np.sum(self.normalize_fitness(genome.fitness) * np.array((0.9, 0.1)))
+
 	def crossover(self, genome1: Genome, genome2: Genome) -> Tuple[Genome, bool]:
 		"""
 		Works similary as the NEAT crossover operator, but if the parent with lower fitness has an input that the other
 		parent does not, and the input is connected to a node present in the other parent, there is a 50% chance of the
 		offspring inheriting that input.
 		"""
-		if genome1.rank != genome2.rank:
-			parents = sorted([genome1, genome2], key=lambda x: x.rank)
+		# if genome1.rank != genome2.rank:
+		genome1.ws, genome2.ws = self.weighted_sum(genome1), self.weighted_sum(genome2)
+		if genome1.ws != genome2.ws:
+			# parents = sorted([genome1, genome2], key=lambda x: x.rank)
+			parents = sorted([genome1, genome2], key=lambda x: x.ws)
 			offspring = parents[0].copy()
 			for connection_a in offspring.connection_genes:
 				connection_b = parents[1].get_connection_gene(connection_a.innovation_number)
@@ -161,7 +169,7 @@ class SMS_MONEAT(N3O):
 		if len(front[-1]) == 1:
 			remove_index = 0
 		else:
-			front_fitness = np.array([list(p.fitness) for p in front[-1]])
+			front_fitness = np.array([list(p.fitness) for p in front[-1]], dtype=np.float32)
 			front_fitness *= self.objective_norm # Normalize objective
 			remove_index, _ = choose_repeated_index(front_fitness)
 			if remove_index is None:
