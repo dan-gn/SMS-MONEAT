@@ -33,13 +33,15 @@ def svm_fs_test(model: SMS_MONEAT, genome: Genome):
 
 data = {}
 
+selector = SolutionSelector(method='WSum', pareto_front=False)
+
 for i, alg in enumerate(algorithms):
     data[alg] = {}
     iterations = 200 if alg == 'n3o' else 18000
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final2\\{ds}"
+                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_5\\{ds}"
         train = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
@@ -48,9 +50,9 @@ for i, alg in enumerate(algorithms):
             with open(f'{results_path}/{results_filename}', 'rb') as f:
                 results = pickle.load(f)
             model = results[2]['model']
-            model.best_solution = choose_solution_train(model.population, model.x_train, model.y_train)
-            model.best_solution_val = choose_solution_val(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-            model.best_solution_archive = choose_solution_val(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+            model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+            model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+            model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
             train[k] = svm_fs_test(model, model.best_solution)
             val[k] = svm_fs_test(model, model.best_solution_val)
             arch[k] = svm_fs_test(model, model.best_solution_archive)
@@ -59,7 +61,7 @@ for i, alg in enumerate(algorithms):
         data[alg][ds]['arch'] = np.mean(arch)		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms_moneat_mod_svm.csv', 'w', newline='') as file:
+with open('results_sms_moneat_svm5.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']

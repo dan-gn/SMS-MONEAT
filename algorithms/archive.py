@@ -10,8 +10,9 @@ from utilities.data_utils import choose_repeated_index
 
 class Species:
 
-	def __init__(self) -> None:
+	def __init__(self, selected_features) -> None:
 		self.members = []
+		self.selected_features = selected_features
 
 	def add_member(self, new_member: Genome) -> None:
 		self.members.append(new_member)
@@ -26,7 +27,7 @@ class Species:
 		return len(self.members)
 
 	def sort_members(self) -> None:
-		self.members = sorted(self.members, key=lambda x: -x.fitness[0])
+		self.members = sorted(self.members, key=lambda x: x.fitness[0])
 
 
 class SpeciesArchive:
@@ -96,7 +97,7 @@ class SpeciesArchive:
 		# Compare new member with existing species
 		for species in self.archive:
 			# Add new member to species which belongs to
-			if self.compare(species.get_random_member(), new_member):
+			if self.compare(species, new_member):
 				species.add_member(new_member)
 				species.sort_members()
 				if species.get_size() > self.max_species_size:
@@ -107,7 +108,7 @@ class SpeciesArchive:
 				break
 		# If new member does not belong to any existing species create a new one
 		if not added:
-			species = Species()
+			species = Species(new_member.selected_features)
 			species.add_member(new_member)
 			self.archive.append(species)
 		# Check for archive overflow

@@ -141,6 +141,7 @@ class SolutionSelector:
 
 	def weighted_sum_selector(self, population: List[Genome], x, y):
 		w = self.w if self.w is not None else np.array([0.35, 0.15])
+		# w = self.w if self.w is not None else np.array([0.5, 0])
 		for member in population:
 			member.valid = True
 			member.accuracy, member.fitness, member.g_mean = evaluate(member, x, y, True)
@@ -152,6 +153,7 @@ class SolutionSelector:
 
 	def wsum_selector(self, population: List[Genome], x_train, y_train, x_val, y_val):
 		w = self.w if self.w is not None else np.array([0.35, 0.15, 0.35, 0.15])
+		# w = self.w if self.w is not None else np.array([0.5, 0, 0.5, 0])
 		for member in population:
 			z = []
 			member.valid = True

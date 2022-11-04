@@ -25,7 +25,7 @@ for ds in datasets:
 	data[ds] = {'n_samples' : x.shape[0], 'n_features' : x.shape[1], 'distribution' : distribution}
 	print(f'Dataset: {ds}; Samples {x.shape[0]}; Features {x.shape[1]}, Distribution {distribution}')
     
-with open('datasets_info_irace.csv', 'w', newline='') as file:
+with open('datasets_info_all.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset', 'Samples', 'Features', 'Distribution']

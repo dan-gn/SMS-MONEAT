@@ -25,20 +25,20 @@ datasets = []
 
 
 """ TESTING """
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE25070')
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE59246') 
+datasets.append('Breast_GSE70947')	
+datasets.append('Colorectal_GSE25070')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
 datasets.append('Leukemia_GSE63270') 
 datasets.append('Liver_GSE14520_U133A') 
 datasets.append('Liver_GSE50579')
@@ -72,15 +72,15 @@ params = {
 	'output_activation_function' : Gaussian(),
 	'output_activation_coeff' : 1,
 	'regularization_parameter' : 0.5,
-	'crossover_prob' : 0.5925 if algorithm=='n3o' else 0.5662,
+	'crossover_prob' : 0.5925 if algorithm=='n3o' else 0.5203,
 	'n_competitors' : 2,
 	'disable_node_prob' : 0.75,
 	'interspecies_mating_rate' : 0.001,
-	'add_input_prob' : 0.0016 if algorithm=='n3o' else 0.1226,
-	'swap_input_prob' : 0.1239 if algorithm=='n3o' else 0.0972,
-	'add_connection_prob' : 0.0874 if algorithm=='n3o' else 0.1352,
-	'add_node_prob' : 0.1339 if algorithm=='n3o' else 0.1390,
-	'weight_mutation_prob' : 0.0980 if algorithm=='n3o' else 0.0498,
+	'add_input_prob' : 0.0016 if algorithm=='n3o' else 0.0169,
+	'swap_input_prob' : 0.1239 if algorithm=='n3o' else 0.1426,
+	'add_connection_prob' : 0.0874 if algorithm=='n3o' else 0.1297,
+	'add_node_prob' : 0.1339 if algorithm=='n3o' else 0.0775,
+	'weight_mutation_prob' : 0.0980 if algorithm=='n3o' else 0.1203,
 	'pol_mutation_distr' : 5,
 	'weight_mutation_sustitution_prob' : 0.1,
 	'compatibility_threshold' : 3,
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final4\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final_5\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
