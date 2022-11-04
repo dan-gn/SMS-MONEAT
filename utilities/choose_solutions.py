@@ -36,7 +36,7 @@ def evaluate(genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool
 
 
 
-def evaluate2(member, x, y, n_folds = 3):
+def evaluate2(member, x, y, n_folds = 5):
 		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
 		features_selected = torch.tensor(features_selected)
 		if features_selected.shape[0] < 1:

@@ -111,8 +111,11 @@ if __name__ == '__main__':
 			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final3\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
-		# for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
-		for i, x_train, x_test, y_train, y_test in ds.cross_validation(k_folds, n_repeats, seed):
+		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
+		# for i, x_train, x_test, y_train, y_test in ds.cross_validation(k_folds, n_repeats, seed):
+
+			x_train = np.concatenate((x_train, x_val))
+			y_train = np.concatenate((y_train, y_val))
 
 			# if i < -1:
 			# if i < 8 or i >= 15:	
