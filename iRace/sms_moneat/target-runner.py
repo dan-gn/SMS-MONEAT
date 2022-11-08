@@ -112,16 +112,15 @@ model = SMS_MONEAT(problem, params)
 model.run(seed, debug=False)
 
 
-# acc, fitness, g_mean = model.evaluate(model.best_solution_test, model.x_test, model.y_test)
-
-reference = np.array([10, 10])
-alpha = 10
+# reference = np.array([10, 10])
+# alpha = 10
 for member in model.population:
-	_, fitness, _ = model.evaluate(member, model.x_test, model.y_test, True)
-front = non_dominated_sorting(model.population)
-fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0]])
-unq, count = np.unique(fitness, axis=0, return_counts=True)
-hv = hypervolume(unq)
+	member.accuracy, member.fitness, _ = model.evaluate(member, model.x_test, model.y_test, True)
+# front = non_dominated_sorting(model.population)
+# fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0]])
+# unq, count = np.unique(fitness, axis=0, return_counts=True)
+# hv = hypervolume(unq)
 
-target = -hv.compute(reference)
+# target = -hv.compute(reference)
+target = np.mean([member.fitness[0] for member in model.population if member.accuracy is not None])
 print(target)
