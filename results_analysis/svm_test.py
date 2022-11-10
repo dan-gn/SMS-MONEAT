@@ -42,7 +42,7 @@ for i, alg in enumerate(algorithms):
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_5\\{ds}"
+                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
         train = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
@@ -55,9 +55,11 @@ for i, alg in enumerate(algorithms):
                 model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
                 model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
-                train[k] = svm_fs_test(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
-                val[k] = svm_fs_test(model.best_solution_val, model.x_train, model.y_train, model.x_test, model.y_test)
-                arch[k] = svm_fs_test(model.best_solution_archive, model.x_train, model.y_train, model.x_test, model.y_test)
+                X_train = torch.concat((model.x_train, model.x_val))
+                y_train = torch.concat((model.y_train, model.y_val))
+                train[k] = svm_fs_test(model.best_solution, X_train, y_train, model.x_test, model.y_test)
+                val[k] = svm_fs_test(model.best_solution_val, X_train, y_train, model.x_test, model.y_test)
+                arch[k] = svm_fs_test(model.best_solution_archive, X_train, y_train, model.x_test, model.y_test)
             else:
                 model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
                 _, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
@@ -66,7 +68,7 @@ for i, alg in enumerate(algorithms):
         data[alg][ds]['arch'] = np.mean(arch)		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms_moneat_svm5.csv', 'w', newline='') as file:
+with open('results_sms_moneat_svm_6.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']
