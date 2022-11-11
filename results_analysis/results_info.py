@@ -3,6 +3,7 @@ import os
 import sys
 import pickle
 import csv
+from statistics import stdev
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -61,14 +62,23 @@ for i, alg in enumerate(algorithms):
 
 			
 		data[alg][ds]['time'] = np.mean(time)		
+		data[alg][ds]['time_std'] = stdev(time)		
 		data[alg][ds]['train'] = np.mean(train)		
+		data[alg][ds]['train_std'] = stdev(train)		
 		data[alg][ds]['train_fs'] = np.mean(train_fs)		
+		data[alg][ds]['train_fs_std'] = stdev(train_fs)		
 		data[alg][ds]['val'] = np.mean(val)		
+		data[alg][ds]['val_std'] = stdev(val)		
 		data[alg][ds]['val_fs'] = np.mean(val_fs)		
+		data[alg][ds]['val_fs_std'] = stdev(val_fs)		
 		data[alg][ds]['arch_t'] = np.mean(train_arch)		
+		data[alg][ds]['arch_t'] = stdev(train_arch)		
 		data[alg][ds]['arch_t_fs'] = np.mean(train_arch_fs)		
+		data[alg][ds]['arch_t_fs_std'] = stdev(train_arch_fs)		
 		data[alg][ds]['arch'] = np.mean(arch)		
+		data[alg][ds]['arch_std'] = stdev(arch)		
 		data[alg][ds]['arch_fs'] = np.mean(arch_fs)		
+		data[alg][ds]['arch_fs_std'] = stdev(arch_fs)		
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
 
 
@@ -78,9 +88,9 @@ with open('results_sms-moneat_final6.csv', 'w', newline='') as file:
 	header = ['Dataset']
 	subheader = ['']
 	for alg in algorithms:
-		header.extend([alg] * 9)
-		temp = ['time']
-		temp.extend(['gmean', 'fs'] * 4)
+		header.extend([alg] * 18)
+		temp = ['time', 'time_stdev']
+		temp.extend(['gmean', 'g_mean_std', 'fs', 'fs_std'] * 4)
 		subheader.extend(temp)
 	all_rows.append(header)
 	all_rows.append(subheader)
