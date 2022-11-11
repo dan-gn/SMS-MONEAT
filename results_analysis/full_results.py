@@ -79,7 +79,7 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-
-store_results('results_sms-moneat_final6_full', 'train', data, 'sms_moneat')
-store_results('results_sms-moneat_final6_full', 'val', data, 'sms_moneat')
-store_results('results_sms-moneat_final6_full', 'arch', data, 'sms_moneat')
+alg = 'sms_moneat'
+store_results(data, alg, f'results_{alg}_final6_full', 'train')
+store_results(data, alg, f'results_{alg}_final6_full', 'val')
+store_results(data, alg, f'results_{alg}_final6_full', 'arch')

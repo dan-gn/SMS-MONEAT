@@ -61,21 +61,26 @@ for i, alg in enumerate(algorithms):
             else:
                 model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
                 _, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
-        data[alg][ds]['train'] = np.mean(train)		
-        data[alg][ds]['val'] = np.mean(val)		
-        data[alg][ds]['arch'] = np.mean(arch)		
+        data[alg][ds]['train'] = train		
+        data[alg][ds]['val'] = val		
+        data[alg][ds]['arch'] = arch		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms_moneat_svm_6.csv', 'w', newline='') as file:
-	writer = csv.writer(file)
-	all_rows = []
-	header = ['Dataset']
-	for alg in algorithms:
-		header.extend([alg for _ in range(3)])
-	all_rows.append(header)
-	for ds in datasets:
-		row = [ds]
-		for alg in algorithms:
-			row.extend([data[alg][ds]['train'], data[alg][ds]['val'], data[alg][ds]['arch']])
-		all_rows.append(row)
-	writer.writerows(all_rows)
+
+def store_results(data, alg, filename, population):
+	with open(f'{filename}_{population}.csv', 'w', newline='') as file:
+		writer = csv.writer(file)
+		all_rows = []
+		header = ['Dataset']
+		header.extend([i for i in range(N_EXPERIMENTS)])
+		all_rows.append(header)
+		for ds in datasets:
+			row = [ds]
+			row.extend(list(data[alg][ds][population]))
+			all_rows.append(row)
+		writer.writerows(all_rows)
+
+alg = 'sms_moneat'
+store_results(data, alg, f'results_{alg}_final6_full_svm', 'train')
+store_results(data, alg, f'results_{alg}_final6_full_svm', 'val')
+store_results(data, alg, f'results_{alg}_final6_full_svm', 'arch')
