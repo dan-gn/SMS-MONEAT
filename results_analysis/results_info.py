@@ -22,7 +22,7 @@ for i, alg in enumerate(algorithms):
 	iterations = 200 if alg=='n3o' else 18000
 	for ds in datasets:
 		data[alg][ds] = {}
-		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_5\\{ds}"
+		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
