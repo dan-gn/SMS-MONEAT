@@ -12,7 +12,7 @@ from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms
 from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
 
-selector = SolutionSelector(method='WSum', pareto_front=False)
+selector = SolutionSelector2(method='WSum', pareto_front=False)
 
 data = {}
 for i, alg in enumerate(algorithms):
@@ -82,4 +82,4 @@ def store_results(data, alg, filename, population):
 alg = 'sms_moneat'
 store_results(data, alg, f'results_{alg}_final6_full', 'train')
 store_results(data, alg, f'results_{alg}_final6_full', 'val')
-store_results(data, alg, f'results_{alg}_final6_full', 'arch')
+store_results(data, alg, f'results_{alg}_final6_full', 'arch')alg = 'sms_emoa'

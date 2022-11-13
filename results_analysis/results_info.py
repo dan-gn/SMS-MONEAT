@@ -17,6 +17,7 @@ from utilities.choose_solutions import SolutionSelector, SolutionSelector2, eval
 data = {}
 
 selector = SolutionSelector(method='WSum', pareto_front=False)
+selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
 	data[alg] = {}
@@ -35,6 +36,7 @@ for i, alg in enumerate(algorithms):
 		arch_fs = [0] * N_EXPERIMENTS
 		for k in range(N_EXPERIMENTS):
 			results_filename = f"{ds}_MinMaxSc_{k}.pkl"
+			# print(ds, k)
 			with open(f'{results_path}/{results_filename}', 'rb') as f:
 				results = pickle.load(f)
 			time[k] = results[2]['time']
@@ -56,7 +58,7 @@ for i, alg in enumerate(algorithms):
 				train_arch_fs[k] = model.best_solution_t_archive.selected_features.shape[0]
 				arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
 			else:
-				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
 				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 				train_fs[k] = train_fitness[1]
 
@@ -72,7 +74,7 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['val_fs'] = np.mean(val_fs)		
 		data[alg][ds]['val_fs_std'] = stdev(val_fs)		
 		data[alg][ds]['arch_t'] = np.mean(train_arch)		
-		data[alg][ds]['arch_t'] = stdev(train_arch)		
+		data[alg][ds]['arch_t_std'] = stdev(train_arch)		
 		data[alg][ds]['arch_t_fs'] = np.mean(train_arch_fs)		
 		data[alg][ds]['arch_t_fs_std'] = stdev(train_arch_fs)		
 		data[alg][ds]['arch'] = np.mean(arch)		

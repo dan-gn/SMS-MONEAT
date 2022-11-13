@@ -47,14 +47,16 @@ with open('table_performance_comparison.txt', 'w') as f:
         for x in data:
             row.extend(list(x[ds]))
         for i in range(4):
-            line = line + f'& {row[i*4]:.4f} &$\pm$ {row[i*4+1]:.2f} & {row[i*4+2]:.2f} &$\pm$ {row[i*4+3]:.2f} '
+            # line = line + f'& {row[i*4]:.4f} &$\pm$ {row[i*4+1]:.2f} & {row[i*4+2]:.2f} &$\pm$ {row[i*4+3]:.2f} '
+            line = line + f'& {row[i*4]:.4f} & {row[i*4+2]:.2f} '
         line = line + ' \\\\ \n'
         f.write(line)
         all_rows.append(row)
     row = np.mean(all_rows, axis=0)
     line = 'Promedio\t'
     for i in range(4):
-        line = line + f'& {row[i*4]:.4f} &$\pm$ {row[i*4+1]:.2f} & {row[i*4+2]:.2f} &$\pm$ {row[i*4+3]:.2f} '
+        # line = line + f'& {row[i*4]:.4f} &$\pm$ {row[i*4+1]:.2f} & {row[i*4+2]:.2f} &$\pm$ {row[i*4+3]:.2f} '
+        line = line + f'& {row[i*4]:.4f} & {row[i*4+2]:.2f} '
     line = line + ' \\\\'
     f.write(line)
 

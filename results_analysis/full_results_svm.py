@@ -14,7 +14,7 @@ sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms
-from utilities.choose_solutions import SolutionSelector
+from utilities.choose_solutions import SolutionSelector, SolutionSelector2
 
 from utilities.choose_solutions import evaluate3
 from models.genotype import MultiObjectiveGenome as Genome
@@ -33,6 +33,7 @@ def svm_fs_test(genome: Genome, X_train, y_train, X_test, y_test):
 data = {}
 
 selector = SolutionSelector(method='WSum', pareto_front=False)
+selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
     data[alg] = {}
@@ -48,8 +49,8 @@ for i, alg in enumerate(algorithms):
             results_filename = f"{ds}_MinMaxSc_{k}.pkl"
             with open(f'{results_path}/{results_filename}', 'rb') as f:
                 results = pickle.load(f)
+            model = results[2]['model']
             if alg != 'sms_emoa':
-                model = results[2]['model']
                 model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
                 model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
@@ -59,8 +60,10 @@ for i, alg in enumerate(algorithms):
                 val[k] = svm_fs_test(model.best_solution_val, X_train, y_train, model.x_test, model.y_test)
                 arch[k] = svm_fs_test(model.best_solution_archive, X_train, y_train, model.x_test, model.y_test)
             else:
-                model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-                _, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
+                model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
+                features_selected = [i for i, xi in enumerate(model.best_solution.genome) if xi == 1]
+                model.best_solution.selected_features = torch.tensor(features_selected)
+                train[k] = svm_fs_test(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
         data[alg][ds]['train'] = train		
         data[alg][ds]['val'] = val		
         data[alg][ds]['arch'] = arch		
@@ -83,4 +86,5 @@ def store_results(data, alg, filename, population):
 alg = 'sms_moneat'
 store_results(data, alg, f'results_{alg}_final6_full_svm', 'train')
 store_results(data, alg, f'results_{alg}_final6_full_svm', 'val')
-store_results(data, alg, f'results_{alg}_final6_full_svm', 'arch')
+store_results(data, alg, f'results_{alg}_final6_full_svm', 'arch')store_results(data, alg, f'results_{alg}_final4_full_svm', 'train')
+store_results(data, alg, f'results_{alg}_final4_full_svm', 'arch')

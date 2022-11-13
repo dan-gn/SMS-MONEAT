@@ -27,11 +27,11 @@ datasets = []
 
 """ TESTING """
 
-datasets.append('Breast_GSE22820') 
-datasets.append('Breast_GSE59246') 
-datasets.append('Breast_GSE70947')	
+# datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE59246') 
+# datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE25070')
-# datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
 # datasets.append('Leukemia_GSE22529_U133A') 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final3\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final4\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
@@ -118,9 +118,10 @@ if __name__ == '__main__':
 			y_train = np.concatenate((y_train, y_val))
 
 			# if i < -1:
-			# if i < 8 or i >= 15:	
-			if i >= 15:
+			# if i < 13 or i >= 15:	
+			# if i >= 15:
 			# if i < 15:
+			if i != 27:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')

@@ -86,8 +86,8 @@ class SMS_EMOA:
 		return np.sum(np.array(fitness, dtype=np.float32) * self.objective_norm * np.array((0.9, 0.1)))
 	
 	def compute_selection_prob(self) -> np.array:
-		# c = np.array([member.rank for member in self.population])
-		c = np.array([self.weighted_sum(member.fitness) for member in self.population])
+		c = np.array([member.rank for member in self.population])
+		# c = np.array([self.weighted_sum(member.fitness) for member in self.population])
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
 			c = c / mean_cost
