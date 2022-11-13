@@ -31,23 +31,23 @@ datasets = []
 # datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE25070')
-datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') 
-# datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232') 
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE6919_U95B')
-# datasets.append('Prostate_GSE6919_U95C')
-# datasets.append('Prostate_GSE11682')
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
+datasets.append('Leukemia_GSE63270') 
+datasets.append('Liver_GSE14520_U133A') 
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232') 
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE6919_U95B')
+datasets.append('Prostate_GSE6919_U95C')
+datasets.append('Prostate_GSE11682')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 
 """ IRACE """
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final4\\{filename}"
+			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-cv_hpt_final5\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
@@ -120,8 +120,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 13 or i >= 15:	
 			# if i >= 15:
-			# if i < 15:
-			if i != 27:
+			if i < 15:
 				continue
 
 			print(f'Seed = {seed}, test = {i}')

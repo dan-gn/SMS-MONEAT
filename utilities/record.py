@@ -80,5 +80,5 @@ class KRecord(Record):
         super().__init__(max_iterations)
 
     def update(self, population, iteration_num):
-        self.population.append([member.copy() for member in population])
+        self.population.append([member.reduced_copy() for member in population])
         self.iteration_num = iteration_num

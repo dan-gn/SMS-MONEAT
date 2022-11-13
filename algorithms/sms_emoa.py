@@ -34,6 +34,7 @@ class Individual:
 		self.rank = None
 		self.dominates_to = []
 		self.n_dominated_by = 0
+		self.reduced_genome = []
 
 	def initialize(self):
 		self.genome = np.zeros(self.n_variables)
@@ -50,6 +51,22 @@ class Individual:
 		new_individual.n_dominated_by = self.n_dominated_by
 		new_individual.dominates_to = list(self.dominates_to)
 		return new_individual
+
+	def expand_genome(self):
+		self.genome = np.array([1 if i in self.reduced_genome else 0 for i in range(self.n_variables)])
+
+	def reduced_copy(self):
+		new_individual = Individual(self.n_variables)
+		new_individual.reduced_genome = [i for i in self.genome if i == 1]
+		new_individual.rank = self.rank
+		new_individual.fitness = self.fitness
+		new_individual.accuracy = self.accuracy
+		new_individual.g_mean = self.g_mean
+		new_individual.n_dominated_by = self.n_dominated_by
+		new_individual.dominates_to = list(self.dominates_to)
+		return new_individual
+
+
 
 
 
