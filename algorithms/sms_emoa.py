@@ -110,7 +110,7 @@ class SMS_EMOA:
 			c = c / mean_cost
 		return np.exp(-self.beta * c)
 
-	def evaluate(self, member, x, y, n_folds = 5):
+	def evaluate(self, member, x, y, n_folds = 3):
 		features_selected = [i for i, xi in enumerate(member.genome) if xi == 1]
 		features_selected = torch.tensor(features_selected)
 		if features_selected.shape[0] < 1:
@@ -231,7 +231,7 @@ class SMS_EMOA:
 			add_genome_nds(self.population, offspring)
 			self.population.append(offspring)
 			self.reduce_population()
-			if (i+1) % 180 == 0:
+			if (i+1) % (int(self.max_iterations / 100)) == 0:
 				record.update(self.population, iteration_num=i+1)
 		n_objectives = len(self.population[0].fitness)
 		self.best_solution = Individual()
