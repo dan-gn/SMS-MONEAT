@@ -13,7 +13,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
-from experiment_info import datasets, algorithms
+from experiment_info import datasets, algorithms, iter_num
 from utilities.choose_solutions import SolutionSelector, SolutionSelector2
 
 from utilities.choose_solutions import evaluate3
@@ -37,7 +37,7 @@ selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
     data[alg] = {}
-    iterations = 200 if alg == 'n3o' else 18000
+    iterations = iter_num[alg]
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
