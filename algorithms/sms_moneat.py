@@ -79,8 +79,8 @@ class SMS_MONEAT(N3O):
 
 	def compute_selection_prob(self) -> np.array:
 		# c = np.array([np.sum(self.normalize_fitness(member.fitness) * np.array([3/4, 1/4])) for member in self.population], dtype="float32") 
-		# c = np.array([member.rank for member in self.population])
-		c = np.array([self.weighted_sum(member) for member in self.population])
+		c = np.array([member.rank for member in self.population])
+		# c = np.array([self.weighted_sum(member) for member in self.population])
 		mean_cost = np.mean(c)
 		if mean_cost != 0:
 			c = c / mean_cost
@@ -102,11 +102,11 @@ class SMS_MONEAT(N3O):
 		parent does not, and the input is connected to a node present in the other parent, there is a 50% chance of the
 		offspring inheriting that input.
 		"""
-		# if genome1.rank != genome2.rank:
-		genome1.ws, genome2.ws = self.weighted_sum(genome1), self.weighted_sum(genome2)
-		if genome1.ws != genome2.ws:
-			# parents = sorted([genome1, genome2], key=lambda x: x.rank)
-			parents = sorted([genome1, genome2], key=lambda x: x.ws)
+		if genome1.rank != genome2.rank:
+		# genome1.ws, genome2.ws = self.weighted_sum(genome1), self.weighted_sum(genome2)
+		# if genome1.ws != genome2.ws:
+		# 	parents = sorted([genome1, genome2], key=lambda x: x.ws)
+			parents = sorted([genome1, genome2], key=lambda x: x.rank)
 			offspring = parents[0].copy()
 			for connection_a in offspring.connection_genes:
 				connection_b = parents[1].get_connection_gene(connection_a.innovation_number)

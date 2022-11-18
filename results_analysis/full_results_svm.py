@@ -86,5 +86,4 @@ def store_results(data, alg, filename, population):
 alg = 'sms_moneat'
 store_results(data, alg, f'results_{alg}_final6_full_svm', 'train')
 store_results(data, alg, f'results_{alg}_final6_full_svm', 'val')
-store_results(data, alg, f'results_{alg}_final6_full_svm', 'arch')store_results(data, alg, f'results_{alg}_final4_full_svm', 'train')
-store_results(data, alg, f'results_{alg}_final4_full_svm', 'arch')
+store_results(data, alg, f'results_{alg}_final6_full_svm', 'arch')
