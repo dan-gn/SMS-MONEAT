@@ -6,6 +6,7 @@ algorithms = []
 # algorithms.append('n3o')
 # algorithms.append('sms_emoa')
 algorithms.append('sms_moneat')
+iter_num = {'n3o': 200, 'sms_emoa': 6000, 'sms_moneat': 18000}
 
 datasets = []
 
