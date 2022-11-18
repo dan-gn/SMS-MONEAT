@@ -22,7 +22,7 @@ from utilities.stats_utils import geometric_mean
 from utilities.moea_utils import non_dominated_sorting_2
 
 C = np.array([1, 0.1], dtype=np.float32)
-REF = np.array([10, 10], dtype=np.float32)
+REF = np.array([60, 10], dtype=np.float32)
 
 def hv_test(population, X, y):
     # Evaluate data
@@ -35,7 +35,20 @@ def hv_test(population, X, y):
     hv = pygmo.hypervolume(fitness)
     return hv.compute(REF)
 
-    
+def hv_test2(population, X_train, y_train, X_test, y_test):
+    # Evaluate data
+    for member in population:
+        _, member.fitness, _ = evaluate3(member, X_train, y_train, X_test, y_test)
+    front = non_dominated_sorting_2(population)
+    fitness = np.array([np.array(member.fitness, np.float32) for member in front[0]])
+
+    fitness = fitness * C
+    # Compute HV
+    hv = pygmo.hypervolume(fitness)
+    return hv.compute(REF), fitness.max(axis=0)
+
+max_values = [0, 0] 
+
 data = {}
 
 for i, alg in enumerate(algorithms):
@@ -56,11 +69,12 @@ for i, alg in enumerate(algorithms):
                 train[k] = hv_test(model.population, model.x_test, model.y_test)
                 arch[k] = hv_test(model.archive.get_full_population(), model.x_test, model.y_test)
             else:
-                train[k] = hv_test(model.population, model.x_test, model.y_test)
-                arch[k] = hv_test(model.archive.get_full_population(), model.x_test, model.y_test)
+                train[k], m = hv_test2(model.population, model.x_train, model.y_train, model.x_test, model.y_test)
+                max_values[0] = max(max_values[0], m[0])
+                max_values[1] = max(max_values[1], m[1])
         data[alg][ds]['train'] = train		
         data[alg][ds]['arch'] = arch		
-        print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Arch {np.mean(arch)}')
+        print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Arch {np.mean(arch)}, Max values {max_values}')
 
 
 def store_results(data, alg, filename, population):
@@ -78,4 +92,4 @@ def store_results(data, alg, filename, population):
 
 alg = 'sms_moneat'
 store_results(data, alg, f'results_{alg}_final6_full_hv', 'train')
-store_results(data, alg, f'results_{alg}_final6_full_hv', 'arch')
+store_results(data, alg, f'results_{alg}_final6_full_hv', 'arch')alg = 'sms_emoa'
