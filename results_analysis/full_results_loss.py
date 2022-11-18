@@ -43,7 +43,7 @@ for i, alg in enumerate(algorithms):
                 model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
                 model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
-                model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True, True
+                model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
                 _, fitness, _ = model.evaluate(model.best_solution, model.x_test, model.y_test)
                 train[k] = fitness[0]
                 _, fitness, _ = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
@@ -75,6 +75,7 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-store_results(data, alg, f'results_{alg}_final{exp}_full_loss', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full_loss', 'val')
-store_results(data, alg, f'results_{alg}_final{exp}_full_loss', 'arch')
+
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'train')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'val')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'arch')
