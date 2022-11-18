@@ -7,6 +7,7 @@ algorithms = []
 # algorithms.append('sms_emoa')
 algorithms.append('sms_moneat')
 iter_num = {'n3o': 200, 'sms_emoa': 6000, 'sms_moneat': 18000}
+experiment = {'n3o': '2', 'sms_emoa': '5x', 'sms_moneat': '6'}
 
 datasets = []
 

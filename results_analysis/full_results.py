@@ -9,18 +9,20 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
-from experiment_info import datasets, algorithms, iter_num
+from experiment_info import datasets, algorithms, iter_num, experiment
 from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
 
-selector = SolutionSelector2(method='WSum', pareto_front=False)
+selector = SolutionSelector(method='WSum', pareto_front=False)
+selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
 data = {}
 for i, alg in enumerate(algorithms):
 	data[alg] = {}
 	iterations = iter_num[alg]
+	exp = experiment[alg]
 	for ds in datasets:
 		data[alg][ds] = {}
-		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
+		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -79,7 +81,6 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-alg = 'sms_moneat'
-store_results(data, alg, f'results_{alg}_final6_full', 'train')
-store_results(data, alg, f'results_{alg}_final6_full', 'val')
-store_results(data, alg, f'results_{alg}_final6_full', 'arch')alg = 'sms_emoa'
+store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
+store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
+store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')

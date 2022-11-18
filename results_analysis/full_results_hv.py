@@ -13,16 +13,14 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
-from experiment_info import datasets, algorithms, iter_num
+from experiment_info import datasets, algorithms, iter_num, experiment
 from utilities.choose_solutions import evaluate
 
 from utilities.choose_solutions import evaluate3
-from models.genotype import MultiObjectiveGenome as Genome
-from utilities.stats_utils import geometric_mean
 from utilities.moea_utils import non_dominated_sorting_2
 
 C = np.array([1, 0.1], dtype=np.float32)
-REF = np.array([60, 10], dtype=np.float32)
+REF = np.array([60, 15], dtype=np.float32)
 
 def hv_test(population, X, y):
     # Evaluate data
@@ -33,7 +31,7 @@ def hv_test(population, X, y):
     fitness = fitness * C
     # Compute HV
     hv = pygmo.hypervolume(fitness)
-    return hv.compute(REF)
+    return hv.compute(REF), fitness.max(axis=0)
 
 def hv_test2(population, X_train, y_train, X_test, y_test):
     # Evaluate data
@@ -54,10 +52,11 @@ data = {}
 for i, alg in enumerate(algorithms):
     data[alg] = {}
     iterations = iter_num[alg]
+    exp = experiment[alg]
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
+                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
         train = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
         for k in range(N_EXPERIMENTS):
@@ -66,8 +65,12 @@ for i, alg in enumerate(algorithms):
                 results = pickle.load(f)
             model = results[2]['model']
             if alg != 'sms_emoa':
-                train[k] = hv_test(model.population, model.x_test, model.y_test)
-                arch[k] = hv_test(model.archive.get_full_population(), model.x_test, model.y_test)
+                train[k], m = hv_test(model.population, model.x_test, model.y_test)
+                max_values[0] = max(max_values[0], m[0])
+                max_values[1] = max(max_values[1], m[1])
+                arch[k], m = hv_test(model.archive.get_full_population(), model.x_test, model.y_test)
+                max_values[0] = max(max_values[0], m[0])
+                max_values[1] = max(max_values[1], m[1])
             else:
                 train[k], m = hv_test2(model.population, model.x_train, model.y_train, model.x_test, model.y_test)
                 max_values[0] = max(max_values[0], m[0])
@@ -90,6 +93,5 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-alg = 'sms_moneat'
-store_results(data, alg, f'results_{alg}_final6_full_hv', 'train')
-store_results(data, alg, f'results_{alg}_final6_full_hv', 'arch')alg = 'sms_emoa'
+store_results(data, alg, f'results_{alg}_final{exp}_full_hv', 'train')
+store_results(data, alg, f'results_{alg}_final{exp}_full_hv', 'arch')
