@@ -53,7 +53,7 @@ for i, alg in enumerate(algorithms):
             else:
                 model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
                 _, fitness, _ = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
-                train[k] = fitness[0]
+                train[k] = fitness[0].numpy()
 
 			
         data[alg][ds]['train'] = train		
