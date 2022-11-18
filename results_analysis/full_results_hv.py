@@ -93,5 +93,5 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-store_results(data, alg, f'results_{alg}_final{exp}_full_hv', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full_hv', 'arch')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv', 'train')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv', 'arch')
