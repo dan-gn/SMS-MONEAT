@@ -45,11 +45,11 @@ for i, alg in enumerate(algorithms):
                 model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
                 _, fitness, _ = evaluate4(model.best_solution, model.x_test, model.y_test)
-                train[k] = fitness if alg == 'n3o' else fitness[0]
+                train[k] =  fitness[0]
                 _, fitness, _ = evaluate4(model.best_solution_val, model.x_test, model.y_test)
-                val[k] = fitness if alg == 'n3o' else fitness[0]
+                val[k] = fitness[0]
                 _, fitness, _ = evaluate4(model.best_solution_archive, model.x_test, model.y_test)
-                arch[k] = fitness if alg == 'n3o' else fitness[0]
+                arch[k] = fitness[0]
             else:
                 model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
                 _, fitness, _ = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
