@@ -11,7 +11,7 @@ sys.path.append(parent)
 
 from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms, iter_num, experiment
-from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
+from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3, evaluate4
 
 
 data = {}
@@ -44,11 +44,11 @@ for i, alg in enumerate(algorithms):
                 model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
                 model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
-                _, fitness, _ = model.evaluate(model.best_solution, model.x_test, model.y_test)
+                _, fitness, _ = evaluate4(model.best_solution, model.x_test, model.y_test)
                 train[k] = fitness if alg == 'n3o' else fitness[0]
-                _, fitness, _ = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
+                _, fitness, _ = evaluate4(model.best_solution_val, model.x_test, model.y_test)
                 val[k] = fitness if alg == 'n3o' else fitness[0]
-                _, fitness, _ = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
+                _, fitness, _ = evaluate4(model.best_solution_archive, model.x_test, model.y_test)
                 arch[k] = fitness if alg == 'n3o' else fitness[0]
             else:
                 model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
@@ -76,6 +76,6 @@ def store_results(data, alg, filename, population):
 		writer.writerows(all_rows)
 
 
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'train')
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'val')
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss', 'arch')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss2', 'train')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss2', 'val')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_loss2', 'arch')

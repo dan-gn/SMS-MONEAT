@@ -74,6 +74,21 @@ def evaluate3(member, x_train, y_train, x_test, y_test):
 		g_mean = geometric_mean(y_real, y_predict)
 		return acc, [loss, features_selected.shape[0]], g_mean
 
+def evaluate4(genome: Genome, x: torch.Tensor, y: torch.Tensor, build_model: bool = True) -> Tuple[np.float32, np.array, np.float32]:
+	if build_model:
+		genome.compute_phenotype(activation)
+	if genome.selected_features.shape[0] == 0:
+		return None, np.array([math.inf, math.inf]), 0
+	x_prima = x.index_select(1, genome.selected_features)
+	with torch.no_grad():
+		y_predict = genome.phenotype(x_prima)
+		loss = fitness_function(y, y_predict) 
+		acc = (y == torch.round(y_predict)).type(torch.float32).mean()
+		gmean = geometric_mean(y, y_predict)
+	fitness = np.array([loss, genome.selected_features.shape[0]])
+	return acc, fitness, gmean
+
+
 
 def choose_solution_train(population: List[Genome], x, y) -> Genome:
 	# solution = Genome()

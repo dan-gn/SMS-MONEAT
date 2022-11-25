@@ -20,37 +20,35 @@ def csv2expdata(filename, cols):
                 data[row[0]] = np.array(row[cols[0]:cols[1]], dtype=np.float32)
     return data
 
-filename = []
-alg = 'n3o'
-filename.append(f'final_exp/{alg}/results_{alg}_final2_full_arch_t.csv')
-filename.append(f'final_exp/{alg}/results_{alg}_final2_full_arch.csv')
 alg = 'sms_moneat'
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_train.csv')
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_val.csv')
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_arch_t.csv')
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_arch.csv')
+filename_loss = f'final_exp/{alg}/results_{alg}_final6_full_arch.csv'
+filename_fs = f'final_exp/{alg}/results_{alg}_final6_full_fs_arch.csv'
 
 
-df = [pd.read_csv(file) for file in filename]
+df_loss = pd.read_csv(filename_loss)
+df_fs = pd.read_csv(filename_fs)
 
 rm_words = ['Breast_', 'Colorectal_', 'Leukemia_', 'Liver_', 'Prostate_']
-with open('table_solution_selection.txt', 'w') as f:
-    all_rows = [[] for _ in range(len(filename))]
+with open('table_sms_moneat_Q_loss_fs.txt', 'w') as f:
+    all_rows_loss = []
+    all_rows_fs = []
     for ds in datasets:
-        row = [x.loc[x['Dataset'] == ds].iloc[0, 1:] for x in df]
+        row_loss = df_loss.loc[df_loss['Dataset'] == ds].iloc[0, 1:] 
+        row_fs = df_fs.loc[df_fs['Dataset'] == ds].iloc[0, 1:] 
         ds_name = re.sub(r'|'.join(map(re.escape, rm_words)), '', ds)
         ds_name = re.sub(r'_', '\_', ds_name)
         line = f'{ds_name}\t'
-        for r in row:
-            line += f'& {r.mean():.4f} &$\pm$ {r.std():.2f}'
+        line += f'& {row_loss.mean():.4f} &$\pm$ {row_loss.std():.2f}'
+        line += f'& {row_fs.mean():.2f} &$\pm$ {row_fs.std():.2f}'
         line += '\\\\ \n'
         f.write(line)
-        for i, r in enumerate(row):
-            all_rows[i].append(r)
-    all_rows = [pd.DataFrame(r).stack() for r in all_rows]
+        all_rows_loss.append(row_loss)
+        all_rows_fs.append(row_fs)
+    all_rows_loss = pd.DataFrame(all_rows_loss).stack()
+    all_rows_fs = pd.DataFrame(all_rows_fs).stack()
     line = f'Todos\t'
-    for r in all_rows:
-        line += f'& {r.mean():.4f} &$\pm$ {r.std():.2f}'
+    line += f'& {all_rows_loss.mean():.4f} &$\pm$ {all_rows_loss.std():.2f}'
+    line += f'& {all_rows_fs.mean():.2f} &$\pm$ {all_rows_fs.std():.2f}'
     line += '\\\\ \n'
     f.write(line)
 
