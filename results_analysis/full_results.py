@@ -28,6 +28,8 @@ for i, alg in enumerate(algorithms):
 		train_fs = [0] * N_EXPERIMENTS
 		val = [0] * N_EXPERIMENTS
 		val_fs = [0] * N_EXPERIMENTS
+		train_arch = [0] * N_EXPERIMENTS
+		train_arch_fs = [0] * N_EXPERIMENTS
 		arch = [0] * N_EXPERIMENTS
 		arch_fs = [0] * N_EXPERIMENTS
 		for k in range(N_EXPERIMENTS):
@@ -41,13 +43,16 @@ for i, alg in enumerate(algorithms):
 			if alg != 'sms_emoa':
 				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
 				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
 				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
 				model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
 				_, _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
 				_, _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
+				_, _, train_arch[k] = model.evaluate(model.best_solution_t_archive, model.x_test, model.y_test)
 				_, _, arch[k] = model.evaluate(model.best_solution_archive, model.x_test, model.y_test)
 				train_fs[k] = model.best_solution.selected_features.shape[0]
 				val_fs[k] = model.best_solution_val.selected_features.shape[0]
+				train_arch_fs[k] = model.best_solution_t_archive.selected_features.shape[0]
 				arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
 			else:
 				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
@@ -60,12 +65,15 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['train_fs'] = train_fs
 		data[alg][ds]['val'] = val
 		data[alg][ds]['val_fs'] = val_fs
+		data[alg][ds]['arch_t'] = train_arch	
+		data[alg][ds]['arch_t_fs'] = train_arch_fs		
 		data[alg][ds]['arch'] = arch
 		data[alg][ds]['arch_fs'] = arch_fs
-		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
+		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
+		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
 
 def store_results(data, alg, filename, population):
-	with open(f'{filename}_{population}.csv', 'w', newline='') as file:
+	with open(f'final_exp/{alg}/{filename}_{population}.csv', 'w', newline='') as file:
 		writer = csv.writer(file)
 		all_rows = []
 		header = ['Dataset']
@@ -81,6 +89,7 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')
+# store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
+# store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
+store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
+# store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')
