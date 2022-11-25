@@ -16,7 +16,7 @@ from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms, iter_num, experiment
 from utilities.choose_solutions import evaluate
 
-from utilities.choose_solutions import evaluate3
+from utilities.choose_solutions import evaluate3, evaluate4
 from utilities.moea_utils import non_dominated_sorting_2
 
 C = np.array([1, 0.1], dtype=np.float32)
@@ -25,7 +25,7 @@ REF = np.array([60, 15], dtype=np.float32)
 def hv_test(population, X, y):
     # Evaluate data
     for member in population:
-        _, member.fitness, _ = evaluate(member, X, y, True)
+        _, member.fitness, _ = evaluate4(member, X, y, True)
     front = non_dominated_sorting_2(population)
     fitness = np.array([np.array(member.fitness, np.float32) for member in front[0]])
     fitness = fitness * C
@@ -93,5 +93,5 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv', 'train')
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv', 'arch')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv2', 'train')
+store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full_hv2', 'arch')
