@@ -1,21 +1,22 @@
-GSE25070	& 0.2646 & 13.80 & 7.6439 & 3.07 & 0.2964 & 2.53 & 0.3089 & 3.07 \\ 
-GSE32323	& 0.1368 & 16.00 & 8.8550 & 1.33 & 0.1962 & 2.03 & 0.2415 & 2.17 \\ 
-GSE44076	& 0.1466 & 11.50 & 2.2455 & 2.63 & 0.1420 & 2.13 & 0.1456 & 2.37 \\ 
-GSE44861	& 0.4520 & 9.67 & 16.4272 & 4.47 & 0.4671 & 2.60 & 0.4881 & 2.90 \\ 
-GSE14520\_U133A	& 0.2760 & 6.73 & 3.5434 & 8.80 & 0.3184 & 2.13 & 0.3117 & 2.33 \\ 
-GSE50579	& 0.4030 & 8.40 & 13.9422 & 4.40 & 0.3568 & 2.83 & 0.4172 & 2.83 \\ 
-GSE62232	& 0.1342 & 9.50 & 2.4910 & 1.87 & 0.1775 & 1.60 & 0.1693 & 2.13 \\ 
-GSE22529\_U133A	& 0.4086 & 8.97 & 12.3958 & 2.23 & 0.3843 & 4.33 & 0.3498 & 4.37 \\ 
-GSE22529\_U133B	& 0.3248 & 9.07 & 12.9792 & 1.67 & 0.3930 & 3.07 & 0.3581 & 3.50 \\ 
-GSE33615	& 0.0776 & 11.90 & 3.2666 & 1.57 & 0.1236 & 2.50 & 0.0926 & 2.87 \\ 
-GSE63270	& 0.1889 & 7.97 & 3.7892 & 3.07 & 0.2254 & 3.50 & 0.2286 & 4.23 \\ 
-ALL-AML-full	& 0.3230 & 10.03 & 9.7584 & 3.70 & 0.3170 & 3.33 & 0.3243 & 3.53 \\ 
-GSE22820	& 0.1351 & 13.37 & 8.6279 & 2.07 & 0.1495 & 2.93 & 0.1522 & 3.13 \\ 
-GSE59246	& 0.4687 & 11.13 & 16.3718 & 6.03 & 0.5792 & 3.70 & 0.5584 & 4.17 \\ 
-GSE70947	& 0.4354 & 7.20 & 17.7360 & 5.13 & 0.4478 & 2.50 & 0.4530 & 2.90 \\ 
-breastCancer-full	& 0.6524 & 9.23 & 27.2599 & 6.20 & 0.6518 & 3.30 & 0.6226 & 3.47 \\ 
-GSE6919\_U95Av2	& 0.7095 & 10.40 & 29.2038 & 6.23 & 0.6851 & 3.43 & 0.6683 & 3.83 \\ 
-GSE6919\_U95B	& 0.7038 & 9.80 & 31.1768 & 6.17 & 0.7400 & 4.10 & 0.6960 & 4.60 \\ 
-GSE11682	& 1.0628 & 11.27 & 29.0371 & 3.37 & 0.8654 & 2.53 & 0.7307 & 2.77 \\ 
-prostate\_tumorVSNormal-full	& 0.5928 & 7.30 & 15.0791 & 4.70 & 0.6232 & 2.73 & 0.6000 & 3.43 \\ 
-Todos	& 0.3948 & 10.16 & 13.5915 & 3.94 & 0.4070 & 2.89 & 0.3958 & 3.23 \\ 
+Colon$_1$			& 0.2964 						& \cellcolor{peach}2.53 	& 0.3089 $\leftrightarrow$ 						& 3.07 $\leftrightarrow$ 					& \cellcolor{lavender}0.2646 $\leftrightarrow$$\leftrightarrow$ 				& 13.80 $\downarrow$$\downarrow$ 		& 7.6439 $\leftrightarrow$$\leftrightarrow$  	& 3.07 $\leftrightarrow$$\leftrightarrow$ \\ 
+Colon$_2$			& 0.1962 						& 2.00						& 0.2415 $\leftrightarrow$						& 2.17 $\leftrightarrow$ 					& \cellcolor{lavender}0.1368 $\leftrightarrow$$\leftrightarrow$					& 16.00 $\downarrow$$\downarrow$		& 8.8550 $\leftrightarrow$$\leftrightarrow$		& \cellcolor{peach}1.33 $\leftrightarrow$$\leftrightarrow$ \\ 
+Colon$_3$			& \cellcolor{lavender}0.1420 	& \cellcolor{peach}2.10 	& 0.1456 $\leftrightarrow$						& 2.37 $\leftrightarrow$ 					& 0.1466 $\leftrightarrow$$\leftrightarrow$	 									& 11.50 $\downarrow$$\downarrow$		& 2.2455 $\leftrightarrow$$\leftrightarrow$		& 2.63 $\leftrightarrow$$\leftrightarrow$\\ 
+Colon$_4$			& 0.4671 						& \cellcolor{peach}2.63 	& 0.4881 $\leftrightarrow$						& 2.90 $\leftrightarrow$ 					& \cellcolor{lavender}0.4520 $\leftrightarrow$$\leftrightarrow$					& 9.67 	$\downarrow$$\downarrow$		& 16.4272$\downarrow$$\downarrow$ 	& 4.47 $\downarrow$$\leftrightarrow$\\ 
+Hígado$_1$			& 0.3184 						& \cellcolor{peach}2.10 	& 0.3117 $\leftrightarrow$						& 2.33 $\leftrightarrow$ 					& \cellcolor{lavender}0.2760 $\leftrightarrow$$\leftrightarrow$					& 6.73 	$\downarrow$$\downarrow$		& 3.5434 $\downarrow$$\downarrow$		& 8.80 $\downarrow$$\downarrow$\\ 
+Hígado$_2$			& \cellcolor{lavender}0.3568 	& \cellcolor{peach}2.83 	& 0.4172 $\leftrightarrow$						& \cellcolor{peach}2.83$\leftrightarrow$ 	& 0.4030 $\leftrightarrow$$\leftrightarrow$ 									& 8.40 	$\downarrow$$\downarrow$		& 13.9422$\leftrightarrow$$\leftrightarrow$ 	& 4.40 $\leftrightarrow$$\leftrightarrow$\\ 
+Hígado$_3$			& 0.1775 						& \cellcolor{peach}1.53 	& 0.1693 $\leftrightarrow$						& 2.13$\leftrightarrow$ 					& \cellcolor{lavender}0.1342 $\leftrightarrow$$\leftrightarrow$					& 9.50 	$\downarrow$$\downarrow$		& 2.4910 $\leftrightarrow$$\leftrightarrow$		& 1.87 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_1$		& 0.3843 						& 4.27 						& \cellcolor{lavender}0.3498$\leftrightarrow$ 	& 4.37$\leftrightarrow$ 					& 0.4086 $\leftrightarrow$$\leftrightarrow$										& 8.97 	$\downarrow$$\downarrow$		& 12.3958$\leftrightarrow$$\leftrightarrow$ 	& \cellcolor{peach}2.23 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_2$		& 0.3930 						& 3.07 						& 0.3581 $\leftrightarrow$						& 3.50$\leftrightarrow$ 					& \cellcolor{lavender}0.3248 $\leftrightarrow$$\leftrightarrow$					& 9.07 	$\downarrow$$\downarrow$		& 12.9792$\leftrightarrow$$\downarrow$ 	& \cellcolor{peach}1.67 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_3$		& 0.1236 						& 2.53 						& 0.0926 $\leftrightarrow$						& 2.87$\leftrightarrow$ 					& \cellcolor{lavender}0.0776 $\leftrightarrow$$\leftrightarrow$					& 11.90 $\downarrow$$\downarrow$		& 3.2666 $\downarrow$$\downarrow$		& \cellcolor{peach}1.57 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_4$		& 0.2254 						& 3.47 						& 0.2286 $\leftrightarrow$						& 4.23$\leftrightarrow$ 					& \cellcolor{lavender}0.1889 $\leftrightarrow$$\leftrightarrow$					& 7.97 	$\downarrow$$\downarrow$		& 3.7892 $\leftrightarrow$$\leftrightarrow$		& \cellcolor{peach}3.07 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_5$		& \cellcolor{lavender}0.3170 	& \cellcolor{peach}3.30 	& 0.3243 $\leftrightarrow$						& 3.53$\leftrightarrow$ 					& 0.3230 $\leftrightarrow$$\leftrightarrow$										& 10.03 $\downarrow$$\downarrow$		& 9.7584 $\leftrightarrow$$\leftrightarrow$		& 3.70 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_1$			& 0.1495 						& 2.90 						& 0.1522 $\leftrightarrow$						& 3.13$\leftrightarrow$ 					& \cellcolor{lavender}0.1351 $\leftrightarrow$$\leftrightarrow$					& 13.37 $\downarrow$$\downarrow$		& 8.6279 $\downarrow$$\downarrow$		& \cellcolor{peach}2.07 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_2$			& 0.5792 						& \cellcolor{peach}3.67 	& 0.5584 $\leftrightarrow$						& 4.17$\leftrightarrow$ 					& \cellcolor{lavender}0.4687 $\leftrightarrow$$\leftrightarrow$					& 11.13 $\downarrow$$\downarrow$		& 16.3718$\downarrow$$\downarrow$ 	& 6.03 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_3$			& 0.4478 						& \cellcolor{peach}2.47 	& 0.4530 $\leftrightarrow$						& 2.90$\leftrightarrow$ 					& \cellcolor{lavender}0.4354 $\leftrightarrow$$\leftrightarrow$					& 7.20 	$\downarrow$$\downarrow$		& 17.7360$\downarrow$$\downarrow$ 	& 5.13 $\downarrow$$\leftrightarrow$\\ 
+Mama$_4$			& \cellcolor{lavender}0.6518 	& \cellcolor{peach}3.23 	& 0.6226 $\leftrightarrow$						& 3.47$\leftrightarrow$ 					& 0.6524 $\leftrightarrow$$\leftrightarrow$										& 9.23 	$\downarrow$$\downarrow$		& 27.2599$\downarrow$$\downarrow$ 	& 6.20 $\downarrow$$\downarrow$\\ 
+Próstata$_1$		& \cellcolor{lavender}0.6851 	& \cellcolor{peach}3.53 	& 0.6683 $\leftrightarrow$						& 3.83$\leftrightarrow$ 					& 0.7095 $\leftrightarrow$$\leftrightarrow$										& 10.40 $\downarrow$$\downarrow$		& 29.2038$\downarrow$$\downarrow$ 	& 6.23 $\downarrow$$\leftrightarrow$\\ 
+Próstata$_2$		& \cellcolor{lavender}0.7400 	& \cellcolor{peach}4.07 	& 0.6960 $\leftrightarrow$						& 4.60$\leftrightarrow$ 					& 0.7038 $\leftrightarrow$$\leftrightarrow$										& 9.80 	$\downarrow$$\downarrow$		& 31.1768$\downarrow$$\downarrow$ 	& 6.17 $\downarrow$$\leftrightarrow$\\ 
+Próstata$_3$		& \cellcolor{lavender}0.8654 	& \cellcolor{peach}2.53 	& 0.7307 $\leftrightarrow$						& 2.77$\leftrightarrow$ 					& 1.0628 $\leftrightarrow$$\leftrightarrow$										& 11.27 $\downarrow$$\downarrow$		& 29.0371$\downarrow$$\downarrow$ 	& 3.37 $\leftrightarrow$$\leftrightarrow$\\ 
+Próstata$_4$		& 0.6232 						& 2.77 						& 0.6000 $\leftrightarrow$						& \cellcolor{peach}3.43 $\leftrightarrow$	& \cellcolor{lavender}0.5928 $\leftrightarrow$$\leftrightarrow$					& 7.30 	$\downarrow$$\downarrow$		& 15.0791$\downarrow$$\downarrow$ 	& 4.70 $\downarrow$$\leftrightarrow$\\ 
+\textbf{Promedio}	& 0.4070 						& 2.88 						& 0.3958 $\leftrightarrow$						& \cellcolor{deeppeach}3.23					& \cellcolor{lavenderblue}0.3948												& 10.16 								& 13.5915 										& 3.94 \\ 
+\bottomrule

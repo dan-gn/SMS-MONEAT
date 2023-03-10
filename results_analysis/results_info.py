@@ -21,10 +21,10 @@ selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
 for i, alg in enumerate(algorithms):
 	data[alg] = {}
-	iterations = 200 if alg=='n3o' else 18000
+	iterations = 200 if alg=='n3o' else 6000
 	for ds in datasets:
 		data[alg][ds] = {}
-		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
+		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final5\\{ds}"
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -84,7 +84,7 @@ for i, alg in enumerate(algorithms):
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
 
 
-with open('results_sms-moneat_final6.csv', 'w', newline='') as file:
+with open('results_sms-emoa_final5.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']

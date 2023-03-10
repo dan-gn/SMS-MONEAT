@@ -3,8 +3,8 @@ N_EXPERIMENTS = 30
 N_POPULATION = 100
 
 algorithms = []
-# algorithms.append('n3o')
-algorithms.append('sms_emoa')
+algorithms.append('n3o')
+# algorithms.append('sms_emoa')
 # algorithms.append('sms_moneat')
 
 iter_num = {'n3o': 200, 'sms_emoa': 6000, 'sms_moneat': 18000}
@@ -39,3 +39,26 @@ datasets.append('prostate_tumorVSNormal-full')
 # datasets.append('Prostate_GSE46602')
 # datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
 # datasets.append('Breast_GSE42568')
+
+
+dataset_names = []
+dataset_names.append('Colon$_1$')
+dataset_names.append('Colon$_2$')
+dataset_names.append('Colon$_3$')
+dataset_names.append('Colon$_4$')
+dataset_names.append('Hígado$_1$')
+dataset_names.append('Hígado$_2$')
+dataset_names.append('Hígado$_3$')
+dataset_names.append('Leucemia$_1$')
+dataset_names.append('Leucemia$_2$')
+dataset_names.append('Leucemia$_3$')
+dataset_names.append('Leucemia$_4$')
+dataset_names.append('Leucemia$_5$')
+dataset_names.append('Mama$_1$')
+dataset_names.append('Mama$_2$')
+dataset_names.append('Mama$_3$')
+dataset_names.append('Mama$_4$')
+dataset_names.append('Próstata$_1$')
+dataset_names.append('Próstata$_2$')
+dataset_names.append('Próstata$_3$')
+dataset_names.append('Próstata$_4$')

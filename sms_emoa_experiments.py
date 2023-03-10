@@ -27,13 +27,13 @@ datasets = []
 
 """ TESTING """
 
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE25070')
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE59246') 
+datasets.append('Breast_GSE70947')	
+datasets.append('Colorectal_GSE25070')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
 datasets.append('Leukemia_GSE22529_U133A') 
 datasets.append('Leukemia_GSE22529_U133B') 
 datasets.append('Leukemia_GSE33615')
@@ -63,12 +63,13 @@ n_repeats = 3
 save_results = True
 debug = False
 algorithm = 'sms_emoa'
+
 	
 
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 200 if algorithm=='n3o' else 18000,
+	'max_iterations' : 6000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
