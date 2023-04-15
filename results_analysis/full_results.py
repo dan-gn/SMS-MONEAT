@@ -70,7 +70,8 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch'] = arch
 		data[alg][ds]['arch_fs'] = arch_fs
 		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
-		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
+		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
+		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Train Arch: {np.mean(train_arch_fs)}, Arch {np.mean(arch_fs)}')
 
 def store_results(data, alg, filename, population):
 	with open(f'final_exp/{alg}/{filename}_{population}.csv', 'w', newline='') as file:
@@ -90,6 +91,6 @@ def store_results(data, alg, filename, population):
 		writer.writerows(all_rows)
 
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
-# store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
+store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')

@@ -41,7 +41,7 @@ for i, alg in enumerate(algorithms):
     for ds in datasets:
         data[alg][ds] = {}
         results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
+                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final4\\{ds}"
         train = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
@@ -69,7 +69,7 @@ for i, alg in enumerate(algorithms):
         data[alg][ds]['arch'] = np.mean(arch)		
         print(f'Algorithm: {alg}; Dataset: {ds}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 
-with open('results_sms_moneat_svm_6.csv', 'w', newline='') as file:
+with open('results_sms_emoa_svm_4.csv', 'w', newline='') as file:
 	writer = csv.writer(file)
 	all_rows = []
 	header = ['Dataset']

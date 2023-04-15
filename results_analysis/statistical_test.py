@@ -28,7 +28,8 @@ files = []
 # files.append('results_sms_moneat_final6_full_arch.csv')
 # files.append('results_n3o_final2_full_val.csv')
 files.append('results_sms_moneat_final6_full_svm_val.csv')
-files.append('results_sms_moneat_final6_full_svm_arch.csv')
+# files.append('results_sms_moneat_final6_full_svm_arch.csv')
+files.append('results_n3o_final2_full_svm_val.csv')
                
 g_mean = {}
 fs = {}
@@ -45,7 +46,7 @@ for ds in datasets:
     # sample2 = np.array(fs[files[1]][ds], np.float32)
     # _, data[ds]['fs'] = ranksums(sample1, sample2)
 
-with open('sms-moneat-val-svm_vs_sms-moneat-arch-svm.csv', 'w', newline='') as file:
+with open('sms-moneat-val-svm_vs_n3o-svm.csv', 'w', newline='') as file:
     writer = csv.writer(file) 
     all_rows = []
     header = ['Dataset', 'gmean', 'fs']

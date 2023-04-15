@@ -18,7 +18,7 @@ iterations = 18000
 data = {}
 
 for ds in datasets:
-    results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final\\{ds}"
+    results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final_6\\{ds}"
     kw_fs = [0] * N_EXPERIMENTS
     for k in range(N_EXPERIMENTS):
         results_filename = f"{ds}_MinMaxSc_{k}.pkl"
@@ -30,11 +30,11 @@ for ds in datasets:
     print(f'Dataset: {ds}; FS: {np.mean(kw_fs)}, Std: {stdev(kw_fs)}')
 
 
-# with open('results_kw.csv', 'w', newline='') as file:
-#     writer = csv.writer(file)
-#     all_rows = []
-#     header = ['Dataset', 'FS', 'Std']
-#     all_rows.append(header)
-#     all_rows.extend([[ds, data[ds]['mean'], data[ds]['std']] for ds in datasets])
-#     writer.writerows(all_rows)
+with open('results_kw.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    all_rows = []
+    header = ['Dataset', 'FS', 'Std']
+    all_rows.append(header)
+    all_rows.extend([[ds, data[ds]['mean'], data[ds]['std']] for ds in datasets])
+    writer.writerows(all_rows)
 
