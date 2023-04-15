@@ -31,10 +31,10 @@ def csv2expdata2(filename):
 metric = '_hv'
 
 files = []
-files.append(f'final_exp/n3o/results_n3o_final2_full{metric}_arch.csv')
+files.append(f'final_exp/n3o/results_n3o_final2_full{metric}2_arch.csv')
 files.append(f'final_exp/sms_emoa/results_sms_emoa_final5x_full{metric}_train.csv')
-files.append(f'final_exp/sms_moneat/results_sms_moneat_final6_full{metric}_train.csv')
-files.append(f'final_exp/sms_moneat/results_sms_moneat_final6_full{metric}_arch.csv')
+files.append(f'final_exp/sms_moneat/results_sms_moneat_final6_full{metric}2_train.csv')
+files.append(f'final_exp/sms_moneat/results_sms_moneat_final6_full{metric}2_arch.csv')
 
 res = {}
 for i, file in enumerate(files):
@@ -63,4 +63,4 @@ for ds in datasets:
 
 for ds in datasets:
     significance = data[ds]['res'] < 0.05
-    significance.to_csv(f'kw_final/hv/{ds}.csv')
+    significance.to_csv(f'kw_final/hv3/{ds}.csv')

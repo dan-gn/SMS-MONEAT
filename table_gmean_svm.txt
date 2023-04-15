@@ -1,21 +1,21 @@
-GSE25070	& 0.8967 &$\pm$ 0.14& 0.9144 &$\pm$ 0.14& 0.9063 &$\pm$ 0.13& 0.9088 &$\pm$ 0.13\\ 
-GSE32323	& 0.9276 &$\pm$ 0.20& 0.7776 &$\pm$ 0.38& 0.9374 &$\pm$ 0.20& 0.9414 &$\pm$ 0.12\\ 
-GSE44076	& 0.9824 &$\pm$ 0.03& 0.9720 &$\pm$ 0.04& 0.9680 &$\pm$ 0.04& 0.9752 &$\pm$ 0.03\\ 
-GSE44861	& 0.8398 &$\pm$ 0.12& 0.8112 &$\pm$ 0.20& 0.8148 &$\pm$ 0.13& 0.8190 &$\pm$ 0.15\\ 
-GSE14520\_U133A	& 0.9346 &$\pm$ 0.05& 0.9517 &$\pm$ 0.04& 0.9180 &$\pm$ 0.05& 0.9215 &$\pm$ 0.05\\ 
-GSE50579	& 0.7941 &$\pm$ 0.37& 0.7263 &$\pm$ 0.42& 0.7896 &$\pm$ 0.33& 0.8695 &$\pm$ 0.25\\ 
-GSE62232	& 0.9957 &$\pm$ 0.02& 0.9450 &$\pm$ 0.18& 0.9758 &$\pm$ 0.04& 0.9846 &$\pm$ 0.04\\ 
-GSE22529\_U133A	& 0.8443 &$\pm$ 0.34& 0.7715 &$\pm$ 0.40& 0.8581 &$\pm$ 0.30& 0.8293 &$\pm$ 0.34\\ 
-GSE22529\_U133B	& 0.7858 &$\pm$ 0.40& 0.7955 &$\pm$ 0.41& 0.8911 &$\pm$ 0.30& 0.8920 &$\pm$ 0.30\\ 
-GSE33615	& 0.9930 &$\pm$ 0.03& 0.9894 &$\pm$ 0.03& 0.9770 &$\pm$ 0.08& 0.9770 &$\pm$ 0.08\\ 
-GSE63270	& 0.9500 &$\pm$ 0.08& 0.9480 &$\pm$ 0.08& 0.9179 &$\pm$ 0.09& 0.9282 &$\pm$ 0.09\\ 
-ALL-AML-full	& 0.8809 &$\pm$ 0.15& 0.8793 &$\pm$ 0.13& 0.8521 &$\pm$ 0.14& 0.8860 &$\pm$ 0.13\\ 
-GSE22820	& 0.9948 &$\pm$ 0.01& 0.9267 &$\pm$ 0.25& 0.9598 &$\pm$ 0.18& 0.9253 &$\pm$ 0.25\\ 
-GSE59246	& 0.7987 &$\pm$ 0.11& 0.7945 &$\pm$ 0.11& 0.7317 &$\pm$ 0.15& 0.7311 &$\pm$ 0.13\\ 
-GSE70947	& 0.8255 &$\pm$ 0.08& 0.8373 &$\pm$ 0.07& 0.8128 &$\pm$ 0.07& 0.8041 &$\pm$ 0.06\\ 
-breastCancer-full	& 0.5254 &$\pm$ 0.29& 0.6125 &$\pm$ 0.20& 0.5919 &$\pm$ 0.22& 0.5537 &$\pm$ 0.29\\ 
-GSE6919\_U95Av2	& 0.6194 &$\pm$ 0.16& 0.6577 &$\pm$ 0.16& 0.6039 &$\pm$ 0.17& 0.6111 &$\pm$ 0.15\\ 
-GSE6919\_U95B	& 0.6461 &$\pm$ 0.12& 0.6436 &$\pm$ 0.18& 0.5843 &$\pm$ 0.11& 0.5843 &$\pm$ 0.13\\ 
-GSE11682	& 0.3662 &$\pm$ 0.38& 0.4190 &$\pm$ 0.41& 0.4231 &$\pm$ 0.39& 0.4828 &$\pm$ 0.42\\ 
-prostate\_tumorVSNormal-full	& 0.6071 &$\pm$ 0.17& 0.7426 &$\pm$ 0.13& 0.5986 &$\pm$ 0.17& 0.6102 &$\pm$ 0.18\\ 
-Todos	& 0.8104 &$\pm$ 0.26& 0.8058 &$\pm$ 0.27& 0.8056 &$\pm$ 0.25& 0.8118 &$\pm$ 0.25\\ 
+Colon$_1$		& 0.9063 &$\pm$ 0.13		& 0.9088 &$\pm$ 0.13 $\leftrightarrow$ 		& 0.8967 &$\pm$ 0.14 $\leftrightarrow$$\leftrightarrow$		& 0.9144 &$\pm$ 0.14 $\leftrightarrow$$\leftrightarrow$\\ 
+Colon$_2$		& 0.9374 &$\pm$ 0.20		& 0.9414 &$\pm$ 0.12 $\leftrightarrow$ 		& 0.9276 &$\pm$ 0.20 $\leftrightarrow$$\leftrightarrow$		& 0.7776 &$\pm$ 0.38 $\leftrightarrow$$\leftrightarrow$\\ 
+Colon$_3$		& 0.9680 &$\pm$ 0.04		& 0.9752 &$\pm$ 0.03 $\leftrightarrow$ 		& 0.9824 &$\pm$ 0.03 $\leftrightarrow$$\leftrightarrow$		& 0.9720 &$\pm$ 0.04 $\leftrightarrow$$\leftrightarrow$\\ 
+Colon$_4$		& 0.8148 &$\pm$ 0.13		& 0.8190 &$\pm$ 0.15 $\leftrightarrow$ 		& 0.8398 &$\pm$ 0.12 $\leftrightarrow$$\leftrightarrow$		& 0.8112 &$\pm$ 0.20 $\leftrightarrow$$\leftrightarrow$\\ 
+Hígado$_1$		& 0.9180 &$\pm$ 0.05		& 0.9215 &$\pm$ 0.05 $\leftrightarrow$ 		& 0.9346 &$\pm$ 0.05 $\leftrightarrow$$\leftrightarrow$		& 0.9517 &$\pm$ 0.04 $\uparrow$$\uparrow$\\ 
+Hígado$_2$		& 0.7896 &$\pm$ 0.33		& 0.8695 &$\pm$ 0.25 $\leftrightarrow$ 		& 0.7941 &$\pm$ 0.37 $\leftrightarrow$$\leftrightarrow$		& 0.7263 &$\pm$ 0.42 $\leftrightarrow$$\leftrightarrow$\\ 
+Hígado$_3$		& 0.9758 &$\pm$ 0.04		& 0.9846 &$\pm$ 0.04 $\leftrightarrow$ 		& 0.9957 &$\pm$ 0.02 $\leftrightarrow$$\leftrightarrow$		& 0.9450 &$\pm$ 0.18 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_1$	& 0.8581 &$\pm$ 0.30		& 0.8293 &$\pm$ 0.34 $\leftrightarrow$ 		& 0.8443 &$\pm$ 0.34 $\leftrightarrow$$\leftrightarrow$		& 0.7715 &$\pm$ 0.40 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_2$	& 0.8911 &$\pm$ 0.30		& 0.8920 &$\pm$ 0.30 $\leftrightarrow$ 		& 0.7858 &$\pm$ 0.40 $\leftrightarrow$$\leftrightarrow$		& 0.7955 &$\pm$ 0.41 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_3$	& 0.9770 &$\pm$ 0.08		& 0.9770 &$\pm$ 0.08 $\leftrightarrow$ 		& 0.9930 &$\pm$ 0.03 $\leftrightarrow$$\leftrightarrow$		& 0.9894 &$\pm$ 0.03 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_4$	& 0.9179 &$\pm$ 0.09		& 0.9282 &$\pm$ 0.09 $\leftrightarrow$ 		& 0.9500 &$\pm$ 0.08 $\leftrightarrow$$\leftrightarrow$		& 0.9480 &$\pm$ 0.08 $\leftrightarrow$$\leftrightarrow$\\ 
+Leucemia$_5$	& 0.8521 &$\pm$ 0.14		& 0.8860 &$\pm$ 0.13 $\leftrightarrow$ 		& 0.8809 &$\pm$ 0.15 $\leftrightarrow$$\leftrightarrow$		& 0.8793 &$\pm$ 0.13 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_1$		& 0.9598 &$\pm$ 0.18		& 0.9253 &$\pm$ 0.25 $\leftrightarrow$ 		& 0.9948 &$\pm$ 0.01 $\leftrightarrow$$\leftrightarrow$		& 0.9267 &$\pm$ 0.25 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_2$		& 0.7317 &$\pm$ 0.15		& 0.7311 &$\pm$ 0.13 $\leftrightarrow$ 		& 0.7987 &$\pm$ 0.11 $\leftrightarrow$$\leftrightarrow$		& 0.7945 &$\pm$ 0.11 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_3$		& 0.8128 &$\pm$ 0.07		& 0.8041 &$\pm$ 0.06 $\leftrightarrow$ 		& 0.8255 &$\pm$ 0.08 $\leftrightarrow$$\leftrightarrow$		& 0.8373 &$\pm$ 0.07 $\leftrightarrow$$\leftrightarrow$\\ 
+Mama$_4$		& 0.5919 &$\pm$ 0.22		& 0.5537 &$\pm$ 0.29 $\leftrightarrow$ 		& 0.5254 &$\pm$ 0.29 $\leftrightarrow$$\leftrightarrow$		& 0.6125 &$\pm$ 0.20 $\leftrightarrow$$\leftrightarrow$\\ 
+Próstata$_1$	& 0.6039 &$\pm$ 0.17		& 0.6111 &$\pm$ 0.15 $\leftrightarrow$ 		& 0.6194 &$\pm$ 0.16 $\leftrightarrow$$\leftrightarrow$		& 0.6577 &$\pm$ 0.16 $\leftrightarrow$$\leftrightarrow$\\ 
+Próstata$_2$	& 0.5843 &$\pm$ 0.11		& 0.5843 &$\pm$ 0.13 $\leftrightarrow$ 		& 0.6461 &$\pm$ 0.12 $\leftrightarrow$$\leftrightarrow$		& 0.6436 &$\pm$ 0.18 $\leftrightarrow$$\leftrightarrow$\\ 
+Próstata$_3$	& 0.4231 &$\pm$ 0.39		& 0.4828 &$\pm$ 0.42 $\leftrightarrow$ 		& 0.3662 &$\pm$ 0.38 $\leftrightarrow$$\leftrightarrow$		& 0.4190 &$\pm$ 0.41 $\leftrightarrow$$\leftrightarrow$\\ 
+Próstata$_4$	& 0.5986 &$\pm$ 0.17		& 0.6102 &$\pm$ 0.18 $\leftrightarrow$ 		& 0.6071 &$\pm$ 0.17 $\leftrightarrow$$\leftrightarrow$		& 0.7426 &$\pm$ 0.13 $\uparrow$$\uparrow$\\ 
+Promedio		& 0.8056 &$\pm$ 0.25		& 0.8118 &$\pm$ 0.25 		& 0.8104 &$\pm$ 0.26		& 0.8058 &$\pm$ 0.27\\ 

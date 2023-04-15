@@ -10,7 +10,7 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from experiment_info import datasets
+from experiment_info import datasets, dataset_names
 
 def csv2expdata(filename, cols):
     data = {}
@@ -22,8 +22,8 @@ def csv2expdata(filename, cols):
     return data
 
 filename = []
-alg = 'n3o'
-filename = f'final_exp/{alg}/results_{alg}_final2_full_ANNInfo_arch.csv'
+alg = 'sms_moneat'
+filename = f'final_exp/{alg}/results_{alg}_final6_full_ANNInfo_arch.csv'
 
 df = pd.read_csv(filename)
 df_fs = df.iloc[:20, :]
@@ -34,8 +34,8 @@ df_hidden_active = df.iloc[80:100, :]
 df_connections_active = df.iloc[100:120, :]
 
 rm_words = ['Breast_', 'Colorectal_', 'Leukemia_', 'Liver_', 'Prostate_']
-with open('table_ANNInfo_n3o.txt', 'w') as f:
-    for ds in datasets:
+with open('table_ANNInfo_sms_moneat_Q.txt', 'w') as f:
+    for j, ds in enumerate(datasets):
         row_fs = df_fs.loc[df_fs['Dataset'] == ds].iloc[0, 1:]
         row_fs_active = df_fs_active.loc[df_fs_active['Dataset'] == ds].iloc[0, 1:]
         row_hidden = df_hidden.loc[df_hidden['Dataset'] == ds].iloc[0, 1:]
@@ -45,7 +45,8 @@ with open('table_ANNInfo_n3o.txt', 'w') as f:
 
         ds_name = re.sub(r'|'.join(map(re.escape, rm_words)), '', ds)
         ds_name = re.sub(r'_', '\_', ds_name)
-        line = f'{ds_name}\t'
+        # line = f'{ds_name}\t'
+        line = f'{dataset_names[j]}\t'
         line += f'& {row_fs.mean():.2f} &$\pm$ {row_fs.std():.2f}'
         line += f'& {row_fs_active.mean():.2f} &$\pm$ {row_fs_active.std():.2f}'
         line += f'& {row_hidden.mean():.2f} &$\pm$ {row_hidden.std():.2f}'

@@ -9,7 +9,7 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from experiment_info import datasets
+from experiment_info import datasets, dataset_names
 
 def csv2expdata(filename, cols):
     data = {}
@@ -21,25 +21,26 @@ def csv2expdata(filename, cols):
     return data
 
 filename = []
-alg = 'n3o'
-filename.append(f'final_exp/{alg}/results_{alg}_final2_full_svm_arch.csv')
-alg = 'sms_emoa'
-filename.append(f'final_exp/{alg}/results_{alg}_final5x_full_svm_train.csv')
 alg = 'sms_moneat'
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_svm_val.csv')
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_svm_arch.csv')
+filename.append(f'final_exp/{alg}/results_{alg}_final6_full_val.csv')
+filename.append(f'final_exp/{alg}/results_{alg}_final6_full_arch.csv')
+alg = 'n3o'
+filename.append(f'final_exp/{alg}/results_{alg}_final2_full_arch.csv')
+alg = 'sms_emoa'
+filename.append(f'final_exp/{alg}/results_{alg}_final5x_full_train.csv')
 
 
 df = [pd.read_csv(file) for file in filename]
 
 rm_words = ['Breast_', 'Colorectal_', 'Leukemia_', 'Liver_', 'Prostate_']
-with open('table_gmean_svm.txt', 'w') as f:
+with open('table_gmean.txt', 'w') as f:
     all_rows = [[] for _ in range(len(filename))]
-    for ds in datasets:
+    for j, ds in enumerate(datasets):
         row = [x.loc[x['Dataset'] == ds].iloc[0, 1:] for x in df]
         ds_name = re.sub(r'|'.join(map(re.escape, rm_words)), '', ds)
         ds_name = re.sub(r'_', '\_', ds_name)
-        line = f'{ds_name}\t'
+        # line = f'{ds_name}\t'
+        line = f'{dataset_names[j]}\t'
         for r in row:
             line += f'& {r.mean():.4f} &$\pm$ {r.std():.2f}'
         line += '\\\\ \n'
@@ -47,7 +48,7 @@ with open('table_gmean_svm.txt', 'w') as f:
         for i, r in enumerate(row):
             all_rows[i].append(r)
     all_rows = [pd.DataFrame(r).stack() for r in all_rows]
-    line = f'Todos\t'
+    line = f'Promedio\t'
     for r in all_rows:
         line += f'& {r.mean():.4f} &$\pm$ {r.std():.2f}'
     line += '\\\\ \n'

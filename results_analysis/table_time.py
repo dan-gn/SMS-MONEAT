@@ -9,7 +9,7 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from experiment_info import datasets
+from experiment_info import datasets, dataset_names
 
 def csv2expdata(filename, cols):
     data = {}
@@ -21,12 +21,12 @@ def csv2expdata(filename, cols):
     return data
 
 filename = []
+alg = 'sms_moneat'
+filename.append(f'final_exp/{alg}/results_{alg}_final6_full_time.csv')
 alg = 'n3o'
 filename.append(f'final_exp/{alg}/results_{alg}_final2_full_time.csv')
 alg = 'sms_emoa'
 filename.append(f'final_exp/{alg}/results_{alg}_final5x_full_time.csv')
-alg = 'sms_moneat'
-filename.append(f'final_exp/{alg}/results_{alg}_final6_full_time.csv')
 
 
 df = [pd.read_csv(file) for file in filename]
@@ -34,11 +34,12 @@ df = [pd.read_csv(file) for file in filename]
 rm_words = ['Breast_', 'Colorectal_', 'Leukemia_', 'Liver_', 'Prostate_']
 with open('table_time.txt', 'w') as f:
     all_rows = [[] for _ in range(len(filename))]
-    for ds in datasets:
+    for j, ds in enumerate(datasets):
         row = [x.loc[x['Dataset'] == ds].iloc[0, 1:] for x in df]
         ds_name = re.sub(r'|'.join(map(re.escape, rm_words)), '', ds)
         ds_name = re.sub(r'_', '\_', ds_name)
-        line = f'{ds_name}\t'
+        # line = f'{ds_name}\t'
+        line = f'{dataset_names[j]}\t'
         for r in row:
             line += f'& {r.mean():.4f} &$\pm$ {r.std():.2f}'
         line += '\\\\ \n'
