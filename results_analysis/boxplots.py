@@ -22,7 +22,7 @@ def csv2expdata(filename):
             metric[row[0]] = row[1:]
     return metric
 
-alg_names = ['SMS-MONEAT', 'N3O']
+alg_names = ['SMS-MONEAT', 'N3O', 'SMS-EMOA']
 
 data = {}
 metric = '_time'
@@ -47,10 +47,10 @@ exp = experiment[alg]
 filename = f'final_exp/{alg}/results_{alg}_final{exp}_full{metric}.csv'
 data[alg_names[1]] = pd.read_csv(filename, header=0, index_col=0).transpose()
 
-# alg = 'sms_emoa'
-# exp = experiment[alg]
-# filename = f'final_exp/{alg}/results_{alg}_final{exp}_full{metric}.csv'
-# data[alg_names[2]] = pd.read_csv(filename, header=0, index_col=0).transpose()
+alg = 'sms_emoa'
+exp = experiment[alg]
+filename = f'final_exp/{alg}/results_{alg}_final{exp}_full{metric}.csv'
+data[alg_names[2]] = pd.read_csv(filename, header=0, index_col=0).transpose()
 
 
 # alg_names = ['N3O', 'SMS-MONEAT (P)', 'SMS-MONEAT (Q)']
@@ -80,14 +80,37 @@ dataset_names.append('Próstata3')
 dataset_names.append('Próstata4')
 
 
-for ds in dataset_names:
-    x.extend([ds for _ in range(N_EXPERIMENTS)])
+# for ds in dataset_names:
+#     x.extend([ds for _ in range(N_EXPERIMENTS)])
+
+# fig = go.Figure()
+# for alg in alg_names: 
+#     y = []
+#     for ds in datasets:
+#         y.extend(list(data[alg][ds]))
+#     fig.add_trace(go.Box(y=y, x=x, name=alg))
+
+# fig.update_layout(
+#     xaxis_title='Conjunto de datos',
+#     yaxis_title=metric_names[metric],
+#     boxmode='group'
+# )
+# fig.show()
+
+# seaborn.set(style='whitegrid')
+# seaborn.boxplot(data=df)
+# plt.xticks(rotation='vertical')
+# plt.show()
+
+for name in alg_names:
+    x.extend([name for _ in range(N_EXPERIMENTS*len(dataset_names))])
 
 fig = go.Figure()
 for alg in alg_names: 
     y = []
     for ds in datasets:
         y.extend(list(data[alg][ds]))
+    print(np.mean(y))
     fig.add_trace(go.Box(y=y, x=x, name=alg))
 
 fig.update_layout(
@@ -95,9 +118,30 @@ fig.update_layout(
     yaxis_title=metric_names[metric],
     boxmode='group'
 )
-fig.show()
 
-# seaborn.set(style='whitegrid')
-# seaborn.boxplot(data=df)
-# plt.xticks(rotation='vertical')
-# plt.show()
+# fig.show()
+
+boxplot_data = []
+for alg in alg_names:
+    temp = []
+    for ds in datasets:
+        temp.extend(list(data[alg][ds]))
+    boxplot_data.append(temp)
+
+colors = ['#6666ff', '#ff6666', '#66ff66']
+
+fig, ax = plt.subplots()
+ax.set_title('Execution time comparion from microarray experiments')
+ax.set_xlabel('Algorithm')
+ax.set_ylabel('Time (s)')
+print(len(boxplot_data), len(boxplot_data[0]))
+bplot = ax.boxplot(boxplot_data,
+                   patch_artist=True,  # fill with color
+                   labels=alg_names)  # will be used to label x-ticks
+
+
+# fill with colors
+for patch, color in zip(bplot['boxes'], colors):
+    patch.set_facecolor(color)
+
+plt.show()

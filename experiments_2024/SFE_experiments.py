@@ -37,24 +37,24 @@ datasets = []
 
 """ TESTING """
 
-datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE22820') 
 # datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE25070')
 # datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') 
-# datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232') 
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE6919_U95B')
-# datasets.append('Prostate_GSE6919_U95C')
-# datasets.append('Prostate_GSE11682')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
+datasets.append('Leukemia_GSE63270') 
+datasets.append('Liver_GSE14520_U133A') 
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232') 
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE6919_U95B')
+datasets.append('Prostate_GSE6919_U95C')
+datasets.append('Prostate_GSE11682')
 # datasets.append('breastCancer-full') 
 # datasets.append('ALL-AML-full')
 # datasets.append('prostate_tumorVSNormal-full')
@@ -77,7 +77,8 @@ algorithm = 'sfe'
 	
 
 params = {
-	'max_iterations' : 60,
+	'n_population' : 1,
+	'max_iterations' : 6000,
 }
 
 
@@ -106,8 +107,8 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 13 or i >= 15:	
 			# if i >= 15:
-			if i < 15:
-				continue
+			# if i < 10:
+			# 	continue
 
 			print(f'Seed = {seed}, test = {i}')
 			print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')
@@ -170,7 +171,7 @@ if __name__ == '__main__':
 			print(f'Time Execution: {time_exec}')
 
 			print('Best solution: Train Dataset')
-			acc, fitness, g_mean = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
+			acc, fitness, g_mean = model.final_evaluate(model.individual, model.x_train, model.y_train, model.x_test, model.y_test)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 			print('\n')
 
@@ -180,6 +181,6 @@ if __name__ == '__main__':
 				results_filename = f"{filename}_MinMaxSc_{i}.pkl"
 				with open(f'{results_path}/{results_filename}', 'wb') as f:
 					pickle.dump([problem, params, result], f)
-				with open(f'{results_path}/record_{results_filename}', 'wb') as f:
-					pickle.dump(record, f)
+				# with open(f'{results_path}/record_{results_filename}', 'wb') as f:
+				# 	pickle.dump(record, f)
 				problem['fitness_function'] = torch_fitness_function	

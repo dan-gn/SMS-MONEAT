@@ -30,7 +30,7 @@ def fit(xtrain, ytrain, kk):
     #  print('pos', pos)
      kf = KFold(n_splits=k)
 
-     model  = KNeighborsClassifier(n_neighbors =1,metric='euclidean') 
+     model  = KNeighborsClassifier(n_neighbors =2,metric='euclidean') 
      X=xtrain[:,pos]
      
     #  model.fit(X, ytrain)

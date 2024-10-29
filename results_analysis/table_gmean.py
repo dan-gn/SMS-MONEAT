@@ -28,6 +28,8 @@ alg = 'n3o'
 filename.append(f'final_exp/{alg}/results_{alg}_final2_full_arch.csv')
 alg = 'sms_emoa'
 filename.append(f'final_exp/{alg}/results_{alg}_final5x_full_train.csv')
+alg = 'sfe'
+filename.append(f'results/{alg}-pop_1-it_6000_seed0-exp2024.csv')
 
 
 df = [pd.read_csv(file) for file in filename]
