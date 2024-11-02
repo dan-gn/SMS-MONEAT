@@ -27,7 +27,7 @@ from algorithms.n3o import N3O
 from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 from algorithms.sms_emoa import SMS_EMOA
 
-from experiments_2024.SFE_2 import SFE
+from algorithms.chc import MOCHC
 
 # import warnings
 # warnings.simplefilter("ignore", UserWarning)
@@ -37,24 +37,24 @@ datasets = []
 
 """ TESTING """
 
-# datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE22820') 
 # datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE25070')
 # datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE22529_U133A') 
-datasets.append('Leukemia_GSE22529_U133B') 
-datasets.append('Leukemia_GSE33615')
-datasets.append('Leukemia_GSE63270') 
-datasets.append('Liver_GSE14520_U133A') 
-datasets.append('Liver_GSE50579')
-datasets.append('Liver_GSE62232') 
-datasets.append('Prostate_GSE6919_U95Av2')
-datasets.append('Prostate_GSE6919_U95B')
-datasets.append('Prostate_GSE6919_U95C')
-datasets.append('Prostate_GSE11682')
+# datasets.append('Leukemia_GSE22529_U133A') 
+# datasets.append('Leukemia_GSE22529_U133B') 
+# datasets.append('Leukemia_GSE33615')
+# datasets.append('Leukemia_GSE63270') 
+# datasets.append('Liver_GSE14520_U133A') 
+# datasets.append('Liver_GSE50579')
+# datasets.append('Liver_GSE62232') 
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE6919_U95B')
+# datasets.append('Prostate_GSE6919_U95C')
+# datasets.append('Prostate_GSE11682')
 # datasets.append('breastCancer-full') 
 # datasets.append('ALL-AML-full')
 # datasets.append('prostate_tumorVSNormal-full')
@@ -70,9 +70,9 @@ datasets.append('Prostate_GSE11682')
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = True
-debug = False
-algorithm = 'sfe'
+save_results = False
+debug = True
+algorithm = 'mochc'
 
 	
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 13 or i >= 15:	
 			# if i >= 15:
-			# if i < 10:
+			# if i > 0:
 			# 	continue
 
 			print(f'Seed = {seed}, test = {i}')
@@ -157,8 +157,8 @@ if __name__ == '__main__':
 				model = SMS_NEAT(problem, params)
 			elif algorithm == 'sms_emoa':
 				model = SMS_EMOA(problem, params)
-			elif algorithm == 'sfe':
-				model = SFE(problem, params)
+			elif algorithm == 'mochc':
+				model = MOCHC(problem, params)
 
 			start = time.time()
 			record['population'] = model.run(i, debug)
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 			print(f'Time Execution: {time_exec}')
 
 			print('Best solution: Train Dataset')
-			acc, fitness, g_mean = model.final_evaluate(model.individual, model.x_train, model.y_train, model.x_test, model.y_test)
+			acc, fitness, g_mean = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 			print('\n')
 
