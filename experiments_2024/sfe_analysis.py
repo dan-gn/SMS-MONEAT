@@ -9,8 +9,8 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
-from experiment_info import datasets, algorithms
+from results_analysis.experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
+from results_analysis.experiment_info import datasets, algorithms
 
 
 data = {}
@@ -31,7 +31,7 @@ for ds in datasets:
             results = pickle.load(f)
         time[k] = results[2]['time']
         model = results[2]['model']
-        _, fitness, g_mean[k] = model.final_evaluate(model.individual, model.x_train, model.y_train, model.x_test, model.y_test)
+        _, fitness, g_mean[k] = model.final_evaluate(model.best_solution.best_position, model.x_train, model.y_train, model.x_test, model.y_test)
         loss[k] = fitness[0]
         fs[k] = fitness[1]
     data[ds]['time'] = np.mean(time)		

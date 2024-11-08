@@ -28,6 +28,7 @@ from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
 from algorithms.sms_emoa import SMS_EMOA
 
 from experiments_2024.SFE_2 import SFE
+from experiments_2024.sfe_pso import SFE_PSO
 
 # import warnings
 # warnings.simplefilter("ignore", UserWarning)
@@ -44,8 +45,8 @@ datasets = []
 # datasets.append('Colorectal_GSE32323')
 # datasets.append('Colorectal_GSE44076')
 # datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE22529_U133A') 
-datasets.append('Leukemia_GSE22529_U133B') 
+# datasets.append('Leukemia_GSE22529_U133A') 
+# datasets.append('Leukemia_GSE22529_U133B') 
 datasets.append('Leukemia_GSE33615')
 datasets.append('Leukemia_GSE63270') 
 datasets.append('Liver_GSE14520_U133A') 
@@ -55,9 +56,9 @@ datasets.append('Prostate_GSE6919_U95Av2')
 datasets.append('Prostate_GSE6919_U95B')
 datasets.append('Prostate_GSE6919_U95C')
 datasets.append('Prostate_GSE11682')
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 
 """ IRACE """
@@ -72,7 +73,7 @@ k_folds = 10
 n_repeats = 3
 save_results = True
 debug = False
-algorithm = 'sfe'
+algorithm = 'sfe-pso'
 
 	
 
@@ -107,8 +108,10 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 13 or i >= 15:	
 			# if i >= 15:
-			# if i < 10:
+			# if i < 7:
 			# 	continue
+
+			
 
 			print(f'Seed = {seed}, test = {i}')
 			print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')
@@ -117,6 +120,7 @@ if __name__ == '__main__':
 			# print(f'Statistical Filtering...')
 			filter = KruskalWallisFilter(threshold=0.01)
 			x_train, features_selected = filter.fit_transform(x_train, y_train)
+			# x_val, _ = filter.transform(x_val)
 			x_test, _ = filter.transform(x_test)
 			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
 			params['mutation_prob'] = 1 / (features_selected.shape[0])
@@ -125,7 +129,11 @@ if __name__ == '__main__':
 			# print(f'Scaling datasets...')
 			scaler = MinMaxScaler()
 			x_train = scaler.fit_transform(x_train)
+			# x_val = scaler.transform(x_val)
 			x_test = scaler.transform(x_test)
+			
+			# x_train = np.concatenate((x_train, x_val))
+			# y_train = np.concatenate((y_train, y_val))
 
 			# print(f'Final preprocessing data steps...')
 			y_train = np.expand_dims(y_train, axis=1)
@@ -159,6 +167,8 @@ if __name__ == '__main__':
 				model = SMS_EMOA(problem, params)
 			elif algorithm == 'sfe':
 				model = SFE(problem, params)
+			elif algorithm == 'sfe-pso':
+				model = SFE_PSO(problem, params)
 
 			start = time.time()
 			record['population'] = model.run(i, debug)
@@ -171,7 +181,7 @@ if __name__ == '__main__':
 			print(f'Time Execution: {time_exec}')
 
 			print('Best solution: Train Dataset')
-			acc, fitness, g_mean = model.final_evaluate(model.individual, model.x_train, model.y_train, model.x_test, model.y_test)
+			acc, fitness, g_mean = model.final_evaluate(model.best_solution.position, model.x_train, model.y_train, model.x_test, model.y_test)
 			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 			print('\n')
 

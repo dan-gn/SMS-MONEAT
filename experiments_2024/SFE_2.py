@@ -3,7 +3,6 @@ import math
 
 import pandas as pd
 import scipy.stats as stats
-# from Fit import fit
 import torch
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import StratifiedKFold

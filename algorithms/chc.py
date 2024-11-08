@@ -21,6 +21,8 @@ from utilities.moea_utils import non_dominated_sorting
 from utilities.stats_utils import geometric_mean
 from utilities.fitness_functions import torch_fitness_function
 
+import time
+import itertools
 
 class Individual:
 
@@ -42,7 +44,7 @@ class Individual:
         #     index = np.random.randint(self.n_variables)
         #     self.genome[index] = 1
         # self.genome = np.random.randint(0, 2, size= self.n_variables)
-        threshold = 0.05
+        threshold = 0.01
         self.genome = np.random.rand(self.n_variables)
         self.genome = [0 if x >= threshold else 1 for x in self.genome]
 
@@ -65,14 +67,12 @@ class CHC:
         self.population_size = 100
         self.cataclysmic_muation_prob = 0.35
         self.preserved_population = 0.05
-        self.initial_convergence_count = 0.05
+        self.initial_convergence_count = 0.02
         self.convergence_value_k = 1
         self.max_evaluations = 6000
         self.current_evaluations = 0
         # Crossover -> HUX
         # Parent selection -> Random with incest threshold
-        self.beta = 1
-        self.n_competitors = 2
         # New generation selection -> Elitist selection
         # Ordering criterion -> Sort by value
         # Problem parameters
@@ -92,7 +92,7 @@ class CHC:
             population.append(member)
         return population
 
-    def ending_condition(self):
+    def ending_condition(self, iteration):
         return False # No ending condition
     
     def select_parents(self, population, convergence_count):
@@ -101,18 +101,19 @@ class CHC:
         #     parent_index = np.random.choice(self.population_size, 2, replace=False)
         #     parents.append([population[parent_index[0]], population[parent_index[1]]])
         # return parents
-        parents = []
-        for parent1 in population:
-            for parent2 in population:
-                if self.hamming_distance(parent1.genome, parent2.genome) > convergence_count:
-                    parents.append([parent1, parent2])
+        # parents = []
+        # for parent1 in population:
+            # for parent2 in population:
+            #     if self.hamming_distance(parent1.genome, parent2.genome) > convergence_count:
+            #         parents.append([parent1, parent2])
+        parents = [(parent1, parent2) for parent1, parent2 in itertools.combinations(population, 2) if self.hamming_distance(parent1.genome, parent2.genome) > convergence_count]
         if len(parents) > self.population_size:
-            return np.random.choice(parents, self.population_size, replace=False)
+            random_index = np.random.choice(len(parents), int(self.population_size/2), replace=False)
+            return [parents[i] for i in random_index]
         return parents
-
     
     def hamming_distance(self, a, b):
-        return np.sum(a != b)
+        return np.sum(np.array(a) != np.array(b))
     
     def half_uniform_crossover(self, parent1, parent2):
         parent1 = np.array(parent1)
@@ -146,6 +147,8 @@ class CHC:
             _, child1.fitness, _ = self.evaluate(child1, self.x_train, self.y_train)
             _, child2.fitness, _ = self.evaluate(child2, self.x_train, self.y_train)
             offspring.extend([child1, child2])
+            if self.current_evaluations >= self.max_evaluations:
+                break
         return offspring
 
     def elitism(self, population, offspring):
@@ -153,14 +156,14 @@ class CHC:
         sorted_pop = sorted(offspring, key=lambda x:(x.fitness[0], x.fitness[1]))
         return sorted_pop[:self.population_size]
 
-    def modified(self, population, new_population):
+    def modified(self, population, new_population, parents):
         # population = sorted(population, key=lambda x:(x.fitness[0], x.fitness[1]))
         # genomes_a = np.array([member.genome for member in population])
         # genomes_b = np.array([member.genome for member in new_population])
         # if np.array_equal(genomes_a, genomes_b):
         #      return False
         # return True
-        return True if len(new_population) else False
+        return True if len(parents) else False
     
     def mutate(self, member):
         random_array = np.random.rand(self.n_var)
@@ -231,11 +234,9 @@ class CHC:
         convergence_count = self.initialize_convergence_count()
         population = self.initialize_population()
         iteration = 0
-        for member in population:
-            print(np.sum(member.genome))
         while self.current_evaluations < self.max_evaluations:
             iteration += 1
-            if self.ending_condition():
+            if self.ending_condition(iteration):
                 break
             parents = self.select_parents(population, convergence_count)
             offspring = self.crossover(parents, convergence_count)
@@ -245,12 +246,17 @@ class CHC:
                 mean_loss = np.mean([x.fitness[0] for x in new_population])
                 mean_fs = np.mean([x.fitness[1] for x in new_population])
                 print(f'Iteration {iteration}, Evaluations {self.current_evaluations}, Convergence {convergence_count}, mean loss {mean_loss}, mean fs {mean_fs}')
-            if not self.modified(population, new_population):
+            if not self.modified(population, new_population, parents):
+                # distance = [self.hamming_distance(parent1.genome, parent2.genome) for parent1, parent2 in itertools.combinations(population, 2)]
+                # convergence_count = max(distance)
                 convergence_count = convergence_count - 1
                 if convergence_count <= -self.convergence_value_k:
+                    self.archive = self.elitism(self.archive, new_population)
                     new_population = self.restart(population)
                     convergence_count = self.initialize_convergence_count()
-            population = copy.deepcopy(new_population)
+            # population = copy.deepcopy(new_population)
+            population = list(new_population)
+        self.archive = self.elitism(self.archive, new_population)
         n_objectives = len(population[0].fitness)
         self.best_solution = Individual()
         self.best_solution.fitness = np.ones(n_objectives) * math.inf
@@ -276,6 +282,8 @@ class MOCHC(CHC):
         return sorted_population
 
     def elitism(self, population, offspring):
+        if len(offspring) == 0:
+            return population
         offspring.extend(population)
         # fronts = non_dominated_sorting(offspring)
         points = [member.fitness for member in offspring]
@@ -284,7 +292,6 @@ class MOCHC(CHC):
         for index_front, front in enumerate(ndf):
             for index_pop in front:
                 fronts[index_front].append(offspring[index_pop])
-
         new_population = []
         for front in fronts:
             if len(new_population) + len(front) > self.population_size:

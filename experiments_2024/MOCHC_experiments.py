@@ -37,7 +37,7 @@ datasets = []
 
 """ TESTING """
 
-datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE22820') 
 # datasets.append('Breast_GSE59246') 
 # datasets.append('Breast_GSE70947')	
 # datasets.append('Colorectal_GSE25070')
@@ -55,9 +55,9 @@ datasets.append('Breast_GSE22820')
 # datasets.append('Prostate_GSE6919_U95B')
 # datasets.append('Prostate_GSE6919_U95C')
 # datasets.append('Prostate_GSE11682')
-# datasets.append('breastCancer-full') 
-# datasets.append('ALL-AML-full')
-# datasets.append('prostate_tumorVSNormal-full')
+datasets.append('breastCancer-full') 
+datasets.append('ALL-AML-full')
+datasets.append('prostate_tumorVSNormal-full')
 
 
 """ IRACE """
@@ -70,8 +70,8 @@ datasets.append('Breast_GSE22820')
 seed = 0
 k_folds = 10
 n_repeats = 3
-save_results = False
-debug = True
+save_results = True
+debug = False
 algorithm = 'mochc'
 
 	
@@ -117,6 +117,7 @@ if __name__ == '__main__':
 			# print(f'Statistical Filtering...')
 			filter = KruskalWallisFilter(threshold=0.01)
 			x_train, features_selected = filter.fit_transform(x_train, y_train)
+			# x_val, _ = filter.transform(x_val)
 			x_test, _ = filter.transform(x_test)
 			print(f'Remaining features after Kruskal Wallis H Test: {features_selected.shape[0]} features')
 			params['mutation_prob'] = 1 / (features_selected.shape[0])
@@ -125,7 +126,11 @@ if __name__ == '__main__':
 			# print(f'Scaling datasets...')
 			scaler = MinMaxScaler()
 			x_train = scaler.fit_transform(x_train)
+			# x_val = scaler.transform(x_val)
 			x_test = scaler.transform(x_test)
+
+			# x_train = np.concatenate((x_train, x_val))
+			# y_train = np.concatenate((y_train, y_val))
 
 			# print(f'Final preprocessing data steps...')
 			y_train = np.expand_dims(y_train, axis=1)
@@ -172,7 +177,7 @@ if __name__ == '__main__':
 
 			print('Best solution: Train Dataset')
 			acc, fitness, g_mean = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
-			print(f'Train dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
+			print(f'Test dataset: fitness = {fitness}, accuracy = {acc}, g mean = {g_mean}')
 			print('\n')
 
 			if save_results:
