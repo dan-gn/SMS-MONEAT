@@ -1,0 +1,2 @@
+crossover_prob		mutation_prob		
+0.75				0.10				

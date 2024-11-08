@@ -1,0 +1,5 @@
+maxExperiments = 1000
+parameterFile = "./parameters.txt"
+configurationsFile = "./configurations.txt"
+trainInstancesFile = "./instances.txt"
+targetRunner = "./target-runner.bat"
