@@ -15,9 +15,10 @@ class SFE:
     def __init__(self, problem: dict, params: dict) -> None:
         # Execution algorithm parameters
         self.max_iterations = params['max_iterations']
-        self.UR = 0.3
-        self.UR_Max = 0.3
-        self.UR_Min = 0.001
+        self.UR = params['UR']
+        self.UR_Max = params['UR_max']
+        self.UR_Min = params['UR_min']
+        self.SN = params['SN']
         
         self.Run = 1
 
@@ -60,8 +61,8 @@ class SFE:
             if np.sum(new_individual) == 0:
                 S_Index = np.where(individual == 0)                  # Find non-selected Features in X
                 NSF_X = np.size(S_Index, 1)                 # Number of non-selected Features in X
-                SN = 1                                      # The Number of Features to Select
-                K1 = np.random.randint(0, NSF_X, SN)        # Generate SN random number between 1 to the number of non-selected features in X
+                self.SN = 1                                      # The Number of Features to Select
+                K1 = np.random.randint(0, NSF_X, self.SN)        # Generate SN random number between 1 to the number of non-selected features in X
                 res = np.array([*set(K1)])
                 res1 = np.array(res)
                 K = S_Index[0][[res1]]
