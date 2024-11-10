@@ -6,6 +6,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
+warnings.simplefilter("ignore", RuntimeWarning)
+warnings.simplefilter("ignore", FutureWarning)
 
 import sys
 sys.path.insert(0, '../..')
@@ -105,15 +107,21 @@ model = SMS_EMOA(problem, params)
 model.run(seed, debug=False)
 
 
-reference = np.array([60, 15])
+A = 60
+B = 100
+reference = np.array([A, B])
 alpha = 10
 for member in model.population:
-	member.accuracy, member.fitness, _ = model.evaluate(member, model.x_test, model.y_test, True)
+	member.accuracy, member.fitness, _ = model.evaluate(member, model.x_test, model.y_test)
 front = non_dominated_sorting(model.population)
-fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0]])
-unq, count = np.unique(fitness, axis=0, return_counts=True)
-hv = hypervolume(unq)
+fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0] if (f.fitness[0] <= A and f.fitness[1] <= 10*B)]) 
+if len(fitness) < 1:
+	target = 1
+	print(target)
+else:
+	unq, count = np.unique(fitness, axis=0, return_counts=True)
+	hv = hypervolume(unq)
 
-target = -hv.compute(reference)
-# target = np.mean([member.fitness[0] for member in model.population if member.accuracy is not None])
-print(target)
+	target = -hv.compute(reference)
+	# target = np.mean([member.fitness[0] for member in model.population if member.accuracy is not None])
+	print(target)
