@@ -1,2 +1,2 @@
-ur_max      sn		
-0.3			1
+ur_min      ur_max      sn		
+3           0.3			1

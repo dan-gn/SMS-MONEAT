@@ -1,8 +1,14 @@
+import sys
+import os
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
 import numpy as np
 import math
 import copy
 
-from SFE_2 import SFE
+from experiments_2024.SFE_2 import SFE
 
 class Individual: # Particle
 
@@ -72,9 +78,9 @@ class SFE_PSO(SFE):
         self.x_test_full = self.x_test.clone()
         self.max_evaluations = self.max_iterations
         self.population_size = 100
-        self.w = 1
-        self.c1 = 2
-        self.c2 = 1.5
+        self.w = params['w']
+        self.c1 = params['c1']
+        self.c2 = params['c2']
 
     def initialize_population(self):
         population = [] 
@@ -138,19 +144,19 @@ class SFE_PSO(SFE):
         
     def run(self, seed: int = None, debug: bool = False):
         np.random.seed(seed)
-        fitness_vector = np.zeros(self.max_iterations)
-        EFs = 1
+        Nvar = np.size(self.x_train, 1)                         # Number of Features in Dataset
     
         individual = np.random.randint(0, 2, np.size(self.x_train, 1))   # Initialize an Individual X
         # Fit_X = fit(self.x_train, self.y_train.squeeze(1), individual)                    # Calculate the Fitness of X
         _, fitness, _ = self.evaluate(individual, self.x_train, self.y_train)
         Fit_X = fitness[0]
-        Nvar = np.size(self.x_train, 1)                         # Number of Features in Dataset
+        EFs = 1
 
+        fitness_vector = np.zeros(self.max_iterations)
         fitness_vector[EFs - 1] = Fit_X
 
         pso_flag = False
-        while (EFs <= self.max_iterations):
+        while (EFs < self.max_iterations):
             new_individual = np.copy(individual)
             # Non-selection operation:
 

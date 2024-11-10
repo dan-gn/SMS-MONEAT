@@ -20,7 +20,6 @@ sys.path.append(parent)
 
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
-from experiments_2024.SFE_2 import SFE
 from experiments_2024.sfe_pso import SFE_PSO
 
 configuration_id = sys.argv[1]
@@ -31,6 +30,9 @@ irace_params = sys.argv[5:]
 UR_MIN = int(irace_params[1])
 UR_MAX = float(irace_params[3])
 SN = int(irace_params[5])
+W = int(irace_params[7])
+C1 = int(irace_params[9])
+C2 = int(irace_params[11])
 
 N_POPULATION = 100
 N_ITERATIONS = 6000
@@ -50,7 +52,10 @@ params = {
 	'UR' : UR_MAX,
 	'UR_max' : UR_MAX,
 	'UR_min' : 1/10**UR_MIN,
-	'SN' : SN
+	'SN' : SN,
+	'w' : W,
+	'c1' : C1,
+	'c2' : C2
 }
 
 # Read microarray dataset
@@ -92,7 +97,7 @@ problem = {
 TRAIN MODEL
 """
 # Training the model
-model = SFE(problem, params)
+model = SFE_PSO(problem, params)
 model.run(seed, debug=False)
 
 _, fitness, _ = model.evaluate(model.individual, model.x_test, model.y_test)

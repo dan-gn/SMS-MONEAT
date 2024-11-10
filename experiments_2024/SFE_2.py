@@ -31,17 +31,15 @@ class SFE:
 
     def run(self, seed: int = None, debug: bool = False):
         np.random.seed(seed)
+        Nvar = np.size(self.x_train, 1)                         # Number of Features in Dataset
 
-        EFs = 1
-    
         individual = np.random.randint(0, 2, np.size(self.x_train, 1))   # Initialize an Individual X
         # Fit_X = fit(self.x_train, self.y_train.squeeze(1), individual)                    # Calculate the Fitness of X
         _, fitness, _ = self.evaluate(individual, self.x_train, self.y_train)
         Fit_X = fitness[0]
-        Nvar = np.size(self.x_train, 1)                         # Number of Features in Dataset
-
+        EFs = 1
     
-        while (EFs <= self.max_iterations):
+        while (EFs < self.max_iterations):
             new_individual = np.copy(individual)
             # Non-selection operation:
 

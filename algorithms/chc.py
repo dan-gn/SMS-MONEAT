@@ -64,12 +64,12 @@ class Individual:
 class CHC:
 
     def __init__(self, problem: dict, params: dict) -> None:
-        self.population_size = 100
-        self.cataclysmic_muation_prob = 0.35
+        self.population_size = params['n_population']
+        self.cataclysmic_muation_prob = params['mutation_prob']
         self.preserved_population = 0.05
-        self.initial_convergence_count = 0.02
+        self.initial_convergence_count = params['initial_convergence_count']
         self.convergence_value_k = 1
-        self.max_evaluations = 6000
+        self.max_evaluations = params['max_iterations']
         self.current_evaluations = 0
         # Crossover -> HUX
         # Parent selection -> Random with incest threshold
