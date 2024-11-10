@@ -16,7 +16,7 @@ from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
-from pygmo import hypervolume
+from pygmo import hypervolume, fast_non_dominated_sorting
 from utilities.moea_utils import non_dominated_sorting
 from algorithms.sms_moneat import SMS_MONEAT
 from algorithms.sms_emoa import SMS_EMOA
@@ -107,21 +107,46 @@ model = SMS_EMOA(problem, params)
 model.run(seed, debug=False)
 
 
+# A = 60
+# B = 100
+# reference = np.array([A, B])
+# alpha = 10
+# for member in model.population:
+# 	member.accuracy, member.fitness, _ = model.evaluate(member, model.x_test, model.y_test)
+# front = non_dominated_sorting(model.population)
+# fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0] if (f.fitness[0] <= A and f.fitness[1] <= 10*B)]) 
+# if len(fitness) < 1:
+# 	target = 1
+# 	print(target)
+# else:
+# 	unq, count = np.unique(fitness, axis=0, return_counts=True)
+# 	hv = hypervolume(unq)
+
+# 	target = -hv.compute(reference)
+# 	# target = np.mean([member.fitness[0] for member in model.population if member.accuracy is not None])
+# 	print(target)
+
 A = 60
 B = 100
 reference = np.array([A, B])
 alpha = 10
-for member in model.population:
-	member.accuracy, member.fitness, _ = model.evaluate(member, model.x_test, model.y_test)
-front = non_dominated_sorting(model.population)
-fitness = np.array([list([f.fitness[0], f.fitness[1]/alpha]) for f in front[0] if (f.fitness[0] <= A and f.fitness[1] <= 10*B)]) 
+for i, member in enumerate(model.archive):
+	_, model.archive[i].fitness, _ = model.evaluate(member, model.x_test, model.x_test)
+
+points = [member.fitness for member in model.archive]
+ndf, _, _, _ = fast_non_dominated_sorting(points = points)
+fronts = [[] for _ in range(len(ndf))]
+for index_front, front in enumerate(ndf):
+	for index_pop in front:
+		fronts[index_front].append(model.archive[index_pop])
+
+fitness = np.array([[f.fitness[0], f.fitness[1]/alpha] for f in front[0] if (f.fitness[0] <= A and f.fitness[1] <= alpha*B)])
+
 if len(fitness) < 1:
 	target = 1
 	print(target)
 else:
 	unq, count = np.unique(fitness, axis=0, return_counts=True)
 	hv = hypervolume(unq)
-
 	target = -hv.compute(reference)
-	# target = np.mean([member.fitness[0] for member in model.population if member.accuracy is not None])
 	print(target)
