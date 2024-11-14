@@ -1,6 +1,23 @@
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
+def log_file_call(file_name="file.txt"):
+    # log_file = os.path.abspath(os.getcwd()) + "irace_mochc_log.txt"
+	log_file = "C:/Users/23252359/Documents/SMS-MONEAT/iRace/sfe_pso/irace_counter.txt"
+
+	# Initialize count
+	count = 0
+	if os.path.exists(log_file):
+		with open(log_file, "r") as log:
+			count = int(log.read())
+
+	# Increment count and write back to log
+	count += 1
+	with open(log_file, "w") as log:
+		log.write(str(count))
+
+log_file_call('target-runnet.py')
+
 import numpy as np
 import torch
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -100,9 +117,12 @@ TRAIN MODEL
 model = SFE_PSO(problem, params)
 model.run(seed, debug=False)
 
-for i, member in enumerate(model.population):
-    model.population[i].accuracy, model.population[i].fitness, _ = model.evaluate(member.best_position, model.x_test, model.y_test)
+_, fitness, _ = model.final_evaluate(model.best_solution.best_position, model.x_train, model.y_train, model.x_test, model.y_test)
+target = fitness[0]
+
+# for i, member in enumerate(model.population):
+#     model.population[i].accuracy, model.population[i].fitness, _ = model.evaluate(member.best_position, model.x_test, model.y_test)
     
-fitness = [x.fitness[0] for x in model.population if x.accuracy is not None]
-target = np.mean(fitness)
+# fitness = [x.fitness[0] for x in model.population if x.accuracy is not None]
+# target = np.mean(fitness)
 print(target)
