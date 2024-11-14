@@ -2,7 +2,7 @@
 
 library(irace)
 
-setwd("C:/Users/23252359/Documents/SMS-MONEAT/iRace/sfe")
+setwd("C:/Users/23252359/Documents/SMS-MONEAT/iRace/mochc")
 
 scenario <- readScenario(filename = "scenario.txt", scenario = defaultScenario())
 

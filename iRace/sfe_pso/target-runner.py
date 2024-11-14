@@ -30,9 +30,9 @@ irace_params = sys.argv[5:]
 UR_MIN = int(irace_params[1])
 UR_MAX = float(irace_params[3])
 SN = int(irace_params[5])
-W = int(irace_params[7])
-C1 = int(irace_params[9])
-C2 = int(irace_params[11])
+W = float(irace_params[7])
+C1 = float(irace_params[9])
+C2 = float(irace_params[11])
 
 N_POPULATION = 100
 N_ITERATIONS = 6000
@@ -100,7 +100,9 @@ TRAIN MODEL
 model = SFE_PSO(problem, params)
 model.run(seed, debug=False)
 
-_, fitness, _ = model.evaluate(model.individual, model.x_test, model.y_test)
-# target = np.mean([member.fitness for member in model.archive.population if member.accuracy is not None])
-target = fitness[0]
+for i, member in enumerate(model.population):
+    model.population[i].accuracy, model.population[i].fitness, _ = model.evaluate(member.best_position, model.x_test, model.y_test)
+    
+fitness = [x.fitness[0] for x in model.population if x.accuracy is not None]
+target = np.mean(fitness)
 print(target)

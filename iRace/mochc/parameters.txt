@@ -1,3 +1,3 @@
 # 1:            		        2:                   		        3:  4:      		5:
-initial_convergence_count       "--initial_convergence_count "      r   (0.01, 0.5)
-mutation_prob                   "--mutation_prob "       	        r   (0, 0.5)
+initial_convergence_count       "--initial_convergence_count "      r   (0.01, 0.1)
+mutation_prob                   "--mutation_prob "       	        r   (0.05, 0.50)

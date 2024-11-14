@@ -1,2 +1,2 @@
-crossover_prob		mutation_prob		
-0.75				0.10				
+initial_convergence_count		mutation_prob		
+0.02				            0.35				

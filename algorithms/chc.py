@@ -38,15 +38,19 @@ class Individual:
         self.n_dominated_by = 0
         self.reduced_genome = []
 
-    def initialize(self):
+    def initialize(self, threshold = 0.1):
         # self.genome = np.zeros(self.n_variables)
         # for _ in range(1):
         #     index = np.random.randint(self.n_variables)
         #     self.genome[index] = 1
         # self.genome = np.random.randint(0, 2, size= self.n_variables)
-        threshold = 0.01
+        # threshold = 0.01
         self.genome = np.random.rand(self.n_variables)
         self.genome = [0 if x >= threshold else 1 for x in self.genome]
+        if np.sum(self.genome) == 0:
+            index = np.random.randint(self.n_variables)
+            self.genome[index] = 1
+
 
     def copy(self):
         new_individual = Individual(self.n_variables)
@@ -87,7 +91,7 @@ class CHC:
         population = [] 
         for _ in range(self.population_size):
             member = Individual(n_variables=self.n_var)
-            member.initialize()
+            member.initialize(threshold=self.initial_convergence_count/2)
             member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train)
             population.append(member)
         return population
@@ -106,6 +110,16 @@ class CHC:
             # for parent2 in population:
             #     if self.hamming_distance(parent1.genome, parent2.genome) > convergence_count:
             #         parents.append([parent1, parent2])
+
+        # parents = []
+        # hamming_distance_vector = []
+        # for parent1, parent2 in itertools.combinations(population, 2):
+        #     hd = self.hamming_distance(parent1.genome, parent2.genome)
+        #     hamming_distance_vector.append(hd)
+        #     if hd > convergence_count:
+        #         parents.append((parent1, parent2))
+        # self.max_hamming_distance = max(hamming_distance_vector)
+
         parents = [(parent1, parent2) for parent1, parent2 in itertools.combinations(population, 2) if self.hamming_distance(parent1.genome, parent2.genome) > convergence_count]
         if len(parents) > self.population_size:
             random_index = np.random.choice(len(parents), int(self.population_size/2), replace=False)
@@ -247,9 +261,9 @@ class CHC:
                 mean_fs = np.mean([x.fitness[1] for x in new_population])
                 print(f'Iteration {iteration}, Evaluations {self.current_evaluations}, Convergence {convergence_count}, mean loss {mean_loss}, mean fs {mean_fs}')
             if not self.modified(population, new_population, parents):
-                # distance = [self.hamming_distance(parent1.genome, parent2.genome) for parent1, parent2 in itertools.combinations(population, 2)]
-                # convergence_count = max(distance)
-                convergence_count = convergence_count - 1
+                # convergence_count = convergence_count - 1
+                distance = [self.hamming_distance(parent1.genome, parent2.genome) for parent1, parent2 in itertools.combinations(population, 2)]
+                convergence_count = max(distance) - 1
                 if convergence_count <= -self.convergence_value_k:
                     self.archive = self.elitism(self.archive, new_population)
                     new_population = self.restart(population)
