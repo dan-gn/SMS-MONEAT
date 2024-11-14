@@ -118,7 +118,7 @@ model = SFE_PSO(problem, params)
 model.run(seed, debug=False)
 
 _, fitness, _ = model.final_evaluate(model.best_solution.best_position, model.x_train, model.y_train, model.x_test, model.y_test)
-target = fitness[0]
+target = float(fitness[0])
 
 # for i, member in enumerate(model.population):
 #     model.population[i].accuracy, model.population[i].fitness, _ = model.evaluate(member.best_position, model.x_test, model.y_test)

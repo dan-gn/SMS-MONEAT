@@ -97,5 +97,5 @@ model.run(seed, debug=False)
 
 _, fitness, _ = model.final_evaluate(model.individual, model.x_train, model.y_train, model.x_test, model.y_test)
 # target = np.mean([member.fitness for member in model.archive.population if member.accuracy is not None])
-target = fitness[0]
+target = float(fitness[0])
 print(target)
