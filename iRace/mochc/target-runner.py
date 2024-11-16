@@ -73,7 +73,7 @@ params = {
 
 # Read microarray dataset
 import os
-ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\..\\..\\datasets\\CUMIDA\\{dataset}.arff')
+ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}/../../datasets/CUMIDA/{dataset}.arff')
 # ds = MicroarrayDataset(f'{os.path.abspath(os.getcwd())}\\datasets\\CUMIDA\\{dataset}.arff')
 x, y = ds.get_full_dataset()
 
