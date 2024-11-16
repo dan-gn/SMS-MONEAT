@@ -1,10 +1,19 @@
+import sys
 import os
+
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+os.environ["OMP_NUM_THREADS"] = "1"
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+parent = os.path.dirname(parent)
+sys.path.append(parent)
+
 
 def log_file_call(file_name="file.txt"):
     # log_file = os.path.abspath(os.getcwd()) + "irace_mochc_log.txt"
-	log_file = "C:/Users/23252359/Documents/SMS-MONEAT/iRace/mochc/irace_counter.txt"
-
+	# log_file = "C:/Users/23252359/Documents/SMS-MONEAT/iRace/mochc/irace_counter.txt"
+	log_file = f'{os.path.abspath(os.getcwd())}/irace_counter.txt'
 	# Initialize count
 	count = 0
 	if os.path.exists(log_file):
@@ -26,15 +35,6 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", RuntimeWarning)
 warnings.simplefilter("ignore", FutureWarning)
-
-import sys
-# sys.path.insert(0, '../..')
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-parent = os.path.dirname(parent)
-sys.path.append(parent)
 
 from utilities.microarray_ds import MicroarrayDataset
 from utilities.stats_utils import KruskalWallisFilter
