@@ -132,7 +132,7 @@ B = 100
 reference = np.array([A, B])
 alpha = 10
 for i, member in enumerate(model.population):
-	_, model.population[i].fitness, _ = model.evaluate(member, model.x_test, model.x_test)
+	_, model.population[i].fitness, _ = model.evaluate(member, model.x_test, model.y_test)
 
 points = [member.fitness for member in model.population]
 ndf, _, _, _ = fast_non_dominated_sorting(points = points)
