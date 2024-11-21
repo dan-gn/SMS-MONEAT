@@ -3,7 +3,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def log_file_call(file_name="file.txt"):
     # log_file = os.path.abspath(os.getcwd()) + "irace_mochc_log.txt"
-	log_file = "C:/Users/23252359/Documents/SMS-MONEAT/iRace/sfe_pso/irace_counter.txt"
+	log_file = "C:/Users/23252359/Documents/ASC/iRace/sfe_pso/irace_counter.txt"
 
 	# Initialize count
 	count = 0
