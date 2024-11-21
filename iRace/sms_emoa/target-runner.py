@@ -131,17 +131,17 @@ A = 60
 B = 100
 reference = np.array([A, B])
 alpha = 10
-for i, member in enumerate(model.archive):
-	_, model.archive[i].fitness, _ = model.evaluate(member, model.x_test, model.x_test)
+for i, member in enumerate(model.population):
+	_, model.population[i].fitness, _ = model.evaluate(member, model.x_test, model.x_test)
 
-points = [member.fitness for member in model.archive]
+points = [member.fitness for member in model.population]
 ndf, _, _, _ = fast_non_dominated_sorting(points = points)
 fronts = [[] for _ in range(len(ndf))]
 for index_front, front in enumerate(ndf):
 	for index_pop in front:
-		fronts[index_front].append(model.archive[index_pop])
+		fronts[index_front].append(model.population[index_pop])
 
-fitness = np.array([[f.fitness[0], f.fitness[1]/alpha] for f in front[0] if (f.fitness[0] <= A and f.fitness[1] <= alpha*B)])
+fitness = np.array([[f.fitness[0], f.fitness[1]/alpha] for f in fronts[0] if (f.fitness[0] <= A and f.fitness[1] <= alpha*B)])
 
 if len(fitness) < 1:
 	target = 1
