@@ -1,22 +1,22 @@
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-def log_file_call(file_name="file.txt"):
-    # log_file = os.path.abspath(os.getcwd()) + "irace_mochc_log.txt"
-	log_file = "C:/Users/23252359/Documents/ASC/iRace/sfe_pso/irace_counter.txt"
+# def log_file_call(file_name="file.txt"):
+#     # log_file = os.path.abspath(os.getcwd()) + "irace_mochc_log.txt"
+# 	log_file = "C:/Users/23252359/Documents/ASC/iRace/sfe_pso/irace_counter.txt"
 
-	# Initialize count
-	count = 0
-	if os.path.exists(log_file):
-		with open(log_file, "r") as log:
-			count = int(log.read())
+# 	# Initialize count
+# 	count = 0
+# 	if os.path.exists(log_file):
+# 		with open(log_file, "r") as log:
+# 			count = int(log.read())
 
-	# Increment count and write back to log
-	count += 1
-	with open(log_file, "w") as log:
-		log.write(str(count))
+# 	# Increment count and write back to log
+# 	count += 1
+# 	with open(log_file, "w") as log:
+# 		log.write(str(count))
 
-log_file_call('target-runnet.py')
+# log_file_call('target-runnet.py')
 
 import numpy as np
 import torch
