@@ -12,6 +12,11 @@ from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms, iter_num, experiment
 from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
 
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+warnings.simplefilter("ignore", RuntimeWarning)
+warnings.simplefilter("ignore", FutureWarning)
+
 selector = SolutionSelector(method='WSum', pareto_front=False)
 selector2 = SolutionSelector2(method='WSum', pareto_front=False)
 
@@ -22,7 +27,8 @@ for i, alg in enumerate(algorithms):
 	exp = experiment[alg]
 	for ds in datasets:
 		data[alg][ds] = {}
-		results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+		# results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+		results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}\\{ds}'
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -40,7 +46,7 @@ for i, alg in enumerate(algorithms):
 			model = results[2]['model']
 
 			# Choose solutions
-			if alg != 'sms_emoa':
+			if alg in ['sms_moneat', 'n3o']:
 				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
 				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
 				model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
@@ -54,10 +60,23 @@ for i, alg in enumerate(algorithms):
 				val_fs[k] = model.best_solution_val.selected_features.shape[0]
 				train_arch_fs[k] = model.best_solution_t_archive.selected_features.shape[0]
 				arch_fs[k] = model.best_solution_archive.selected_features.shape[0]
-			else:
+			elif alg in ['sms_emoa']:
 				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
 				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 				train_fs[k] = train_fitness[1]
+			elif alg in ['mochc']:
+				model.best_solution = selector2.choose(model.archive, model.x_train, model.y_train)
+				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
+				train_fs[k] = train_fitness[1]
+			elif alg == 'sfe':
+				_, train_fitness, train[k] = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
+				train_fs[k] = train_fitness[1]
+			elif alg == 'sfe_pso':
+				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				_, train_fitness, train[k] = model.final_evaluate(model.best_solution.position, model.x_train, model.y_train, model.x_test, model.y_test)
+				train_fs[k] = train_fitness[1]
+
+
 
 			
 		data[alg][ds]['time'] = time
@@ -74,7 +93,7 @@ for i, alg in enumerate(algorithms):
 		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Train Arch: {np.mean(train_arch_fs)}, Arch {np.mean(arch_fs)}')
 
 def store_results(data, alg, filename, population):
-	with open(f'final_exp/{alg}/{filename}_{population}.csv', 'w', newline='') as file:
+	with open(f'final_results_asc/{alg}/{filename}_{population}.csv', 'w', newline='') as file:
 		writer = csv.writer(file)
 		all_rows = []
 		header = ['Dataset']
@@ -84,13 +103,15 @@ def store_results(data, alg, filename, population):
 			row = [ds]
 			row.extend(list(data[alg][ds][population]))
 			all_rows.append(row)
-		for ds in datasets:
-			row = [ds]
-			row.extend(list(data[alg][ds][f'{population}_fs']))
-			all_rows.append(row)
+		# for ds in datasets:
+		# 	row = [ds]
+		# 	row.extend(list(data[alg][ds][f'{population}_fs']))
+		# 	all_rows.append(row)
 		writer.writerows(all_rows)
 
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')
+for alg in algorithms:
+	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'train')
