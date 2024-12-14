@@ -29,32 +29,34 @@ from algorithms.sms_emoa import SMS_EMOA
 
 from algorithms.chc import MOCHC
 
-# import warnings
-# warnings.simplefilter("ignore", UserWarning)
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+warnings.simplefilter("ignore", RuntimeWarning)
+warnings.simplefilter("ignore", FutureWarning)
 
 datasets = []
 
 
 """ TESTING """
 
-# datasets.append('Breast_GSE22820') 
-# datasets.append('Breast_GSE59246') 
-# datasets.append('Breast_GSE70947')	
-# datasets.append('Colorectal_GSE25070')
-# datasets.append('Colorectal_GSE32323')
-# datasets.append('Colorectal_GSE44076')
-# datasets.append('Colorectal_GSE44861')
-# datasets.append('Leukemia_GSE22529_U133A') 
-# datasets.append('Leukemia_GSE22529_U133B') 
-# datasets.append('Leukemia_GSE33615')
-# datasets.append('Leukemia_GSE63270') 
-# datasets.append('Liver_GSE14520_U133A') 
-# datasets.append('Liver_GSE50579')
-# datasets.append('Liver_GSE62232') 
-# datasets.append('Prostate_GSE6919_U95Av2')
-# datasets.append('Prostate_GSE6919_U95B')
-# datasets.append('Prostate_GSE6919_U95C')
-# datasets.append('Prostate_GSE11682')
+datasets.append('Breast_GSE22820') 
+datasets.append('Breast_GSE59246') 
+datasets.append('Breast_GSE70947')	
+datasets.append('Colorectal_GSE25070')
+datasets.append('Colorectal_GSE32323')
+datasets.append('Colorectal_GSE44076')
+datasets.append('Colorectal_GSE44861')
+datasets.append('Leukemia_GSE22529_U133A') 
+datasets.append('Leukemia_GSE22529_U133B') 
+datasets.append('Leukemia_GSE33615')
+datasets.append('Leukemia_GSE63270') 
+datasets.append('Liver_GSE14520_U133A') 
+datasets.append('Liver_GSE50579')
+datasets.append('Liver_GSE62232') 
+datasets.append('Prostate_GSE6919_U95Av2')
+datasets.append('Prostate_GSE6919_U95B')
+datasets.append('Prostate_GSE6919_U95C')
+datasets.append('Prostate_GSE11682')
 datasets.append('breastCancer-full') 
 datasets.append('ALL-AML-full')
 datasets.append('prostate_tumorVSNormal-full')
@@ -77,8 +79,10 @@ algorithm = 'mochc'
 	
 
 params = {
-	'n_population' : 1,
+	'n_population' : 100,
 	'max_iterations' : 6000,
+	'mutation_prob' : 0.3976,
+	'initial_convergence_count' : 0.0110
 }
 
 
@@ -95,7 +99,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2024\\{filename}"
+			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2024\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):

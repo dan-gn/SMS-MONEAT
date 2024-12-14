@@ -29,13 +29,13 @@ filename.append(f'final_exp/{alg}/results_{alg}_final2_full_arch.csv')
 alg = 'sms_emoa'
 filename.append(f'final_exp/{alg}/results_{alg}_final5x_full_train.csv')
 alg = 'sfe'
-filename.append(f'results/{alg}-pop_1-it_6000_seed0-exp2024.csv')
+filename.append(f'results_asc/{alg}-pop_1-it_6000_seed0-exp2024.csv')
 
 
 df = [pd.read_csv(file) for file in filename]
 
 rm_words = ['Breast_', 'Colorectal_', 'Leukemia_', 'Liver_', 'Prostate_']
-with open('table_gmean.txt', 'w') as f:
+with open('results_asc\\table_gmean.txt', 'w') as f:
     all_rows = [[] for _ in range(len(filename))]
     for j, ds in enumerate(datasets):
         row = [x.loc[x['Dataset'] == ds].iloc[0, 1:] for x in df]

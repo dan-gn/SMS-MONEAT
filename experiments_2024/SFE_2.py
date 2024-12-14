@@ -79,7 +79,7 @@ class SFE:
             UR = (self.UR_Max-self.UR_Min)*((self.max_iterations-EFs)/self.max_iterations)+self.UR_Min  # Eq(3)
             # print('Iteration = {} :   Accuracy = {} :   Number of Selected Features= {} :  Run= {}'.format( EFs, Fit_X, np.sum(new_individual), self.Run))
             EFs = EFs+1
-        self.individual = np.copy(individual)
+        self.best_solution = np.copy(individual)
 
     def evaluate(self, member, x, y, n_folds = 3):
         features_selected = [i for i, xi in enumerate(member) if xi == 1]
