@@ -63,18 +63,23 @@ for i, alg in enumerate(algorithms):
 			elif alg in ['sms_emoa']:
 				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
 				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
-				train_fs[k] = train_fitness[1]
+				train_fs[k] = train_fitness[1] # LOSS
 			elif alg in ['mochc']:
 				model.best_solution = selector2.choose(model.archive, model.x_train, model.y_train)
 				_, train_fitness, train[k] = evaluate3(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 				train_fs[k] = train_fitness[1]
+				train[k] = float(train_fitness[0]) # LOSS
 			elif alg == 'sfe':
 				_, train_fitness, train[k] = model.final_evaluate(model.best_solution, model.x_train, model.y_train, model.x_test, model.y_test)
 				train_fs[k] = train_fitness[1]
+				train[k] = float(train_fitness[0]) # LOSS
 			elif alg == 'sfe_pso':
-				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				# print(f'{k}')
+				if hasattr(model, 'population'):
+					model.best_solution = selector2.choose(model.population, model.x_train, model.y_train)
 				_, train_fitness, train[k] = model.final_evaluate(model.best_solution.position, model.x_train, model.y_train, model.x_test, model.y_test)
 				train_fs[k] = train_fitness[1]
+				train[k] = float(train_fitness[0]) # LOSS
 
 
 
@@ -88,12 +93,12 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch_t_fs'] = train_arch_fs		
 		data[alg][ds]['arch'] = arch
 		data[alg][ds]['arch_fs'] = arch_fs
-		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
+		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
 		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
-		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Train Arch: {np.mean(train_arch_fs)}, Arch {np.mean(arch_fs)}')
+		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Train Arch: {np.mean(train_arch_fs)}, Arch {np.mean(arch_fs)}')
 
 def store_results(data, alg, filename, population):
-	with open(f'final_results_asc/{alg}/{filename}_{population}.csv', 'w', newline='') as file:
+	with open(f'final_results_asc/{alg}_2024/{filename}_{population}_gmean.csv', 'w', newline='') as file:
 		writer = csv.writer(file)
 		all_rows = []
 		header = ['Dataset']
@@ -103,15 +108,24 @@ def store_results(data, alg, filename, population):
 			row = [ds]
 			row.extend(list(data[alg][ds][population]))
 			all_rows.append(row)
-		# for ds in datasets:
-		# 	row = [ds]
-		# 	row.extend(list(data[alg][ds][f'{population}_fs']))
-		# 	all_rows.append(row)
 		writer.writerows(all_rows)
-
+	# with open(f'final_results_asc/{alg}/{filename}_{population}_fs.csv', 'w', newline='') as file:
+	# 	writer = csv.writer(file)
+	# 	all_rows = []
+	# 	header = ['Dataset']
+	# 	header.extend([i for i in range(N_EXPERIMENTS)])
+	# 	all_rows.append(header)
+	# 	for ds in datasets:
+	# 		row = [ds]
+	# 		row.extend(list(data[alg][ds][f'{population}_fs']))
+	# 		all_rows.append(row)
+	# 	writer.writerows(all_rows)
+		
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')
-for alg in algorithms:
-	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'train')
+# for alg in algorithms:
+# 	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'train')
+# 	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'val')
+# 	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'arch')

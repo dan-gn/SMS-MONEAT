@@ -27,9 +27,9 @@ files = []
 # files.append('results_sms_moneat_final6_full_val.csv')
 # files.append('results_sms_moneat_final6_full_arch.csv')
 # files.append('results_n3o_final2_full_val.csv')
-files.append('results_sms_moneat_final6_full_svm_val.csv')
+# files.append('results_sms_moneat_final6_full_svm_val.csv')
 # files.append('results_sms_moneat_final6_full_svm_arch.csv')
-files.append('results_n3o_final2_full_svm_val.csv')
+# files.append('results_n3o_final2_full_svm_val.csv')
                
 g_mean = {}
 fs = {}

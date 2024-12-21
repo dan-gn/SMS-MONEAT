@@ -25,7 +25,8 @@ for i, alg in enumerate(algorithms):
     exp = experiment[alg]
     for ds in datasets:
         data[alg][ds] = {}
-        results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+        # results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+        results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}\\{ds}'
         time = [0] * N_EXPERIMENTS
         for k in range(N_EXPERIMENTS):
             results_filename = f"{ds}_MinMaxSc_{k}.pkl"
@@ -51,4 +52,4 @@ def store_results(data, alg, filename, population):
 		writer.writerows(all_rows)
 
 
-store_results(data, alg, f'final_exp/{alg}/results_{alg}_final{exp}_full', 'time')
+store_results(data, alg, f'final_results_asc/{alg}/results_{alg}_final{exp}_full', 'time')

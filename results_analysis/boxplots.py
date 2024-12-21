@@ -22,7 +22,7 @@ def csv2expdata(filename):
             metric[row[0]] = row[1:]
     return metric
 
-alg_names = ['SMS-MONEAT', 'N3O', 'SMS-EMOA']
+alg_names = ['SMS-MONEAT', 'N3O', 'SMS-EMOA', 'MOCHC', 'SFE', 'SFE-PSO']
 
 data = {}
 metric = '_time'
@@ -51,6 +51,22 @@ alg = 'sms_emoa'
 exp = experiment[alg]
 filename = f'final_exp/{alg}/results_{alg}_final{exp}_full{metric}.csv'
 data[alg_names[2]] = pd.read_csv(filename, header=0, index_col=0).transpose()
+
+alg = 'mochc'
+exp = experiment[alg]
+filename = f'final_results_asc/{alg}/results_{alg}_final{exp}_full{metric}.csv'
+data[alg_names[3]] = pd.read_csv(filename, header=0, index_col=0).transpose()
+
+alg = 'sfe'
+exp = experiment[alg]
+filename = f'final_results_asc/{alg}/results_{alg}_final{exp}_full{metric}.csv'
+data[alg_names[4]] = pd.read_csv(filename, header=0, index_col=0).transpose()
+
+alg = 'sfe_pso'
+exp = experiment[alg]
+filename = f'final_results_asc/{alg}/results_{alg}_final{exp}_full{metric}.csv'
+data[alg_names[5]] = pd.read_csv(filename, header=0, index_col=0).transpose()
+
 
 
 # alg_names = ['N3O', 'SMS-MONEAT (P)', 'SMS-MONEAT (Q)']
@@ -109,7 +125,7 @@ fig = go.Figure()
 for alg in alg_names: 
     y = []
     for ds in datasets:
-        y.extend(list(data[alg][ds]))
+        y.extend(list(np.log(data[alg][ds])))
     print(np.mean(y))
     fig.add_trace(go.Box(y=y, x=x, name=alg))
 
@@ -125,15 +141,18 @@ boxplot_data = []
 for alg in alg_names:
     temp = []
     for ds in datasets:
-        temp.extend(list(data[alg][ds]))
+        temp.extend(list(np.log(data[alg][ds])))
+        # temp.extend(list(data[alg][ds]))
     boxplot_data.append(temp)
 
-colors = ['#6666ff', '#ff6666', '#66ff66']
+# colors = ['#6666ff', '#ff6666', '#66ff66'] * 2
+# colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+colors = ['#ff9999', '#ffcc99', '#ffff99', '#99ff99', '#99ccff', '#cc99ff']
 
 fig, ax = plt.subplots()
-ax.set_title('Execution time comparion from microarray experiments')
+ax.set_title('Execution time from microarray experiments')
 ax.set_xlabel('Algorithm')
-ax.set_ylabel('Time (s)')
+ax.set_ylabel('Time (s) in log scale')
 print(len(boxplot_data), len(boxplot_data[0]))
 bplot = ax.boxplot(boxplot_data,
                    patch_artist=True,  # fill with color

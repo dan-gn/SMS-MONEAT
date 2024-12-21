@@ -108,7 +108,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2024\\{filename}"
+			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2024_abc\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
