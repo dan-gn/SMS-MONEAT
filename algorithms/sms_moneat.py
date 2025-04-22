@@ -214,10 +214,10 @@ class SMS_MONEAT(N3O):
 				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
 				record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
-			# if i % 500 == 0:
-			# 	population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
-			# 	population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
-			# 	print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}')
+			if i % 3000 == 0:
+				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
+				population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
+				print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}')
 		n_objectives = len(self.population[0].fitness)
 		self.best_solution = Genome()
 		self.best_solution.fitness = np.ones(n_objectives) * math.inf

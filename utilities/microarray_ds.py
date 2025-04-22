@@ -5,13 +5,46 @@ from scipy.io import arff
 import arff as arfff
 from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold, StratifiedKFold, train_test_split
 
+import tempfile
+
+def load_arff_ignore_names(path):
+    with open(path, 'r') as file:
+        lines = file.readlines()
+
+    new_lines = []
+    attr_counter = 0
+    for line in lines:
+        if line.lower().startswith('@attribute'):
+            # Replace attribute name with a unique placeholder
+            parts = line.split()
+            if len(parts) >= 3:
+                new_name = f"attr_{attr_counter}"
+                new_line = f"@attribute {new_name} {' '.join(parts[2:])}\n"
+                new_lines.append(new_line)
+                attr_counter += 1
+            else:
+                new_lines.append(line)
+        else:
+            new_lines.append(line)
+
+    # Write modified content to a temporary file
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        temp_file.writelines(new_lines)
+        temp_file_path = temp_file.name
+
+    # Now load with arff
+    data, meta = arff.loadarff(temp_file_path)
+    return data, meta
+
+
 class MicroarrayDataset:
 
 	def __init__(self, filename):
 		self.x, self.y, self.df = self.load_dataset(filename)
 
 	def load_dataset(self, filename):
-		dataset = arff.loadarff(filename)
+		# dataset = arff.loadarff(filename)
+		dataset = load_arff_ignore_names(filename)
 		df = pd.DataFrame(dataset[0])
 		self.labels = {label:i for i, label in enumerate(df.iloc[:, -1].unique())}
 		df[df.columns[-1]] = df.iloc[:, -1].replace(self.labels)

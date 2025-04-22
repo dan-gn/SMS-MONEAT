@@ -16,7 +16,7 @@ from utilities.scalers import MeanScaler
 from utilities.fitness_functions import torch_fitness_function
 from utilities.activation_functions import Gaussian
 from algorithms.n3o import N3O
-from algorithms.sms_moneat import SMS_MONEAT as SMS_NEAT
+from algorithms.sms_moneat import SMS_MONEAT as SMS_MONEAT
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -28,28 +28,28 @@ datasets = []
 
 
 """ TESTING """
-datasets.append('breastCancer-full') 
-datasets.append('ALL-AML-full')
-datasets.append('prostate_tumorVSNormal-full')
+# datasets.append('breastCancer-full') 
+# datasets.append('ALL-AML-full')
+# datasets.append('prostate_tumorVSNormal-full')
 
-datasets.append('Breast_GSE22820') 
-datasets.append('Breast_GSE59246') 
-datasets.append('Breast_GSE70947')	
-datasets.append('Colorectal_GSE25070')
-datasets.append('Colorectal_GSE32323')
-datasets.append('Colorectal_GSE44076')
-datasets.append('Colorectal_GSE44861')
-datasets.append('Leukemia_GSE22529_U133A') 
-datasets.append('Leukemia_GSE22529_U133B') 
-datasets.append('Leukemia_GSE33615')
-datasets.append('Leukemia_GSE63270') 
-datasets.append('Liver_GSE14520_U133A') 
-datasets.append('Liver_GSE50579')
-datasets.append('Liver_GSE62232') 
-datasets.append('Prostate_GSE6919_U95Av2')
-datasets.append('Prostate_GSE6919_U95B')
-datasets.append('Prostate_GSE6919_U95C')
-datasets.append('Prostate_GSE11682')
+# datasets.append('Breast_GSE22820') 
+# datasets.append('Breast_GSE59246') 
+# datasets.append('Breast_GSE70947')	
+# datasets.append('Colorectal_GSE25070')
+# datasets.append('Colorectal_GSE32323')
+# datasets.append('Colorectal_GSE44076')
+# datasets.append('Colorectal_GSE44861')
+# datasets.append('Leukemia_GSE22529_U133A') 
+# datasets.append('Leukemia_GSE22529_U133B') 
+# datasets.append('Leukemia_GSE33615')
+# datasets.append('Leukemia_GSE63270') 
+# datasets.append('Liver_GSE14520_U133A') 
+# datasets.append('Liver_GSE50579')
+# datasets.append('Liver_GSE62232') 
+# datasets.append('Prostate_GSE6919_U95Av2')
+# datasets.append('Prostate_GSE6919_U95B')
+# datasets.append('Prostate_GSE6919_U95C')
+# datasets.append('Prostate_GSE11682')
 
 """ IRACE """
 # datasets.append('Leukemia_GSE71935') # Only 9
@@ -57,6 +57,12 @@ datasets.append('Prostate_GSE11682')
 # datasets.append('Prostate_GSE46602')
 # datasets.append('Colorectal_GSE8671') # SMS-MONEAT 
 # datasets.append('Breast_GSE42568')
+
+""" ASoC Comparison """
+datasets.append('ALL-AML-full')
+datasets.append('CNS')
+datasets.append('Colon')
+datasets.append('Ovarian')
 
 seed = 0
 k_folds = 10
@@ -69,7 +75,7 @@ algorithm = 'sms_moneat'
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 200 if algorithm=='n3o' else 18000,
+	'max_iterations' : 200 if algorithm=='n3o' else 30000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -101,14 +107,15 @@ if __name__ == '__main__':
 
 		# Read microarray dataset
 		print(f'Reading dataset: {filename}')
-		ds = MicroarrayDataset(f'./datasets/CUMIDA/{filename}.arff')
+		# ds = MicroarrayDataset(f'./datasets/CUMIDA/{filename}.arff')
+		ds = MicroarrayDataset(f'./datasets/ASoC_comp/{filename}.arff')
 		print(f'Dataset labels: {ds.get_labels()}')
 		x, y = ds.get_full_dataset()
 		print(f'Total samples = {x.shape[0]}, Total features = {x.shape[1]}')
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2024_abc\\{filename}"
+			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2025_asoc\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
@@ -169,7 +176,7 @@ if __name__ == '__main__':
 			if algorithm == 'n3o':
 				model = N3O(problem, params)
 			elif algorithm == 'sms_moneat':
-				model = SMS_NEAT(problem, params)
+				model = SMS_MONEAT(problem, params)
 			start = time.time()
 			record['final'], record['archive'] = model.run(i, debug)
 			time_exec = time.time()- start
