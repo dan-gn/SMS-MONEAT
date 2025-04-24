@@ -167,8 +167,8 @@ class SolutionSelector:
 		return sorted_population[0]
 
 	def wsum_selector(self, population: List[Genome], x_train, y_train, x_val, y_val):
-		# w = self.w if self.w is not None else np.array([0.35, 0.15, 0.35, 0.15])
-		w = self.w if self.w is not None else np.array([0, 0.5, 0, 0.5])
+		w = self.w if self.w is not None else np.array([0.35, 0.15, 0.35, 0.15])
+		# w = self.w if self.w is not None else np.array([0, 0.5, 0, 0.5])
 		for member in population:
 			z = []
 			member.valid = True

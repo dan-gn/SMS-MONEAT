@@ -29,18 +29,24 @@ class SMS_MONEAT(N3O):
 		super().__init__(problem, params)
 		self.beta = 1
 		self.objective_norm = np.array([1, 0.1], dtype=np.float32)
+		self.max_stagnant_iterations = self.max_iterations/10
+		self.stagnant_iterations = 0
+		self.n_restarts = 0
+		self.best_fitness = np.inf
+		self.do_restarts = True
 
-	def initialize_population(self) -> None:
+	def initialize_population(self, restart=False) -> None:
 		"""
 		For each network in the intial population, randomly select an input and an output and add a link connecting them.
 		"""
-		# Global genome to keep track of all node and connection genes
-		self.global_genome = Genome()
-		self.global_genome.create_node_genes(self.x_train.shape[1], self.y_train.shape[1])
-		self.global_genome.set_weight_limits(self.weight_min_value, self.weight_max_value)
-		# Global variables for node id and innovation number
-		self.node_id = len(self.global_genome.node_genes)
-		self.innovation_number = 0
+		if not restart:
+			# Global genome to keep track of all node and connection genes
+			self.global_genome = Genome()
+			self.global_genome.create_node_genes(self.x_train.shape[1], self.y_train.shape[1])
+			self.global_genome.set_weight_limits(self.weight_min_value, self.weight_max_value)
+			# Global variables for node id and innovation number
+			self.node_id = len(self.global_genome.node_genes)
+			self.innovation_number = 0
 		# Create population from copies of the global genome 
 		self.population = []
 		for i in range(self.n_population):
@@ -55,6 +61,8 @@ class SMS_MONEAT(N3O):
 			member.set_weight_limits(self.weight_min_value, self.weight_max_value)
 			# Evaluate member fitness
 			member.accuracy, member.fitness, member.g_mean = self.evaluate(member, self.x_train, self.y_train, True)
+			if member.fitness[0] < self.best_fitness:
+				self.best_fitness = member.fitness[0]
 			# Add member to population
 			self.population.append(member)
 
@@ -161,6 +169,11 @@ class SMS_MONEAT(N3O):
 			child = parent.copy()
 			self.mutate(child)
 		child.accuracy, child.fitness, child.g_mean = self.evaluate(child, self.x_train, self.y_train, True)
+		if child.fitness[0] < self.best_fitness:
+			self.best_fitness = child.fitness[0]
+			self.stagnant_iterations = 0
+		else:
+			self.stagnant_iterations += 1
 		return child
 
 	def reduce_population(self) -> None:
@@ -198,7 +211,9 @@ class SMS_MONEAT(N3O):
 		record.update(self.population, iteration_num=0)
 		record_archive = Record(self.max_iterations)
 		record_archive.update(self.archive.get_full_population(), iteration_num=0)
-		for i in range(self.max_iterations):
+		# for i in range(self.max_iterations):
+		i = 0
+		while i < self.max_iterations:
 			# Get offspring
 			offspring = self.next_generation()
 			# Update Non-Dominated Sorting variables from population and offspring
@@ -210,14 +225,27 @@ class SMS_MONEAT(N3O):
 			# Add to archive
 			self.archive.add(offspring)
 			# Store in record
-			if (i+1) % 180 == 0:
+			if (i+1) % (self.max_iterations/100) == 0:
 				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
 				record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
-			if i % 3000 == 0:
+			if i % (self.max_iterations/10) == 0:
 				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
 				population_gmean = np.array([member.g_mean for member in self.population]).mean(axis=0)
-				print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}')
+				print(f'Iteration {i}: population fitness = {population_fitness}, g mean = {population_gmean:.4f}, species = {self.archive.species_count()}, invalid_nets = {self.n_invalid_nets}, restarts = {self.n_restarts}, best = {self.best_fitness}')
+			if self.do_restarts and self.stagnant_iterations >= self.max_stagnant_iterations:
+				self.n_restarts += 1
+				self.stagnant_iterations = 0
+				n_objectives = len(self.population[0].fitness)
+				self.best_solution = Genome()
+				self.best_solution.fitness = np.ones(n_objectives) * math.inf
+				self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+				self.initialize_population(restart=True)
+				self.population = sorted(self.population, key=lambda x:x.fitness[0])
+				self.population[-1] = self.best_solution.copy(True)
+				_ = non_dominated_sorting_2(self.population)
+				i += self.n_population
+			i += 1
 		n_objectives = len(self.population[0].fitness)
 		self.best_solution = Genome()
 		self.best_solution.fitness = np.ones(n_objectives) * math.inf

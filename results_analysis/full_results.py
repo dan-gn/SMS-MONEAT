@@ -12,6 +12,8 @@ from experiment_info import SEED, N_EXPERIMENTS, N_POPULATION
 from experiment_info import datasets, algorithms, iter_num, experiment
 from utilities.choose_solutions import SolutionSelector, SolutionSelector2, evaluate3
 
+from models.genotype import MultiObjectiveGenome as Genome
+
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -28,7 +30,7 @@ for i, alg in enumerate(algorithms):
 	for ds in datasets:
 		data[alg][ds] = {}
 		# results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
-		results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}\\{ds}'
+		results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}_rest\\{ds}'
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -51,10 +53,16 @@ for i, alg in enumerate(algorithms):
 
 			# Choose solutions
 			if alg in ['sms_moneat', 'n3o']:
-				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-				model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
-				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+				# model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				# model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+				# model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
+				# model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution = Genome()
+				model.best_solution.fitness = np.ones(2) * np.inf
+				model.best_solution = model.choose_solution(model.population, model.x_train, model.y_train)
+				model.best_solution_val = model.choose_solution(sorted(model.population, key=lambda x:x.fitness[0]), model.x_val, model.y_val)
+				model.best_solution_t_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_train, model.y_train)
+				model.best_solution_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_val, model.y_val)
 				model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
 				train_acc[k], _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
 				val_acc[k], _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
@@ -113,7 +121,7 @@ def store_results(data, alg, filename, population):
 			row = [ds]
 			row.extend(list(data[alg][ds][population]))
 			all_rows.append(row)
-		writer.writerows(all_rows)
+		writer.writerows(np.array(all_rows))
 	with open(f'final_results_asc/{alg}_2025/{filename}_{population}_fs.csv', 'w', newline='') as file:
 		writer = csv.writer(file)
 		all_rows = []
@@ -126,10 +134,11 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 		
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'train')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'arch')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
-store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch')
+
 # for alg in algorithms:
 # 	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'train')
 # 	store_results(data, alg, f'results_{alg}_final{exp}_full_ws2', 'val')

@@ -10,7 +10,7 @@ algorithms.append('sms_moneat')
 # algorithms.append('sfe')
 # algorithms.append('sfe_pso')
 
-iter_num = {'n3o': 200, 'sms_emoa': 6000, 'sms_moneat': 18000, 'sfe': 6000, 'sfe_pso': 6000, 'mochc': 6000}
+iter_num = {'n3o': 200, 'sms_emoa': 6000, 'sms_moneat': 50000, 'sfe': 6000, 'sfe_pso': 6000, 'mochc': 6000}
 # experiment = {'n3o': '2', 'sms_emoa': '5x', 'sms_moneat': '6', 'sfe': '2024', 'sfe_pso': '2024', 'mochc': 2024}
 experiment = {'n3o': '2', 'sms_emoa': '5x', 'sms_moneat': '2025_asoc', 'sfe': '2024', 'sfe_pso': '2024', 'mochc': 2024}
 
@@ -46,9 +46,10 @@ datasets = []
 # datasets.append('Prostate_GSE6919_U95C')
 
 datasets.append('ALL-AML-full')
-datasets.append('CNS')
+datasets.append('prostate_tumorVSNormal-full')
 datasets.append('Colon')
-datasets.append('Ovarian')
+# datasets.append('Ovarian')
+# datasets.append('CNS')
 
 # dataset_names = []
 # dataset_names.append('Colon$_1$')
