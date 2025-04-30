@@ -59,12 +59,12 @@ datasets = []
 # datasets.append('Breast_GSE42568')
 
 """ ASoC Comparison """
-datasets.append('DLBCL')
 datasets.append('ALL-AML-full')
+datasets.append('DLBCL')
 datasets.append('prostate_tumorVSNormal-full')
 datasets.append('Colon')
-datasets.append('Ovarian')
-datasets.append('CNS')
+# datasets.append('CNS')
+# datasets.append('Ovarian')
 
 seed = 0
 k_folds = 10
@@ -77,7 +77,7 @@ algorithm = 'sms_moneat'
 params = {
 	'fitness_function': torch_fitness_function, 
 	'n_population' : 100, 
-	'max_iterations' : 200 if algorithm=='n3o' else 70000,
+	'max_iterations' : 200 if algorithm=='n3o' else 72000,
 	'hidden_activation_function' : nn.Tanh(),
 	'hidden_activation_coeff' : 4.9 * 0.5,
 	'output_activation_function' : Gaussian(),
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 		print(f'Proportion of classes = ({np.sum(y)/y.shape[0]:.2f}, {(y.shape[0]-np.sum(y))/y.shape[0]:.2f})')
 
 		if save_results:
-			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2025_asoc_rest\\{filename}"
+			results_path = os.getcwd() + f"\\results_asc\\{algorithm}-pop_{params['n_population']}-it_{params['max_iterations']}_seed{seed}-exp2025_asoc_rest20_v1_3o\\{filename}"
 			Path(results_path).mkdir(parents=True, exist_ok=True)
 
 		for i, x_train, x_val, x_test, y_train, y_val, y_test in ds.cross_validation_experiment(k_folds, n_repeats, seed):
@@ -125,8 +125,8 @@ if __name__ == '__main__':
 			# if i < -1:
 			# if i < 12 or i >= 15:	
 			# if i >= 15:
-			# if i < 15:
-			# 	continue
+			if i != 0:
+				continue
 
 			print(f'Seed = {seed}, test = {i}')
 			print(f'Traning dataset samples = {x_train.shape[0]}, Test dataset samples = {x_test.shape[0]}')

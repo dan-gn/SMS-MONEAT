@@ -28,8 +28,8 @@ class SMS_MONEAT(N3O):
 	def __init__(self, problem: dict, params: dict) -> None:
 		super().__init__(problem, params)
 		self.beta = 1
-		self.objective_norm = np.array([1, 0.1], dtype=np.float32)
-		self.max_stagnant_iterations = self.max_iterations/10
+		self.objective_norm = np.array([1, 0.1, 1], dtype=np.float32)
+		self.max_stagnant_iterations = self.max_iterations/20
 		self.stagnant_iterations = 0
 		self.n_restarts = 0
 		self.best_fitness = np.inf
@@ -70,10 +70,10 @@ class SMS_MONEAT(N3O):
 		if build_model:
 			genome.compute_phenotype(self.activation)
 		if genome.selected_features.shape[0] == 0:
-			return None, np.array([math.inf, math.inf]), 0
+			return None, np.array([math.inf, math.inf, math.inf]), 0
 		x_prima = x.index_select(1, genome.selected_features)
 		loss, acc, gmean = eval_model(genome.phenotype, x_prima, y, self.fitness_function, self.l2_parameter, genome.mean_square_weights)
-		fitness = np.array([loss, genome.selected_features.shape[0]])
+		fitness = np.array([loss, genome.selected_features.shape[0], -gmean])
 		# fitness = np.array([false_negative, false_positive, genome.selected_features.shape[0]])
 		return acc, fitness, gmean
 
@@ -211,7 +211,11 @@ class SMS_MONEAT(N3O):
 		record.update(self.population, iteration_num=0)
 		record_archive = Record(self.max_iterations)
 		record_archive.update(self.archive.get_full_population(), iteration_num=0)
-		# for i in range(self.max_iterations):
+		# Initialize best solution
+		n_objectives = len(self.population[0].fitness)
+		self.best_solution = Genome()
+		self.best_solution.fitness = np.ones(n_objectives) * math.inf
+		# Loop
 		i = 0
 		while i < self.max_iterations:
 			# Get offspring
@@ -225,9 +229,9 @@ class SMS_MONEAT(N3O):
 			# Add to archive
 			self.archive.add(offspring)
 			# Store in record
-			if (i+1) % (self.max_iterations/100) == 0:
-				record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
-				record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
+			# if (i+1) % (self.max_iterations/100) == 0:
+			# 	record.update(self.population, iteration_num=i+1, n_invalid_nets=self.n_invalid_nets)
+			# 	record_archive.update(self.archive.get_full_population(), iteration_num=i+1)
 			# Display run info
 			if i % (self.max_iterations/10) == 0:
 				population_fitness = np.array([member.fitness for member in self.population]).mean(axis=0)
@@ -237,18 +241,14 @@ class SMS_MONEAT(N3O):
 				self.n_restarts += 1
 				self.stagnant_iterations = 0
 				n_objectives = len(self.population[0].fitness)
-				self.best_solution = Genome()
-				self.best_solution.fitness = np.ones(n_objectives) * math.inf
 				self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
+				# self.best_fitness = np.inf
 				self.initialize_population(restart=True)
 				self.population = sorted(self.population, key=lambda x:x.fitness[0])
 				self.population[-1] = self.best_solution.copy(True)
 				_ = non_dominated_sorting_2(self.population)
 				i += self.n_population
 			i += 1
-		n_objectives = len(self.population[0].fitness)
-		self.best_solution = Genome()
-		self.best_solution.fitness = np.ones(n_objectives) * math.inf
 		self.best_solution = self.choose_solution(self.population, self.x_train, self.y_train)
 		self.best_solution_val = self.choose_solution(sorted(self.population, key=lambda x:x.fitness[0]), self.x_val, self.y_val)
 		self.best_solution_archive = self.choose_solution(sorted(self.archive.get_full_population(), key=lambda x:x.fitness[0]), self.x_val, self.y_val)

@@ -30,7 +30,7 @@ for i, alg in enumerate(algorithms):
 	for ds in datasets:
 		data[alg][ds] = {}
 		# results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
-		results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}_rest\\{ds}'
+		results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}_rest14\\{ds}'
 		time = [0] * N_EXPERIMENTS
 		train = [0] * N_EXPERIMENTS
 		train_fs = [0] * N_EXPERIMENTS
@@ -50,19 +50,21 @@ for i, alg in enumerate(algorithms):
 				results = pickle.load(f)
 			time[k] = results[2]['time']
 			model = results[2]['model']
+			if k == 0:
+				print(model.x_train.size())
 
 			# Choose solutions
-			if alg in ['sms_moneat', 'n3o']:
-				# model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
-				# model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
-				# model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
-				# model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
-				model.best_solution = Genome()
-				model.best_solution.fitness = np.ones(2) * np.inf
-				model.best_solution = model.choose_solution(model.population, model.x_train, model.y_train)
-				model.best_solution_val = model.choose_solution(sorted(model.population, key=lambda x:x.fitness[0]), model.x_val, model.y_val)
-				model.best_solution_t_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_train, model.y_train)
-				model.best_solution_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_val, model.y_val)
+			if alg in ['sms_moneat', 'n3o'] and False:
+				model.best_solution = selector.choose(model.population, model.x_train, model.y_train)
+				model.best_solution_val = selector.choose(model.population, model.x_train, model.y_train, model.x_val, model.y_val)
+				model.best_solution_t_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train)
+				model.best_solution_archive = selector.choose(model.archive.get_full_population(), model.x_train, model.y_train, model.x_val, model.y_val)
+				# model.best_solution = Genome()
+				# model.best_solution.fitness = np.ones(2) * np.inf
+				# model.best_solution = model.choose_solution(model.population, model.x_train, model.y_train)
+				# model.best_solution_val = model.choose_solution(sorted(model.population, key=lambda x:x.fitness[0]), model.x_val, model.y_val)
+				# model.best_solution_t_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_train, model.y_train)
+				# model.best_solution_archive = model.choose_solution(sorted(model.archive.get_full_population(), key=lambda x:x.fitness[0]), model.x_val, model.y_val)
 				model.best_solution.valid, model.best_solution_val.valid, model.best_solution_archive.valid = True, True, True
 				train_acc[k], _, train[k] = model.evaluate(model.best_solution, model.x_test, model.y_test)
 				val_acc[k], _, val[k] = model.evaluate(model.best_solution_val, model.x_test, model.y_test)
@@ -105,8 +107,8 @@ for i, alg in enumerate(algorithms):
 		data[alg][ds]['arch_t_fs'] = train_arch_fs		
 		data[alg][ds]['arch'] = arch_acc
 		data[alg][ds]['arch_fs'] = arch_fs
-		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Arch {np.mean(arch)}')
-		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Arch {np.mean(arch_fs)}')
+		print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_acc)}, Val {np.mean(val_acc)}, Arch {np.mean(arch_acc)}')
+		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Arch {np.mean(arch_fs)}')
 		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train)}, Val {np.mean(val)}, Train Arch: {np.mean(train_arch)}, Arch {np.mean(arch)}')
 		# print(f'Algorithm: {alg}; Dataset: {ds}; Time {np.mean(time)}; Train {np.mean(train_fs)}, Val {np.mean(val_fs)}, Train Arch: {np.mean(train_arch_fs)}, Arch {np.mean(arch_fs)}')
 
@@ -119,9 +121,9 @@ def store_results(data, alg, filename, population):
 		all_rows.append(header)
 		for ds in datasets:
 			row = [ds]
-			row.extend(list(data[alg][ds][population]))
+			row.extend(list(np.array(data[alg][ds][population])))
 			all_rows.append(row)
-		writer.writerows(np.array(all_rows))
+		writer.writerows(all_rows)
 	with open(f'final_results_asc/{alg}_2025/{filename}_{population}_fs.csv', 'w', newline='') as file:
 		writer = csv.writer(file)
 		all_rows = []
@@ -134,9 +136,9 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 		
-# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'train')
-# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'val')
-# store_results(data, alg, f'results_{alg}_final{exp}_full_50000it', 'arch')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_v2', 'train')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_v2', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_v2', 'arch')
 # store_results(data, alg, f'results_{alg}_final{exp}_full', 'arch_t')
 
 # for alg in algorithms:
