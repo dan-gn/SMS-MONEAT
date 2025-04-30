@@ -26,7 +26,10 @@ def svm_fs_test(genome: Genome, X_train, y_train, X_test, y_test):
     clf = svm.SVC(kernel ='rbf', class_weight = 'balanced')
     clf.fit(x_train, y_train.ravel())
     y_pred = torch.tensor(clf.predict(x_test))
-    return geometric_mean(y_test, y_pred)
+    y_real = y_test.squeeze(dim=1)
+    acc = (y_real == torch.round(y_pred)).type(torch.float32).mean()
+    # return geometric_mean(y_test, y_pred)
+    return acc
 
 
 data = {}
@@ -40,8 +43,8 @@ for i, alg in enumerate(algorithms):
     exp = experiment[alg]
     for ds in datasets:
         data[alg][ds] = {}
-        results_path = os.getcwd() + \
-                                    f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+        # results_path = os.getcwd() + f"\\results\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-cv_hpt_final{exp}\\{ds}"
+        results_path = os.getcwd() + f'\\results_asc\\{alg}-pop_{N_POPULATION}-it_{iterations}_seed{SEED}-exp{exp}_rest14\\{ds}'
         train = [0] * N_EXPERIMENTS
         val = [0] * N_EXPERIMENTS
         arch = [0] * N_EXPERIMENTS
@@ -83,6 +86,10 @@ def store_results(data, alg, filename, population):
 			all_rows.append(row)
 		writer.writerows(all_rows)
 
-store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'train')
-store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'val')
-store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'arch')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'train')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'val')
+# store_results(data, alg, f'results_{alg}_final{exp}_full_svm', 'arch')
+
+store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_svm', 'train')
+store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_svm', 'val')
+store_results(data, alg, f'results_{alg}_final{exp}_full_it{iterations}_rest14_svm', 'arch')
